@@ -28,10 +28,9 @@ from backend.app.api.v1.incidents import router as incidents_router
 
 
 DEFAULT_USERS = [
-    ("admin", "ANURAG20042006@GMAIL.COM", "AdminSecure2026!", "Anurag Rai", "admin"),
-    ("anshika", "ANSHIKAM9594@GMAIL.COM", "AnshikaSecure2026!", "Anshika Mishra", "admin"),
-    ("analyst", "analyst@sentinelai.io", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
-    ("viewer", "viewer@sentinelai.io", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
+    ("admin", "admin@sentinelai.local", "AdminSecure2026!", "System Administrator", "admin"),
+    ("analyst", "analyst@sentinelai.local", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
+    ("viewer", "viewer@sentinelai.local", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
 ]
 
 DEFAULT_MODELS = [

@@ -1,10 +1,12 @@
-# SentinelAI administrator accounts
+# SentinelAI System User Accounts
 
-These accounts are currently configured in the local SentinelAI database and in the default seed configuration.
+These accounts are configured by default in the SentinelAI seed database for demonstration and testing.
 
-| Name | Username | Email | Role | Status |
+| Account Title | Username | Default Email | Role | Status |
 |---|---|---|---|---|
-| Anurag Rai | `admin` | `anurag20042006@gmail.com` | Admin | Active |
-| Anshika Mishra | `anshika` | `anshikam9594@gmail.com` | Admin / co-admin | Active |
+| System Administrator | `admin` | `admin@sentinelai.local` | Administrator | Active |
+| Senior Security Analyst | `analyst` | `analyst@sentinelai.local` | Security Analyst | Active |
+| Operations Viewer | `viewer` | `viewer@sentinelai.local` | Read-Only Viewer | Active |
 
-The Anshika account was created with the temporary password shared in the setup conversation. Change it before using this deployment outside a demo environment.
+> [!IMPORTANT]
+> Always change default passwords before deploying to production.

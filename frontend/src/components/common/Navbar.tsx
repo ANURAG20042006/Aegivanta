@@ -13,7 +13,7 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const currentPage = navItems.find((item) => location.pathname.startsWith(item.path)) || navItems[0];
-  const roleLabel = user?.username === 'anshika' && user.role === 'admin' ? 'Co-admin' : user?.role;
+  const roleLabel = user?.role;
   const initials = user?.full_name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'SA';
 
   return (

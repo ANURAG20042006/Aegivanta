@@ -36,7 +36,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users }) => {
               <td className="p-3 text-slate-400">{u.email}</td>
               <td className="p-3">
                 <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-800 text-cyan-400 border border-slate-700">
-                  {u.username === 'anshika' && u.role === 'admin' ? 'Co-admin' : u.role}
+                  {u.role}
                 </span>
               </td>
               <td className="p-3">
