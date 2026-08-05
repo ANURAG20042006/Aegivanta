@@ -38,7 +38,7 @@ export const Prediction: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      const res = await predictService.predictSingle(formVector, selectedModel);
+      const res = await predictService.predictSingle(formVector as any, selectedModel);
       setSingleResult(res);
     } catch (err) {
       alert('We could not check this connection. Please review the values and try again.');
@@ -55,8 +55,15 @@ export const Prediction: React.FC = () => {
     }
     setIsProcessing(true);
     try {
-      const res = await predictService.predictCSV(selectedFile, selectedModel);
-      setBatchResult(res);
+      const rawRes = await predictService.predictCsv(selectedFile, selectedModel);
+      const formattedBatch: BatchPredictionResponse = {
+        total_packets_inspected: rawRes.total_records,
+        malicious_packets_count: rawRes.malicious_count,
+        benign_packets_count: rawRes.total_records - rawRes.malicious_count,
+        threat_ratio_percentage: Math.round((rawRes.malicious_count / (rawRes.total_records || 1)) * 1000) / 10,
+        results: rawRes.predictions
+      };
+      setBatchResult(formattedBatch);
     } catch (err) {
       alert('We could not read that CSV file. Please check the format and try again.');
     } finally {
@@ -243,7 +250,7 @@ export const Prediction: React.FC = () => {
             <button
               type="submit"
               disabled={isProcessing}
-              className="w-full py-2.5 bg-cyan-500 text-slate-950 font-mono font-bold text-xs rounded-lg"
+              className="w-full py-2.5 bg-cyan-500 text-slate-950 font-mono font-bold text-xs rounded-lg cursor-pointer"
             >
               Check this connection
             </button>

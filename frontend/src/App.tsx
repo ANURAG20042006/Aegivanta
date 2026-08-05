@@ -8,6 +8,7 @@ import { Navbar } from './components/common/Navbar';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Analytics } from './pages/Analytics';
+import { GuidePage } from './pages/Guide';
 import { Prediction } from './pages/Prediction';
 import { Reports } from './pages/Reports';
 import { HistoryPage } from './pages/History';
@@ -39,6 +40,7 @@ const ProtectedLayout: React.FC = () => {
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/guide" element={<GuidePage />} />
               <Route path="/prediction" element={<Prediction />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/history" element={<HistoryPage />} />

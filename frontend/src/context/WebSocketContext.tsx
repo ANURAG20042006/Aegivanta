@@ -11,13 +11,20 @@ export interface PacketEvent {
   attack_type: string;
   confidence_score: number;
   severity: string;
+  incident_id?: string;
+  source_port?: number;
+  destination_port?: number;
+  model_used?: string;
+  attack_probabilities?: Record<string, number>;
 }
 
-interface WebSocketContextType {
+export interface WebSocketContextType {
   isConnected: boolean;
   latestPacket: PacketEvent | null;
   packetStream: PacketEvent[];
   threatAlerts: PacketEvent[];
+  packets: PacketEvent[];
+  alerts: PacketEvent[];
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -58,7 +65,6 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
       ws.onclose = () => {
         setIsConnected(false);
-        console.log('Disconnected from WebSocket.');
       };
 
       ws.onerror = (err) => {
@@ -80,6 +86,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
         latestPacket,
         packetStream,
         threatAlerts,
+        packets: packetStream,
+        alerts: threatAlerts,
       }}
     >
       {children}

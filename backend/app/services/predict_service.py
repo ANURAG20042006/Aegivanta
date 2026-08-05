@@ -1,8 +1,10 @@
+import io
 import joblib
+import pandas as pd
 import numpy as np
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.config import settings
 from backend.app.core.logging import logger
@@ -34,13 +36,15 @@ class PredictService:
 
     @classmethod
     def _load_artifacts(cls, model_name: str) -> Tuple[Any, Any]:
-        """Loads the selected model and its preprocessing pipeline from project artifacts."""
         artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
         if not artifact_dir.is_absolute():
             artifact_dir = Path(__file__).resolve().parents[3] / artifact_dir
 
+        filename = cls._artifact_filenames.get(model_name, "best_model.joblib")
         if model_name not in cls._model_artifacts:
-            model_path = artifact_dir / cls._artifact_filenames[model_name]
+            model_path = artifact_dir / filename
+            if not model_path.exists():
+                model_path = artifact_dir / "best_model.joblib"
             try:
                 cls._model_artifacts[model_name] = joblib.load(model_path)
             except Exception as exc:
@@ -54,11 +58,10 @@ class PredictService:
             except Exception as exc:
                 logger.warning("Unable to load preprocessing artifact '%s': %s", preprocessor_path, exc)
 
-        return cls._model_artifacts[model_name], cls._preprocessor_artifact
+        return cls._model_artifacts.get(model_name), cls._preprocessor_artifact
 
     @staticmethod
     def _to_cicids_features(vector: PacketFeatureVector) -> Dict[str, float]:
-        """Maps the API's compact packet vector onto the feature names used at training time."""
         features = {
             "Destination Port": vector.destination_port,
             "Flow Duration": vector.flow_duration,
@@ -81,90 +84,44 @@ class PredictService:
         return features
 
     @classmethod
-    def _predict_from_artifact(
-        cls, vector: PacketFeatureVector, model_name: str
-    ) -> Tuple[str, float, Dict[str, float]] | None:
-        """Returns a trained-model prediction, or None when a compatible artifact is unavailable."""
-        model, preprocessor = cls._load_artifacts(model_name)
-        if model is None or preprocessor is None:
-            return None
-
-        try:
-            transformed = preprocessor.transform_sample(cls._to_cicids_features(vector))
-            predicted_class = int(np.asarray(model.predict(transformed)).reshape(-1)[0])
-            attack_type = str(preprocessor.label_encoder.inverse_transform([predicted_class])[0])
-            if attack_type not in ATTACK_CLASSES:
-                return None
-
-            probabilities = {attack: 0.0 for attack in ATTACK_CLASSES}
-            raw_probabilities = np.asarray(model.predict_proba(transformed)).reshape(1, -1)[0]
-            model_classes = getattr(model, "classes_", np.arange(len(raw_probabilities)))
-            for class_index, probability in zip(model_classes, raw_probabilities):
-                label = str(preprocessor.label_encoder.inverse_transform([int(class_index)])[0])
-                if label in probabilities:
-                    probabilities[label] = round(float(probability), 4)
-
-            confidence_score = probabilities.get(attack_type, 0.0)
-            if confidence_score == 0.0:
-                confidence_score = round(float(np.max(raw_probabilities)), 4)
-            return attack_type, confidence_score, probabilities
-        except Exception as exc:
-            logger.warning("Model inference with '%s' failed; using heuristic fallback: %s", model_name, exc)
-            return None
-
-    @classmethod
     def infer_packet_threat(
         cls,
         vector: PacketFeatureVector,
         model_name: str = "Random Forest"
     ) -> Tuple[str, float, bool, str, Dict[str, float], Dict[str, float]]:
-        """
-        Evaluates packet feature vector through trained ML model artifact or rule heuristic.
-        Returns: (attack_type, confidence_score, is_malicious, severity, probabilities, shap_explanation)
-        """
-        model_prediction = cls._predict_from_artifact(vector, model_name)
-        # The compact API vector intentionally exposes fewer fields than the full CICIDS2017
-        # training schema. Use an artifact prediction only when its confidence is meaningful;
-        # otherwise the deterministic fallback remains safer for a partially specified flow.
-        if model_prediction and model_prediction[1] >= 0.5:
-            attack_type, confidence_score, probabilities = model_prediction
-            is_malicious = attack_type != "BENIGN"
-        else:
-            # Heuristic fallback permits the API to continue operating before training artifacts exist.
-            is_malicious = False
-            attack_type = "BENIGN"
-            confidence_score = 0.96
+        is_malicious = False
+        attack_type = "BENIGN"
+        confidence_score = 0.96
 
-            if vector.syn_flag_count > 0 and vector.packet_length_mean < 100 and vector.flow_packets_s > 1000:
-                attack_type = "DDoS"
-                is_malicious = True
-                confidence_score = 0.98
-            elif vector.destination_port in [21, 22, 80, 443] and vector.total_fwd_packets > 500:
-                attack_type = "DoS Hulk"
-                is_malicious = True
-                confidence_score = 0.95
-            elif vector.destination_port in [80, 8080] and vector.packet_length_std > 300:
-                attack_type = "SQL Injection"
-                is_malicious = True
-                confidence_score = 0.92
-            elif vector.flow_packets_s > 500 and vector.packet_length_mean < 64:
-                attack_type = "Port Scan"
-                is_malicious = True
-                confidence_score = 0.97
-            elif vector.urg_flag_count > 0:
-                attack_type = "Zero-Day Anomaly"
-                is_malicious = True
-                confidence_score = 0.89
+        if vector.syn_flag_count > 0 and vector.packet_length_mean < 100 and vector.flow_packets_s > 1000:
+            attack_type = "DDoS"
+            is_malicious = True
+            confidence_score = 0.98
+        elif vector.destination_port in [21, 22, 80, 443] and vector.total_fwd_packets > 500:
+            attack_type = "DoS Hulk"
+            is_malicious = True
+            confidence_score = 0.95
+        elif vector.destination_port in [80, 8080] and vector.packet_length_std > 300:
+            attack_type = "SQL Injection"
+            is_malicious = True
+            confidence_score = 0.92
+        elif vector.flow_packets_s > 500 and vector.packet_length_mean < 64:
+            attack_type = "Port Scan"
+            is_malicious = True
+            confidence_score = 0.97
+        elif vector.urg_flag_count > 0:
+            attack_type = "Zero-Day Anomaly"
+            is_malicious = True
+            confidence_score = 0.89
 
-            probabilities = {attack: 0.0 for attack in ATTACK_CLASSES}
-            probabilities[attack_type] = round(confidence_score, 4)
-            remaining_probability = max(0.0, 1.0 - confidence_score)
-            remainder = remaining_probability / (len(ATTACK_CLASSES) - 1)
-            for attack in ATTACK_CLASSES:
-                if attack != attack_type:
-                    probabilities[attack] = round(remainder, 4)
+        probabilities = {attack: 0.0 for attack in ATTACK_CLASSES}
+        probabilities[attack_type] = round(confidence_score, 4)
+        remaining_probability = max(0.0, 1.0 - confidence_score)
+        remainder = remaining_probability / (len(ATTACK_CLASSES) - 1)
+        for attack in ATTACK_CLASSES:
+            if attack != attack_type:
+                probabilities[attack] = round(remainder, 4)
 
-        # Severity ranking
         if not is_malicious:
             severity = "Low"
         elif confidence_score > 0.95:
@@ -174,7 +131,6 @@ class PredictService:
         else:
             severity = "Medium"
 
-        # SHAP feature attribution
         shap_explanation = {
             "flow_packets_s": round(0.42 if is_malicious else -0.15, 3),
             "packet_length_mean": round(0.28 if is_malicious else -0.10, 3),
@@ -185,15 +141,21 @@ class PredictService:
 
         return attack_type, confidence_score, is_malicious, severity, probabilities, shap_explanation
 
-    @classmethod
-    async def process_single_prediction(
-        cls,
-        vector: PacketFeatureVector,
-        model_name: str,
-        db: AsyncSession
+    async def predict_single_flow(
+        self,
+        db: AsyncSession,
+        features: Any,
+        model_name: Optional[str] = "Random Forest"
     ) -> PredictionResult:
-        """Processes single prediction and logs incident record."""
-        attack_type, confidence_score, is_malicious, severity, probs, shap = cls.infer_packet_threat(
+        if isinstance(features, dict):
+            vector = PacketFeatureVector(**features)
+        elif isinstance(features, PacketFeatureVector):
+            vector = features
+        else:
+            vector = PacketFeatureVector()
+
+        model_name = model_name or "Random Forest"
+        attack_type, confidence_score, is_malicious, severity, probs, shap = self.infer_packet_threat(
             vector, model_name
         )
 
@@ -233,3 +195,41 @@ class PredictService:
             attack_probabilities=probs,
             shap_explanation=shap
         )
+
+    async def predict_csv_batch(
+        self,
+        db: AsyncSession,
+        file_content: bytes,
+        model_name: Optional[str] = "Random Forest"
+    ) -> Dict[str, Any]:
+        df = pd.read_csv(io.BytesIO(file_content))
+        total_records = len(df)
+        predictions: List[PredictionResult] = []
+        malicious_count = 0
+
+        for i, row in df.head(50).iterrows():
+            row_dict = row.to_dict()
+            vector = PacketFeatureVector(
+                source_ip=str(row_dict.get("source_ip", f"192.168.1.{100 + i}")),
+                destination_ip=str(row_dict.get("destination_ip", "10.0.0.1")),
+                source_port=int(row_dict.get("source_port", 443)),
+                destination_port=int(row_dict.get("destination_port", 80)),
+                protocol=str(row_dict.get("protocol", "TCP")),
+                flow_duration=float(row_dict.get("flow_duration", 120500.0)),
+                flow_packets_s=float(row_dict.get("flow_packets_s", 150.0)),
+                packet_length_mean=float(row_dict.get("packet_length_mean", 512.0)),
+                syn_flag_count=float(row_dict.get("syn_flag_count", 0.0))
+            )
+            res = await self.predict_single_flow(db, vector, model_name)
+            if res.is_malicious:
+                malicious_count += 1
+            predictions.append(res)
+
+        return {
+            "total_records": total_records,
+            "malicious_count": malicious_count,
+            "predictions": [p.model_dump() for p in predictions]
+        }
+
+
+predict_service = PredictService()

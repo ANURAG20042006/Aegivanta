@@ -22,18 +22,13 @@ class PacketFeatureVector(BaseModel):
     psh_flag_count: float = Field(default=1.0)
     ack_flag_count: float = Field(default=1.0)
     urg_flag_count: float = Field(default=0.0)
-    # Allows callers with the complete CICIDS2017 payload to provide any additional
-    # training features without breaking the compact UI vector contract.
     extra_features: Dict[str, float] = Field(default_factory=dict)
 
 
 class PredictRequest(BaseModel):
     """Payload for single packet threat inference."""
-    features: PacketFeatureVector
-    model_name: Literal[
-        "Random Forest", "XGBoost", "LightGBM", "CatBoost", "Decision Tree",
-        "Logistic Regression", "SVM", "KNN", "Naive Bayes", "1D-CNN", "LSTM", "Autoencoder"
-    ] = Field(default="Random Forest")
+    features: Dict[str, Any] if False else PacketFeatureVector
+    model_name: Optional[str] = Field(default="Random Forest")
 
 
 class PredictionResult(BaseModel):
@@ -52,6 +47,11 @@ class PredictionResult(BaseModel):
     timestamp: datetime
     attack_probabilities: Dict[str, float]
     shap_explanation: Optional[Dict[str, float]] = None
+
+
+# Aliases for API routers
+PredictionRequest = PredictRequest
+PredictionResponse = PredictionResult
 
 
 class BatchPredictionResponse(BaseModel):

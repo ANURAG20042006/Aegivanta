@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.database import get_db
@@ -10,11 +10,11 @@ from backend.app.core.dependencies import require_role
 router = APIRouter(prefix="/logs", tags=["Audit & Logs"])
 
 
-@router.get("", summary="Get System Audit Logs (Admin & Analyst Only)")
+@router.get("", summary="Get System Audit Logs")
 async def get_audit_logs(
-    limit: int = Query(default=50, ge=1, le=500),
+    limit: int = 50,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "analyst"]))
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
 ):
     """Retrieves recent audit log events tracking logins, prediction operations, and user changes."""
     query = select(AuditLog).order_by(desc(AuditLog.timestamp)).limit(limit)

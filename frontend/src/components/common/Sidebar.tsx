@@ -11,11 +11,13 @@ import {
   Info,
   ShieldCheck,
   HelpCircle,
+  Sparkles
 } from 'lucide-react';
 
 export const navItems = [
   { path: '/dashboard', label: 'Dashboard', section: 'Monitor', icon: LayoutDashboard },
   { path: '/analytics', label: 'Model insights', section: 'Monitor', icon: BarChart3 },
+  { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },
   { path: '/history', label: 'Alert history', section: 'Actions', icon: History },
@@ -30,7 +32,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 space-y-1">
         <div className="sidebar-workspace-heading">
           <span className="flex items-center gap-2"><span className="sidebar-heading-icon"><ShieldCheck className="w-3.5 h-3.5" /></span>Workspace</span>
-          <span>8 tools</span>
+          <span>9 tools</span>
         </div>
         {navItems.map((item, index) => {
           const Icon = item.icon;
@@ -46,6 +48,11 @@ export const Sidebar: React.FC = () => {
               >
                 <span className="sidebar-nav-icon"><Icon className="w-4 h-4" /></span>
                 <span>{item.label}</span>
+                {item.path === '/guide' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    NEW
+                  </span>
+                )}
               </NavLink>
             </React.Fragment>
           );

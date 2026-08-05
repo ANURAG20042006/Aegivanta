@@ -7,10 +7,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface AttackDistributionChartProps {
   distribution?: AttackDistributionItem[];
+  data?: AttackDistributionItem[];
 }
 
-export const AttackDistributionChart: React.FC<AttackDistributionChartProps> = ({ distribution }) => {
-  const dist = distribution || [];
+export const AttackDistributionChart: React.FC<AttackDistributionChartProps> = ({ distribution, data }) => {
+  const dist = distribution || data || [];
 
   if (dist.length === 0) {
     return <div className="h-64 flex items-center justify-center text-xs font-mono text-slate-500">No incident data yet.</div>;
@@ -22,12 +23,12 @@ export const AttackDistributionChart: React.FC<AttackDistributionChartProps> = (
       {
         data: dist.map((d) => d.count),
         backgroundColor: [
-          '#00FF9D', // BENIGN Green
-          '#FF0055', // DDoS Red
-          '#FFB800', // DoS Amber
-          '#A855F7', // Port Scan Purple
-          '#00F0FF', // SQL Cyan
-          '#F43F5E', // Anomaly Crimson
+          '#00FF9D',
+          '#FF0055',
+          '#FFB800',
+          '#A855F7',
+          '#00F0FF',
+          '#F43F5E',
         ],
         borderColor: '#0F172A',
         borderWidth: 2,
@@ -56,7 +57,7 @@ export const AttackDistributionChart: React.FC<AttackDistributionChartProps> = (
   };
 
   return (
-    <div className="h-64 w-full flex items-center justify-center">
+    <div className="h-64 w-full bg-slate-900/80 border border-slate-800/80 rounded-xl p-4 backdrop-blur-md flex items-center justify-center">
       <Doughnut data={chartData} options={options} />
     </div>
   );

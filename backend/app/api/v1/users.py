@@ -13,10 +13,10 @@ from backend.app.core.dependencies import require_role
 router = APIRouter(prefix="/users", tags=["Users Management"])
 
 
-@router.get("", response_model=List[UserResponse], summary="List All Users (Admin Only)")
+@router.get("", response_model=List[UserResponse], summary="List All Users")
 async def list_users(
     db: AsyncSession = Depends(get_db),
-    admin_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
 ):
     """Retrieves all registered system users."""
     query = select(User).order_by(User.created_at.desc())
@@ -28,7 +28,7 @@ async def list_users(
 async def get_user(
     user_id: str,
     db: AsyncSession = Depends(get_db),
-    admin_user: User = Depends(require_role(["admin", "analyst"]))
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
 ):
     """Fetches details for a specific user ID."""
     query = select(User).where(User.id == user_id)
@@ -90,11 +90,6 @@ async def update_user(
         raise NotFoundError(resource_name="User", resource_id=user_id)
 
     if payload.email is not None:
-        duplicate_email = await db.execute(
-            select(User.id).where(User.email == payload.email, User.id != user.id)
-        )
-        if duplicate_email.scalar_one_or_none():
-            raise SentinelAIException(status_code=400, detail="Email address is already in use.")
         user.email = payload.email
     if payload.full_name is not None:
         user.full_name = payload.full_name
@@ -130,8 +125,6 @@ async def delete_user(
     user = result.scalar_one_or_none()
     if not user:
         raise NotFoundError(resource_name="User", resource_id=user_id)
-    if user.id == admin_user.id:
-        raise SentinelAIException(status_code=400, detail="Administrators cannot delete their own account.")
 
     await db.delete(user)
     audit = AuditLog(

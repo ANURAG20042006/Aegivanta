@@ -4,22 +4,23 @@ import { ThreatBadge } from '../common/ThreatBadge';
 
 interface PacketTableProps {
   packets: PredictionResult[];
+  onSelectPacket?: (pkt: PredictionResult) => void;
 }
 
-export const PacketTable: React.FC<PacketTableProps> = ({ packets }) => {
+export const PacketTable: React.FC<PacketTableProps> = ({ packets, onSelectPacket }) => {
   if (!packets || packets.length === 0) {
     return (
-      <div className="p-8 text-center text-slate-500 font-mono text-xs">
+      <div className="p-8 text-center text-slate-500 font-mono text-xs bg-slate-900/80 border border-slate-800/80 rounded-xl">
         No packet vectors available. Upload a network traffic CSV to inspect flow threats.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto bg-slate-900/80 border border-slate-800/80 rounded-xl">
       <table className="w-full text-left border-collapse text-xs font-mono">
         <thead>
-          <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 uppercase tracking-wider">
+          <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-400 uppercase tracking-wider">
             <th className="p-3">Status</th>
             <th className="p-3">Source IP</th>
             <th className="p-3">Destination IP</th>
@@ -30,10 +31,11 @@ export const PacketTable: React.FC<PacketTableProps> = ({ packets }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800/60">
-          {packets.map((pkt) => (
+          {packets.map((pkt, i) => (
             <tr
-              key={pkt.incident_id}
-              className={`transition-colors hover:bg-slate-800/40 ${
+              key={pkt.incident_id || i}
+              onClick={() => onSelectPacket && onSelectPacket(pkt)}
+              className={`transition-colors cursor-pointer hover:bg-slate-800/60 ${
                 pkt.is_malicious ? 'bg-rose-500/5' : ''
               }`}
             >

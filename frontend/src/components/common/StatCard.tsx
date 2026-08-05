@@ -1,14 +1,17 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
-interface StatCardProps {
+export interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
   icon: LucideIcon;
+  change?: string;
+  isPositive?: boolean;
   trend?: string;
   trendType?: 'positive' | 'negative' | 'neutral';
   color?: 'cyan' | 'emerald' | 'crimson' | 'amber' | 'purple';
+  gradient?: string;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -16,6 +19,8 @@ export const StatCard: React.FC<StatCardProps> = ({
   value,
   subtitle,
   icon: Icon,
+  change,
+  isPositive = true,
   trend,
   trendType = 'neutral',
   color = 'cyan',
@@ -28,6 +33,9 @@ export const StatCard: React.FC<StatCardProps> = ({
     purple: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
   };
 
+  const displayTrend = change || trend;
+  const isPos = isPositive || trendType === 'positive';
+
   return (
     <div className="glass-panel depth-card p-5 rounded-xl transition-all duration-300 hover:border-slate-700 hover:shadow-lg relative overflow-hidden group">
       <div className="flex items-center justify-between">
@@ -39,17 +47,15 @@ export const StatCard: React.FC<StatCardProps> = ({
 
       <div className="mt-4 flex items-baseline justify-between">
         <div className="text-2xl font-bold font-mono text-white tracking-tight">{value}</div>
-        {trend && (
+        {displayTrend && (
           <span
             className={`text-xs font-mono px-2 py-0.5 rounded ${
-              trendType === 'positive'
+              isPos
                 ? 'text-emerald-400 bg-emerald-500/10'
-                : trendType === 'negative'
-                ? 'text-rose-400 bg-rose-500/10'
-                : 'text-slate-400 bg-slate-800'
+                : 'text-rose-400 bg-rose-500/10'
             }`}
           >
-            {trend}
+            {displayTrend}
           </span>
         )}
       </div>

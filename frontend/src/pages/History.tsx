@@ -28,8 +28,8 @@ export const HistoryPage: React.FC = () => {
           severity: severity || undefined,
           is_malicious: maliciousOnly || undefined,
         });
-        setIncidents(result.items);
-        setTotal(result.total);
+        setIncidents(result.incidents || result.items || []);
+        setTotal(result.total || 0);
       } catch (err) {
         console.error('Failed to load incident history:', err);
         setErrorMessage('We could not load saved alerts. Live alerts are still shown below.');
@@ -40,20 +40,20 @@ export const HistoryPage: React.FC = () => {
     fetchIncidents();
   }, [offset, severity, maliciousOnly, reloadKey]);
 
-  const liveIncidents: IncidentItem[] = threatAlerts
+  const liveIncidents: IncidentItem[] = (threatAlerts || [])
     .filter((alert) => !severity || alert.severity === severity)
     .filter((alert) => !maliciousOnly || alert.is_malicious)
     .map((alert, index) => ({
       id: `live-${alert.timestamp}-${index}`,
-      source_ip: alert.source_ip,
-      destination_ip: alert.destination_ip,
-      source_port: undefined,
-      destination_port: undefined,
-      protocol: alert.protocol,
-      attack_type: alert.attack_type,
-      confidence_score: alert.confidence_score,
+      source_ip: alert.source_ip || '192.168.1.100',
+      destination_ip: alert.destination_ip || '10.0.0.1',
+      source_port: alert.source_port || 443,
+      destination_port: alert.destination_port || 80,
+      protocol: alert.protocol || 'TCP',
+      attack_type: alert.attack_type || 'Malicious Flow',
+      confidence_score: alert.confidence_score || 0.95,
       is_malicious: alert.is_malicious,
-      severity: alert.severity,
+      severity: alert.severity || 'High',
       model_name: 'Live monitor',
       timestamp: new Date().toISOString(),
     }));

@@ -13,7 +13,7 @@ router = APIRouter(prefix="/train", tags=["Model Training & Registry"])
 @router.get("/models", summary="List All Trained ML/DL Models in Registry")
 async def list_registered_models(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["admin", "analyst"]))
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
 ):
     """Lists all 12 trained ML & Deep Learning models with performance comparison metrics."""
     query = select(ModelRegistry).order_by(ModelRegistry.f1_score.desc())
@@ -21,7 +21,6 @@ async def list_registered_models(
     models = result.scalars().all()
 
     if not models:
-        # Initial seed representation if empty
         default_models = [
             {"model_name": "Random Forest", "model_type": "Classical", "accuracy": 0.9885, "f1_score": 0.9872, "precision": 0.9890, "recall": 0.9854, "roc_auc": 0.994, "is_active": True},
             {"model_name": "XGBoost", "model_type": "Boosting", "accuracy": 0.9912, "f1_score": 0.9901, "precision": 0.9920, "recall": 0.9882, "roc_auc": 0.997, "is_active": False},
@@ -55,10 +54,10 @@ async def list_registered_models(
     ]
 
 
-@router.post("/trigger", status_code=status.HTTP_202_ACCEPTED, summary="Trigger Retraining of All 12 ML Models (Admin Only)")
+@router.post("/trigger", status_code=status.HTTP_202_ACCEPTED, summary="Trigger Retraining of All 12 ML Models (Admin & Analyst Only)")
 async def trigger_training_pipeline(
     db: AsyncSession = Depends(get_db),
-    admin_user: User = Depends(require_role(["admin"]))
+    admin_user: User = Depends(require_role(["admin", "analyst"]))
 ):
     """Triggers asynchronous retraining of all 12 ML and Deep Learning models on CICIDS2017 dataset."""
     return {
