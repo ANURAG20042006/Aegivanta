@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, RefreshCw, Radio } from 'lucide-react';
+import { Filter, RefreshCw, Radio, Download } from 'lucide-react';
 import { IncidentTable } from '../components/tables/IncidentTable';
 import { incidentsService } from '../services/incidents';
 import { IncidentItem } from '../types';
@@ -64,6 +64,22 @@ export const HistoryPage: React.FC = () => {
   const firstVisible = visibleTotal === 0 ? 0 : offset + 1;
   const lastVisible = Math.min(offset + pageSize, visibleTotal);
 
+  const handleExportCSV = () => {
+    if (!visibleIncidents.length) return;
+    const headers = ["ID", "Source IP", "Destination IP", "Protocol", "Attack Type", "Confidence", "Is Malicious", "Severity", "Timestamp"];
+    const rows = visibleIncidents.map(i => [
+      i.id, i.source_ip, i.destination_ip, i.protocol, i.attack_type, i.confidence_score, i.is_malicious, i.severity, i.timestamp
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `sentinelai_incident_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       <div className="glass-panel p-6 rounded-2xl flex items-center justify-between">
@@ -87,6 +103,14 @@ export const HistoryPage: React.FC = () => {
             <input type="checkbox" checked={maliciousOnly} onChange={(event) => { setMaliciousOnly(event.target.checked); setOffset(0); }} />
             Show threats only
           </label>
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="flex items-center gap-1 text-xs font-semibold text-teal-300 bg-teal-500/10 border border-teal-500/30 px-3 py-1 rounded hover:bg-teal-500/20 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 
