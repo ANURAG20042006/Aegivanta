@@ -87,16 +87,45 @@ class PredictService:
         model, preprocessor = cls._load_artifacts(model_name)
         raw_dict = vector.model_dump()
         
-        # Validate Feature Schema Contract
+        # Validate Feature Schema Contract (Invalid -> HTTP 422)
         is_valid, schema_errors = validate_input_vector(raw_dict, DEFAULT_FEATURE_SCHEMA)
         if not is_valid:
             from fastapi import HTTPException
             raise HTTPException(
-                status_code=400,
-                detail=f"Feature schema validation failed: {schema_errors}"
+                status_code=422,
+                detail=f"Feature schema contract validation failed: {schema_errors}"
             )
 
-        # Artifact Availability Check (No Fake Heuristic Fallback)
+        # Artifact Availability & Compatibility Integrity Check
+        artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
+        if not artifact_dir.is_absolute():
+            artifact_dir = Path(__file__).resolve().parents[3] / artifact_dir
+
+        meta_path = artifact_dir / "metadata.json"
+        if not meta_path.exists():
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=503,
+                detail=f"Model metadata artifact 'metadata.json' is missing from {artifact_dir}. Please run training pipeline."
+            )
+
+        try:
+            import json
+            with meta_path.open("r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        except Exception as exc:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail=f"Model metadata file 'metadata.json' is corrupted: {exc}")
+
+        from ml.schema.feature_schema import validate_artifact_compatibility
+        compat_ok, compat_errors = validate_artifact_compatibility(metadata)
+        if not compat_ok:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=503,
+                detail=f"Artifact compatibility validation failed: {compat_errors}"
+            )
+
         if model is None or preprocessor is None:
             from fastapi import HTTPException
             raise HTTPException(
