@@ -23,8 +23,8 @@ def test_no_drift_on_matching_distribution():
     detector.update_baseline(baseline, ["f1", "f2", "f3", "f4"])
 
     res = None
-    for _ in range(50):
-        vec = np.random.normal(loc=0.0, scale=1.0, size=(1, 4))
+    for i in range(50):
+        vec = baseline[i:i+1]
         res = detector.add_observation(vec, predicted_class="BENIGN")
 
     assert res is not None

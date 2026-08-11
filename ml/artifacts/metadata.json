@@ -1,9 +1,9 @@
 {
-  "model_version": "catboost-v1.0",
+  "model_version": "random_forest-v1.0",
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
-  "dataset_hash": "91cce31a49a04e0c",
-  "training_timestamp": "2026-08-11T22:03:47.430990+00:00",
+  "dataset_hash": "2acdcd9c8cb49635",
+  "training_timestamp": "2026-08-11T22:05:51.286607+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -12,140 +12,163 @@
     "pandas": "2.2.3"
   },
   "selected_features": [
-    "Total Length of Bwd Packets",
+    "Total Length of Fwd Packets",
+    "Fwd Packet Length Min",
+    "Fwd Packet Length Mean",
     "Fwd Packet Length Std",
-    "Bwd Packet Length Max",
-    "Flow Packets/s",
-    "Flow IAT Mean",
+    "Flow Bytes/s",
     "Flow IAT Std",
-    "Fwd IAT Std",
+    "Fwd IAT Total",
+    "Fwd IAT Mean",
     "Fwd IAT Max",
+    "Fwd IAT Min",
     "Bwd IAT Mean",
     "Bwd IAT Std",
     "Bwd IAT Max",
-    "Bwd PSH Flags",
-    "Fwd URG Flags",
-    "Bwd URG Flags",
-    "Bwd Packets/s",
-    "Max Packet Length",
-    "Packet Length Mean",
+    "Fwd PSH Flags",
+    "Bwd Header Length",
+    "Packet Length Std",
     "FIN Flag Count",
-    "PSH Flag Count",
-    "CWE Flag Count",
-    "Down/Up Ratio",
+    "SYN Flag Count",
+    "RST Flag Count",
+    "URG Flag Count",
+    "Avg Fwd Segment Size",
+    "Avg Bwd Segment Size",
     "Fwd Header Length.1",
-    "Fwd Avg Bytes/Bulk",
     "Fwd Avg Packets/Bulk",
-    "Bwd Avg Packets/Bulk",
-    "Bwd Avg Bulk Rate",
-    "Active Std",
-    "Active Max",
+    "Subflow Fwd Bytes",
+    "Subflow Bwd Packets",
+    "act_data_pkt_fwd",
+    "min_seg_size_forward",
     "Active Min",
     "Idle Mean"
   ],
   "cv_metrics": {
-    "n_splits": 5,
-    "macro_f1_mean": 0.9904,
-    "macro_f1_std": 0.0014
+    "n_splits": 3,
+    "macro_f1_mean": 0.0419,
+    "macro_f1_std": 0.0009,
+    "fold_details": [
+      {
+        "Fold": 1,
+        "Accuracy": 0.5868,
+        "Macro F1": 0.0425,
+        "Precision": 0.0363,
+        "Recall": 0.0514
+      },
+      {
+        "Fold": 2,
+        "Accuracy": 0.5868,
+        "Macro F1": 0.0424,
+        "Precision": 0.0363,
+        "Recall": 0.0509
+      },
+      {
+        "Fold": 3,
+        "Accuracy": 0.5422,
+        "Macro F1": 0.0407,
+        "Precision": 0.036,
+        "Recall": 0.0467
+      }
+    ]
   },
   "leaderboard": [
     {
       "model_name": "Random Forest",
       "model_type": "Classical",
-      "accuracy": 0.6667,
-      "f1_score": 0.0449,
-      "precision": 0.0395,
-      "recall": 0.0519
+      "accuracy": 0.57,
+      "f1_score": 0.0687,
+      "precision": 0.0909,
+      "recall": 0.0671
     },
     {
       "model_name": "XGBoost",
       "model_type": "Boosting",
-      "accuracy": 0.62,
-      "f1_score": 0.0435,
-      "precision": 0.0396,
-      "recall": 0.0483
+      "accuracy": 0.49,
+      "f1_score": 0.0381,
+      "precision": 0.0345,
+      "recall": 0.0425
     },
     {
       "model_name": "LightGBM",
       "model_type": "Boosting",
-      "accuracy": 0.6667,
-      "f1_score": 0.0449,
-      "precision": 0.0395,
-      "recall": 0.0519
+      "accuracy": 0.54,
+      "f1_score": 0.0403,
+      "precision": 0.0353,
+      "recall": 0.0469
     },
     {
       "model_name": "CatBoost",
       "model_type": "Boosting",
       "accuracy": 0.5,
-      "f1_score": 0.0573,
-      "precision": 0.0944,
-      "recall": 0.0498
+      "f1_score": 0.0661,
+      "precision": 0.0627,
+      "recall": 0.0703
     },
     {
       "model_name": "Decision Tree",
       "model_type": "Classical",
-      "accuracy": 0.25,
-      "f1_score": 0.0386,
-      "precision": 0.0492,
-      "recall": 0.044
+      "accuracy": 0.16,
+      "f1_score": 0.02,
+      "precision": 0.0356,
+      "recall": 0.0139
     },
     {
       "model_name": "Logistic Regression",
       "model_type": "Classical",
-      "accuracy": 0.0267,
-      "f1_score": 0.0255,
-      "precision": 0.0567,
-      "recall": 0.0619
+      "accuracy": 0.13,
+      "f1_score": 0.0589,
+      "precision": 0.0648,
+      "recall": 0.0828
     },
     {
       "model_name": "SVM",
       "model_type": "Classical",
-      "accuracy": 0.6867,
-      "f1_score": 0.0455,
-      "precision": 0.0396,
-      "recall": 0.0535
+      "accuracy": 0.61,
+      "f1_score": 0.0421,
+      "precision": 0.0349,
+      "recall": 0.053
     },
     {
       "model_name": "KNN",
       "model_type": "Classical",
-      "accuracy": 0.0433,
-      "f1_score": 0.0194,
-      "precision": 0.0557,
-      "recall": 0.0341
+      "accuracy": 0.03,
+      "f1_score": 0.0211,
+      "precision": 0.0679,
+      "recall": 0.0472
     },
     {
       "model_name": "Naive Bayes",
       "model_type": "Classical",
-      "accuracy": 0.05,
-      "f1_score": 0.0269,
-      "precision": 0.0588,
-      "recall": 0.0693
+      "accuracy": 0.04,
+      "f1_score": 0.0063,
+      "precision": 0.037,
+      "recall": 0.0035
     },
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "accuracy": 0.54,
-      "f1_score": 0.0523,
-      "precision": 0.0518,
-      "recall": 0.0529
+      "accuracy": 0.29,
+      "f1_score": 0.0636,
+      "precision": 0.063,
+      "recall": 0.0697
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "accuracy": 0.1133,
-      "f1_score": 0.0331,
-      "precision": 0.0507,
-      "recall": 0.0472
+      "accuracy": 0.02,
+      "f1_score": 0.0127,
+      "precision": 0.0208,
+      "recall": 0.0286
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
-      "accuracy": 0.7133,
-      "f1_score": 0.0463,
-      "precision": 0.0396,
+      "accuracy": 0.64,
+      "f1_score": 0.0434,
+      "precision": 0.0356,
       "recall": 0.0556
     }
   ],
-  "preprocessing_version": "split_first_smote_train_only",
-  "git_commit": "60e1aabd12994811438f66b32b3bfbc8e60a426e"
+  "preprocessing_version": "split_first_smote_inside_folds_only",
+  "git_commit": "2157bd09cd5125a2ab4d841797d5d8885930e43b"
 }
