@@ -1,0 +1,17 @@
+{
+  "experiment_id": "EXP-2026-001",
+  "best_model": "XGBoost",
+  "best_macro_f1": 0.0619,
+  "timestamp": "2026-08-11T22:26:23.001751+00:00",
+  "output_files": [
+    "dataset_statistics.json",
+    "experiment_config.json",
+    "baseline_comparison.csv",
+    "cross_validation.csv",
+    "ablation.csv",
+    "confusion_matrix.json",
+    "per_class_metrics.csv",
+    "robustness_testing.csv",
+    "explainability_examples.json"
+  ]
+}

@@ -387,7 +387,7 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
     with open(exp_dir / "research_summary.json", "w") as f:
         json.dump(summary_data, f, indent=2)
 
-    print(f"✅ Phase 14 Research Suite Completed. Outputs generated in: results/{exp_id}/")
+    print(f"[SUCCESS] Phase 14 Research Suite Completed. Outputs generated in: results/{exp_id}/")
     return exp_id
 
 
