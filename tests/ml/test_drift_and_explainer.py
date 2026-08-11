@@ -14,8 +14,8 @@ def test_drift_detector():
 
     # Add observations matching baseline (no drift)
     res = None
-    for _ in range(20):
-        vec = np.random.normal(loc=0.0, scale=1.0, size=(1, 5))
+    for i in range(20):
+        vec = baseline[i:i+1]
         res = detector.add_observation(vec)
 
     assert res is not None
