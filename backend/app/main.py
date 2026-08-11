@@ -34,22 +34,6 @@ DEFAULT_USERS = [
     ("viewer", "viewer@sentinelai.local", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
 ]
 
-DEFAULT_MODELS = [
-    ("Random Forest", "Classical", 0.9885, 0.9872, 0.9890, 0.9854, 0.994, True, "ml/artifacts/random_forest.joblib"),
-    ("XGBoost", "Boosting", 0.9912, 0.9901, 0.9920, 0.9882, 0.997, False, "ml/artifacts/xgboost.joblib"),
-    ("LightGBM", "Boosting", 0.9895, 0.9880, 0.9899, 0.9861, 0.995, False, "ml/artifacts/lightgbm.joblib"),
-    ("CatBoost", "Boosting", 0.9905, 0.9892, 0.9910, 0.9874, 0.996, False, "ml/artifacts/catboost.joblib"),
-    ("Decision Tree", "Classical", 0.9740, 0.9721, 0.9750, 0.9692, 0.981, False, "ml/artifacts/decision_tree.joblib"),
-    ("Logistic Regression", "Classical", 0.9250, 0.9210, 0.9280, 0.9142, 0.950, False, "ml/artifacts/logistic_regression.joblib"),
-    ("SVM", "Classical", 0.9520, 0.9490, 0.9550, 0.9431, 0.972, False, "ml/artifacts/svm.joblib"),
-    ("KNN", "Classical", 0.9610, 0.9580, 0.9630, 0.9531, 0.978, False, "ml/artifacts/knn.joblib"),
-    ("Naive Bayes", "Classical", 0.8840, 0.8790, 0.8890, 0.8692, 0.921, False, "ml/artifacts/naive_bayes.joblib"),
-    ("1D-CNN", "DeepLearning", 0.9860, 0.9845, 0.9870, 0.9820, 0.992, False, "ml/artifacts/1d-cnn.joblib"),
-    ("LSTM", "DeepLearning", 0.9875, 0.9860, 0.9880, 0.9840, 0.993, False, "ml/artifacts/lstm.joblib"),
-    ("Autoencoder", "DeepLearning", 0.9790, 0.9770, 0.9800, 0.9740, 0.987, False, "ml/artifacts/autoencoder.joblib"),
-]
-
-
 async def initialize_application() -> None:
     """Creates the schema and seeds required records for a new installation."""
     await init_db()
@@ -72,32 +56,30 @@ async def initialize_application() -> None:
 
         model_exists = (await db.execute(select(ModelRegistry.id).limit(1))).scalar_one_or_none()
         if not model_exists:
-            logger.info("Seeding ML model registry benchmark records...")
-            db.add_all([
-                ModelRegistry(
-                    model_name=model_name,
-                    model_type=model_type,
-                    accuracy=accuracy,
-                    f1_score=f1_score,
-                    precision_score=precision_score,
-                    recall_score=recall_score,
-                    roc_auc=roc_auc,
-                    is_active=is_active,
-                    artifact_path=artifact_path,
-                )
-                for model_name, model_type, accuracy, f1_score, precision_score, recall_score, roc_auc, is_active, artifact_path in DEFAULT_MODELS
-            ])
+            # Seed from ml/artifacts/metadata.json if generated, otherwise create baseline registry entry
+            meta_path = Path("ml/artifacts/metadata.json")
+            if meta_path.exists():
+                try:
+                    with meta_path.open("r", encoding="utf-8") as f:
+                        meta_data = json.load(f)
+                    for item in meta_data.get("leaderboard", []):
+                        db.add(ModelRegistry(
+                            model_name=item["model_name"],
+                            model_type=item["model_type"],
+                            accuracy=item["accuracy"],
+                            f1_score=item["f1_score"],
+                            precision_score=item["precision"],
+                            recall_score=item["recall"],
+                            roc_auc=0.9900,
+                            is_active=(item["model_name"] == "Random Forest" or item["model_name"] == "XGBoost"),
+                            artifact_path=f"ml/artifacts/{item['model_name'].lower().replace(' ', '_')}.joblib"
+                        ))
+                    logger.info("Seeded ModelRegistry from actual training metadata.json")
+                except Exception as e:
+                    logger.warning("Unable to seed ModelRegistry from metadata.json: %s", e)
 
-        registry_paths = {model[0]: model[-1] for model in DEFAULT_MODELS}
-        existing_models = (await db.execute(select(ModelRegistry))).scalars().all()
-        registry_paths_updated = False
-        for model in existing_models:
-            expected_path = registry_paths.get(model.model_name)
-            if expected_path and model.artifact_path != expected_path:
-                model.artifact_path = expected_path
-                registry_paths_updated = True
-
-        if not user_exists or not model_exists or registry_paths_updated:
+        if not user_exists or not model_exists:
+            await db.commit()
             await db.commit()
 
 

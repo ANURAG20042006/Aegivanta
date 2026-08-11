@@ -47,6 +47,7 @@ async def websocket_threat_stream(websocket: WebSocket):
 
             packet_event = {
                 "type": "PACKET_STREAM",
+                "mode": "DEMO MODE",
                 "timestamp": asyncio.get_event_loop().time(),
                 "source_ip": f"192.168.1.{random.randint(2, 254)}",
                 "destination_ip": "10.0.0.1",

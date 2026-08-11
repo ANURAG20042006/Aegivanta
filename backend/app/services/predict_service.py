@@ -90,11 +90,19 @@ class PredictService:
         # Validate Feature Schema Contract
         is_valid, schema_errors = validate_input_vector(raw_dict, DEFAULT_FEATURE_SCHEMA)
         if not is_valid:
-            logger.warning("Schema validation warning for vector: %s", schema_errors)
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=400,
+                detail=f"Feature schema validation failed: {schema_errors}"
+            )
 
-        # Fallback if model artifact is unavailable
+        # Artifact Availability Check (No Fake Heuristic Fallback)
         if model is None or preprocessor is None:
-            return cls._heuristic_fallback(vector)
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=503,
+                detail=f"Model artifact '{model_name}' or preprocessor is currently unavailable/corrupt. Please run model training pipeline."
+            )
 
         try:
             # Transform vector via fitted preprocessor
@@ -152,36 +160,8 @@ class PredictService:
 
         except Exception as exc:
             logger.error("Error executing model inference for %s: %s", model_name, exc)
-            return cls._heuristic_fallback(vector)
-
-    @classmethod
-    def _heuristic_fallback(
-        cls,
-        vector: PacketFeatureVector
-    ) -> Tuple[str, float, bool, str, Dict[str, float], Dict[str, float]]:
-        """Fallback threat heuristic if model artifacts are unavailable."""
-        is_malicious = False
-        attack_type = "BENIGN"
-        confidence_score = 0.96
-
-        if vector.syn_flag_count > 0 and vector.packet_length_mean < 100 and vector.flow_packets_s > 1000:
-            attack_type = "DDoS"
-            is_malicious = True
-            confidence_score = 0.98
-        elif vector.destination_port in [21, 22, 80, 443] and vector.total_fwd_packets > 500:
-            attack_type = "DoS Hulk"
-            is_malicious = True
-            confidence_score = 0.95
-
-        probabilities = {attack: (round(confidence_score, 4) if attack == attack_type else 0.002) for attack in ATTACK_CLASSES}
-        severity = "Low" if not is_malicious else "Critical" if confidence_score > 0.95 else "High"
-        
-        shap_explanation = {
-            "flow_packets_s": 0.42 if is_malicious else -0.15,
-            "packet_length_mean": 0.28 if is_malicious else -0.10,
-            "syn_flag_count": 0.18 if is_malicious else 0.02
-        }
-        return attack_type, confidence_score, is_malicious, severity, probabilities, shap_explanation
+            from fastapi import HTTPException
+            raise HTTPException(status_code=500, detail=f"Model inference failed for '{model_name}': {str(exc)}")
 
     async def predict_single_flow(
         self,

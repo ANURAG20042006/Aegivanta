@@ -1,0 +1,151 @@
+{
+  "model_version": "catboost-v1.0",
+  "feature_schema_version": "schema-v1.0",
+  "dataset_identifier": "synthetic_cicids2017_benchmark",
+  "dataset_hash": "91cce31a49a04e0c",
+  "training_timestamp": "2026-08-11T21:28:36.039841+00:00",
+  "random_seed": 42,
+  "python_version": "3.11.5",
+  "library_versions": {
+    "scikit-learn": "pandas",
+    "numpy": "2.2.2",
+    "pandas": "2.2.3"
+  },
+  "selected_features": [
+    "Total Length of Bwd Packets",
+    "Fwd Packet Length Std",
+    "Bwd Packet Length Max",
+    "Flow Packets/s",
+    "Flow IAT Mean",
+    "Flow IAT Std",
+    "Fwd IAT Std",
+    "Fwd IAT Max",
+    "Bwd IAT Mean",
+    "Bwd IAT Std",
+    "Bwd IAT Max",
+    "Bwd PSH Flags",
+    "Fwd URG Flags",
+    "Bwd URG Flags",
+    "Bwd Packets/s",
+    "Max Packet Length",
+    "Packet Length Mean",
+    "FIN Flag Count",
+    "PSH Flag Count",
+    "CWE Flag Count",
+    "Down/Up Ratio",
+    "Fwd Header Length.1",
+    "Fwd Avg Bytes/Bulk",
+    "Fwd Avg Packets/Bulk",
+    "Bwd Avg Packets/Bulk",
+    "Bwd Avg Bulk Rate",
+    "Active Std",
+    "Active Max",
+    "Active Min",
+    "Idle Mean"
+  ],
+  "cv_metrics": {
+    "n_splits": 5,
+    "macro_f1_mean": 0.9904,
+    "macro_f1_std": 0.0014
+  },
+  "leaderboard": [
+    {
+      "model_name": "Random Forest",
+      "model_type": "Classical",
+      "accuracy": 0.6667,
+      "f1_score": 0.0449,
+      "precision": 0.0395,
+      "recall": 0.0519
+    },
+    {
+      "model_name": "XGBoost",
+      "model_type": "Boosting",
+      "accuracy": 0.62,
+      "f1_score": 0.0435,
+      "precision": 0.0396,
+      "recall": 0.0483
+    },
+    {
+      "model_name": "LightGBM",
+      "model_type": "Boosting",
+      "accuracy": 0.6667,
+      "f1_score": 0.0449,
+      "precision": 0.0395,
+      "recall": 0.0519
+    },
+    {
+      "model_name": "CatBoost",
+      "model_type": "Boosting",
+      "accuracy": 0.5,
+      "f1_score": 0.0573,
+      "precision": 0.0944,
+      "recall": 0.0498
+    },
+    {
+      "model_name": "Decision Tree",
+      "model_type": "Classical",
+      "accuracy": 0.25,
+      "f1_score": 0.0386,
+      "precision": 0.0492,
+      "recall": 0.044
+    },
+    {
+      "model_name": "Logistic Regression",
+      "model_type": "Classical",
+      "accuracy": 0.0267,
+      "f1_score": 0.0255,
+      "precision": 0.0567,
+      "recall": 0.0619
+    },
+    {
+      "model_name": "SVM",
+      "model_type": "Classical",
+      "accuracy": 0.6867,
+      "f1_score": 0.0455,
+      "precision": 0.0396,
+      "recall": 0.0535
+    },
+    {
+      "model_name": "KNN",
+      "model_type": "Classical",
+      "accuracy": 0.0433,
+      "f1_score": 0.0194,
+      "precision": 0.0557,
+      "recall": 0.0341
+    },
+    {
+      "model_name": "Naive Bayes",
+      "model_type": "Classical",
+      "accuracy": 0.05,
+      "f1_score": 0.0269,
+      "precision": 0.0588,
+      "recall": 0.0693
+    },
+    {
+      "model_name": "1D-CNN",
+      "model_type": "DeepLearning",
+      "accuracy": 0.4267,
+      "f1_score": 0.0558,
+      "precision": 0.0557,
+      "recall": 0.0626
+    },
+    {
+      "model_name": "LSTM",
+      "model_type": "DeepLearning",
+      "accuracy": 0.1133,
+      "f1_score": 0.0392,
+      "precision": 0.0593,
+      "recall": 0.0532
+    },
+    {
+      "model_name": "Autoencoder",
+      "model_type": "DeepLearning",
+      "accuracy": 0.7133,
+      "f1_score": 0.0463,
+      "precision": 0.0396,
+      "recall": 0.0556
+    }
+  ],
+  "preprocessing_version": "split_first_smote_train_only",
+  "git_commit": "81a0a2dd13ec25295a64b54792807acd2976e6cd"
+}

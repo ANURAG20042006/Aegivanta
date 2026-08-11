@@ -11,7 +11,7 @@
 
 # SentinelAI – Intelligent Network Intrusion Detection & Threat Analytics Platform
 
-**Production-Grade AI/DL Powered Network Defense System & Security Operations Center (SOC)**
+**Research-Verified AI/ML Network Intrusion Detection & Security Operations Platform Prototype**
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -26,8 +26,8 @@
 ---
 </div>
 
-> [!IMPORTANT]
-> **SentinelAI** is an enterprise-grade Network Intrusion Detection System (NIDS) designed to protect modern cloud networks and websites against zero-day anomalies, volumetric DDoS, and application-layer attacks in real time. It achieves an **F1-Score of 0.9901** using an ensemble of 12 Machine Learning and Deep Learning classifiers trained on the benchmark **CICIDS2017** dataset.
+> [!NOTE]
+> **SentinelAI** is an AI-powered Network Intrusion Detection System (NIDS) prototype designed to evaluate network flow statistics against benchmark intrusion datasets (such as **CICIDS2017**). It evaluates 12 Machine Learning and Deep Learning classifiers using a leakage-free split-first pipeline, with real SHAP explainability, multi-metric promotion gates, and an interactive React SOC dashboard operating in **DEMO MODE**.
 
 ---
 

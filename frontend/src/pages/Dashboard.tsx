@@ -59,6 +59,9 @@ export const Dashboard: React.FC = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-ping" />
                   REAL-TIME ACTIVE
                 </span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                  DEMO MODE (SYNTHETIC STREAM)
+                </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Continuous AI/DL inference monitoring across 78 CICIDS2017 flow attributes.
