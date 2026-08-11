@@ -13,6 +13,7 @@ from backend.app.models.user import User
 from backend.app.models.incident import Incident
 from backend.app.models.model_registry import ModelRegistry
 from backend.app.models.audit_log import AuditLog
+from backend.app.models.training_job import TrainingJob
 from backend.app.security import hash_password
 
 # Import Routers
