@@ -9,7 +9,7 @@ def test_drift_detector():
     """Verifies KS test & PSI calculation in accumulated window drift detector."""
     np.random.seed(42)
     baseline = np.random.normal(loc=0.0, scale=1.0, size=(100, 5))
-    detector = AccumulatedWindowDriftDetector(window_size=20)
+    detector = AccumulatedWindowDriftDetector(min_window_size=20)
     detector.update_baseline(baseline, [f"feat_{i}" for i in range(5)])
 
     # Add observations matching baseline (no drift)
@@ -19,7 +19,7 @@ def test_drift_detector():
         res = detector.add_observation(vec)
 
     assert res is not None
-    assert "drift_detected" in res
+    assert "alert_status" in res
 
 
 def test_real_model_explainer():
