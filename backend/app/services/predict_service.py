@@ -181,9 +181,17 @@ class PredictService:
                 severity = "Medium"
 
             # Compute Real SHAP Feature Explanation
+            model_ver = metadata.get("model_version", f"{model_name.lower().replace(' ', '_')}-v1.0")
             feature_names = getattr(preprocessor, "selected_feature_names", [])
             explainer = cls.get_explainer(model_name, getattr(model, "model", model), feature_names)
-            shap_explanation = explainer.explain_instance(processed_matrix, top_n=5)
+            
+            shap_explanation = explainer.explain_instance(
+                processed_matrix=processed_matrix,
+                model_version=model_ver,
+                prediction=attack_type,
+                confidence=confidence_score,
+                top_n=5
+            )
 
             return attack_type, round(confidence_score, 4), is_malicious, severity, probabilities, shap_explanation
 

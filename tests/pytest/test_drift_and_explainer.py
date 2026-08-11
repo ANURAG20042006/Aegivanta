@@ -33,6 +33,5 @@ def test_real_model_explainer():
     explainer = RealModelExplainer(model, feature_names)
     sample = X[0:1]
     explanation = explainer.explain_instance(sample, top_n=3)
-
-    assert len(explanation) <= 3
-    assert all(isinstance(v, float) for v in explanation.values())
+    assert explanation["explanation_available"] is True
+    assert len(explanation["features"]) <= 3
