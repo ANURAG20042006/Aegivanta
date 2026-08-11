@@ -1,9 +1,9 @@
 {
-  "model_version": "random_forest-v1.0",
+  "model_version": "catboost-v1.0",
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
-  "dataset_hash": "2acdcd9c8cb49635",
-  "training_timestamp": "2026-08-11T21:43:56.925573+00:00",
+  "dataset_hash": "91cce31a49a04e0c",
+  "training_timestamp": "2026-08-11T21:45:59.117392+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -12,62 +12,76 @@
     "pandas": "2.2.3"
   },
   "selected_features": [
-    "Total Length of Fwd Packets",
-    "Fwd Packet Length Min",
-    "Fwd Packet Length Mean",
+    "Total Length of Bwd Packets",
     "Fwd Packet Length Std",
-    "Flow Bytes/s",
+    "Bwd Packet Length Max",
+    "Flow Packets/s",
+    "Flow IAT Mean",
     "Flow IAT Std",
-    "Fwd IAT Total",
-    "Fwd IAT Mean",
+    "Fwd IAT Std",
     "Fwd IAT Max",
-    "Fwd IAT Min",
     "Bwd IAT Mean",
     "Bwd IAT Std",
     "Bwd IAT Max",
-    "Fwd PSH Flags",
-    "Bwd Header Length",
-    "Packet Length Std",
+    "Bwd PSH Flags",
+    "Fwd URG Flags",
+    "Bwd URG Flags",
+    "Bwd Packets/s",
+    "Max Packet Length",
+    "Packet Length Mean",
     "FIN Flag Count",
-    "SYN Flag Count",
-    "RST Flag Count",
-    "URG Flag Count",
-    "Avg Fwd Segment Size",
-    "Avg Bwd Segment Size",
+    "PSH Flag Count",
+    "CWE Flag Count",
+    "Down/Up Ratio",
     "Fwd Header Length.1",
+    "Fwd Avg Bytes/Bulk",
     "Fwd Avg Packets/Bulk",
-    "Subflow Fwd Bytes",
-    "Subflow Bwd Packets",
-    "act_data_pkt_fwd",
-    "min_seg_size_forward",
+    "Bwd Avg Packets/Bulk",
+    "Bwd Avg Bulk Rate",
+    "Active Std",
+    "Active Max",
     "Active Min",
     "Idle Mean"
   ],
   "cv_metrics": {
-    "n_splits": 3,
-    "macro_f1_mean": 0.0419,
-    "macro_f1_std": 0.0009,
+    "n_splits": 5,
+    "macro_f1_mean": 0.058,
+    "macro_f1_std": 0.0073,
     "fold_details": [
       {
         "Fold": 1,
-        "Accuracy": 0.5868,
-        "Macro F1": 0.0425,
-        "Precision": 0.0363,
-        "Recall": 0.0514
+        "Accuracy": 0.6633,
+        "Macro F1": 0.0589,
+        "Precision": 0.0587,
+        "Recall": 0.0623
       },
       {
         "Fold": 2,
-        "Accuracy": 0.5868,
-        "Macro F1": 0.0424,
-        "Precision": 0.0363,
-        "Recall": 0.0509
+        "Accuracy": 0.6233,
+        "Macro F1": 0.0437,
+        "Precision": 0.0398,
+        "Recall": 0.0483
       },
       {
         "Fold": 3,
-        "Accuracy": 0.5422,
-        "Macro F1": 0.0407,
-        "Precision": 0.036,
-        "Recall": 0.0467
+        "Accuracy": 0.6167,
+        "Macro F1": 0.0618,
+        "Precision": 0.0674,
+        "Recall": 0.0617
+      },
+      {
+        "Fold": 4,
+        "Accuracy": 0.6433,
+        "Macro F1": 0.0626,
+        "Precision": 0.0673,
+        "Recall": 0.0637
+      },
+      {
+        "Fold": 5,
+        "Accuracy": 0.65,
+        "Macro F1": 0.0631,
+        "Precision": 0.0677,
+        "Recall": 0.0643
       }
     ]
   },
@@ -75,100 +89,100 @@
     {
       "model_name": "Random Forest",
       "model_type": "Classical",
-      "accuracy": 0.57,
-      "f1_score": 0.0687,
-      "precision": 0.0909,
-      "recall": 0.0671
+      "accuracy": 0.6667,
+      "f1_score": 0.0449,
+      "precision": 0.0395,
+      "recall": 0.0519
     },
     {
       "model_name": "XGBoost",
       "model_type": "Boosting",
-      "accuracy": 0.49,
-      "f1_score": 0.0381,
-      "precision": 0.0345,
-      "recall": 0.0425
+      "accuracy": 0.62,
+      "f1_score": 0.0435,
+      "precision": 0.0396,
+      "recall": 0.0483
     },
     {
       "model_name": "LightGBM",
       "model_type": "Boosting",
-      "accuracy": 0.54,
-      "f1_score": 0.0403,
-      "precision": 0.0353,
-      "recall": 0.0469
+      "accuracy": 0.6667,
+      "f1_score": 0.0449,
+      "precision": 0.0395,
+      "recall": 0.0519
     },
     {
       "model_name": "CatBoost",
       "model_type": "Boosting",
       "accuracy": 0.5,
-      "f1_score": 0.0661,
-      "precision": 0.0627,
-      "recall": 0.0703
+      "f1_score": 0.0573,
+      "precision": 0.0944,
+      "recall": 0.0498
     },
     {
       "model_name": "Decision Tree",
       "model_type": "Classical",
-      "accuracy": 0.16,
-      "f1_score": 0.02,
-      "precision": 0.0356,
-      "recall": 0.0139
+      "accuracy": 0.25,
+      "f1_score": 0.0386,
+      "precision": 0.0492,
+      "recall": 0.044
     },
     {
       "model_name": "Logistic Regression",
       "model_type": "Classical",
-      "accuracy": 0.13,
-      "f1_score": 0.0589,
-      "precision": 0.0648,
-      "recall": 0.0828
+      "accuracy": 0.0267,
+      "f1_score": 0.0255,
+      "precision": 0.0567,
+      "recall": 0.0619
     },
     {
       "model_name": "SVM",
       "model_type": "Classical",
-      "accuracy": 0.61,
-      "f1_score": 0.0421,
-      "precision": 0.0349,
-      "recall": 0.053
+      "accuracy": 0.6867,
+      "f1_score": 0.0455,
+      "precision": 0.0396,
+      "recall": 0.0535
     },
     {
       "model_name": "KNN",
       "model_type": "Classical",
-      "accuracy": 0.03,
-      "f1_score": 0.0211,
-      "precision": 0.0679,
-      "recall": 0.0472
+      "accuracy": 0.0433,
+      "f1_score": 0.0194,
+      "precision": 0.0557,
+      "recall": 0.0341
     },
     {
       "model_name": "Naive Bayes",
       "model_type": "Classical",
-      "accuracy": 0.04,
-      "f1_score": 0.0063,
-      "precision": 0.037,
-      "recall": 0.0035
+      "accuracy": 0.05,
+      "f1_score": 0.0269,
+      "precision": 0.0588,
+      "recall": 0.0693
     },
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "accuracy": 0.41,
-      "f1_score": 0.0549,
-      "precision": 0.0522,
-      "recall": 0.0625
+      "accuracy": 0.3267,
+      "f1_score": 0.0461,
+      "precision": 0.0515,
+      "recall": 0.0471
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "accuracy": 0.02,
-      "f1_score": 0.0218,
-      "precision": 0.0143,
-      "recall": 0.0463
+      "accuracy": 0.07,
+      "f1_score": 0.0132,
+      "precision": 0.0396,
+      "recall": 0.0163
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
-      "accuracy": 0.64,
-      "f1_score": 0.0434,
-      "precision": 0.0356,
+      "accuracy": 0.7133,
+      "f1_score": 0.0463,
+      "precision": 0.0396,
       "recall": 0.0556
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "5df19994ad76fee74bebc24efd61b44cbcb41d91"
+  "git_commit": "e883b82c8a2ef134d73960af47d2cef28cddbb00"
 }
