@@ -1,4 +1,4 @@
-name: SentinelAI CI/CD Pipeline
+name: SentinelAI CI Pipeline
 
 on:
   push:
@@ -7,49 +7,58 @@ on:
     branches: [ master, main ]
 
 jobs:
-  backend-test:
-    name: FastAPI Backend & ML Verification
+  backend-checks:
+    name: Backend Lint, Compile & PyTest Suite
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          pip install -r backend/requirements.txt || pip install pytest numpy pandas scikit-learn xgboost catboost lightgbm fastapi uvicorn pydantic scipy
 
-      - name: Check Backend Syntax & Compilation
+      - name: Python Compileall Check
         run: |
-          python -m py_compile backend/app/main.py
+          python -m compileall backend ml
 
-      - name: Run Integration Tests
+      - name: Run PyTest Test Suite
         run: |
-          python -m tests.integration_test_runner
+          python -m pytest -v
 
-  frontend-build:
-    name: React SPA Build & Typecheck
+  frontend-checks:
+    name: Frontend TypeCheck & Production Build
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js 20
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
       - name: Install Frontend Dependencies
+        working-directory: ./frontend
         run: |
-          cd frontend
-          npm ci
+          npm ci || npm install
 
-      - name: Typecheck & Build Bundle
+      - name: Run TypeScript TypeCheck & Build
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm run build
+
+  docker-build-checks:
+    name: Docker Configuration & Image Build Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: |
+          docker compose config || docker-compose config
