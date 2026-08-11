@@ -1,9 +1,9 @@
 {
-  "model_version": "random_forest-v1.0",
+  "model_version": "1d-cnn-v1.0",
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "2acdcd9c8cb49635",
-  "training_timestamp": "2026-08-11T22:10:40.805013+00:00",
+  "training_timestamp": "2026-08-11T22:14:49.777508+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -147,18 +147,18 @@
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "accuracy": 0.46,
-      "f1_score": 0.0683,
-      "precision": 0.0619,
-      "recall": 0.0845
+      "accuracy": 0.37,
+      "f1_score": 0.0693,
+      "precision": 0.0663,
+      "recall": 0.0767
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
       "accuracy": 0.03,
-      "f1_score": 0.0267,
-      "precision": 0.0728,
-      "recall": 0.0472
+      "f1_score": 0.0286,
+      "precision": 0.0185,
+      "recall": 0.0648
     },
     {
       "model_name": "Autoencoder",
@@ -170,5 +170,5 @@
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "6db3e2a21ce04c9b4191a7423e43817a5876db99"
+  "git_commit": "ade3f1b18a3b3cc18711b9495594b49493ad082a"
 }

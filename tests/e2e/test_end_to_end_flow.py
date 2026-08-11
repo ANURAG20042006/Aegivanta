@@ -38,7 +38,7 @@ def test_full_sentinelai_end_to_end_pipeline():
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X, y)
 
-    feature_names = DEFAULT_FEATURE_SCHEMA.canonical_features
+    feature_names = DEFAULT_FEATURE_SCHEMA.feature_names
     explainer = RealModelExplainer(model, feature_names)
     sample = X[0:1]
 
