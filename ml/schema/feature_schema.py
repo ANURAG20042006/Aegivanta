@@ -86,8 +86,13 @@ def validate_input_vector(
             errors.append(f"Missing required feature: '{req}'")
 
     # 2. Data type and Range validation
+    meta_keys = ["source_ip", "destination_ip", "protocol", "timestamp"]
     for key, val in sample_dict.items():
         if val is None:
+            continue
+
+        # Skip float conversion for network metadata attributes
+        if key in meta_keys or key.lower() in meta_keys:
             continue
         
         # Check invalid non-numeric data types (e.g. dict, list)
