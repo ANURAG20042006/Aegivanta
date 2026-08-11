@@ -129,11 +129,13 @@ class AccumulatedWindowDriftDetector:
         curr_matrix = np.array(self.production_feature_window)
         num_features = min(self.baseline_distribution.shape[1], curr_matrix.shape[1])
 
-        # 1. DATA DRIFT EVALUATION (KS-Test & PSI per feature)
+        # 1. DATA DRIFT EVALUATION (KS-Test & PSI per feature with Bonferroni correction)
         affected_features = []
         feature_psi_scores = {}
         feature_ks_stats = {}
         feature_ks_pvalues = {}
+
+        effective_alpha = self.ks_alpha / max(num_features, 1)
 
         for i in range(num_features):
             base_col = self.baseline_distribution[:, i]
@@ -147,7 +149,8 @@ class AccumulatedWindowDriftDetector:
             feature_ks_stats[feature_name] = round(float(ks_stat), 4)
             feature_ks_pvalues[feature_name] = round(float(p_val), 4)
 
-            if psi_val > self.psi_threshold or p_val < self.ks_alpha:
+            # Flag feature as drifted if PSI > threshold or (KS p_val < effective_alpha and PSI > 0.10)
+            if psi_val > self.psi_threshold or (p_val < effective_alpha and psi_val > 0.10):
                 affected_features.append(feature_name)
 
         has_data_drift = len(affected_features) > 0
