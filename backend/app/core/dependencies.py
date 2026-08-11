@@ -34,11 +34,19 @@ async def get_current_user(
 
 
 def require_role(allowed_roles: list[str]) -> Callable:
-    """Factory dependency for enforcing Role-Based Access Control (RBAC)."""
+    """
+    Factory dependency for enforcing Role-Based Access Control (RBAC).
+    Supported canonical roles: ADMIN, SOC_ANALYST, RESEARCHER, VIEWER.
+    Validates authorization strictly on the server-side.
+    """
+    normalized_allowed = [r.lower() for r in allowed_roles]
+
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in allowed_roles:
+        user_role = current_user.role.lower()
+        if user_role not in normalized_allowed:
             raise PermissionDeniedError(
-                detail=f"Role '{current_user.role}' is not authorized. Required: {allowed_roles}"
+                detail=f"User role '{current_user.role}' is not authorized to access this resource. Required: {allowed_roles}"
             )
         return current_user
+
     return role_checker
