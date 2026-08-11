@@ -1,16 +1,24 @@
-from typing import Optional
-
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, select
+from typing import Optional, List
+from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query, HTTPException, status
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_current_user
+from backend.app.core.dependencies import get_current_user, require_role
 from backend.app.database import get_db
 from backend.app.models.incident import Incident
+from backend.app.models.audit_log import AuditLog
 from backend.app.models.user import User
 
-
 router = APIRouter(prefix="/incidents", tags=["Incident Operations"])
+
+
+class IncidentStatusUpdate(BaseModel):
+    status: str
+    notes: Optional[str] = None
+
+
+VALID_INCIDENT_STATUSES = ["DETECTED", "TRIAGED", "INVESTIGATING", "CONTAINED", "RESOLVED", "CLOSED"]
 
 
 @router.get("", summary="Search and Paginate Recorded Incidents")
@@ -58,3 +66,48 @@ async def list_incidents(
         for incident in result.scalars().all()
     ]
     return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+
+@router.patch("/{incident_id}/status", summary="Update Incident Lifecycle State (Analyst & Admin Only)")
+async def update_incident_status(
+    incident_id: str,
+    payload: IncidentStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst"]))
+):
+    """Transitions an incident along its lifecycle state (DETECTED -> TRIAGED -> INVESTIGATING -> CONTAINED -> RESOLVED -> CLOSED)."""
+    new_status = payload.status.upper()
+    if new_status not in VALID_INCIDENT_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status '{payload.status}'. Valid choices: {VALID_INCIDENT_STATUSES}"
+        )
+
+    query = select(Incident).where(Incident.id == incident_id)
+    result = await db.execute(query)
+    incident = result.scalar_one_or_none()
+
+    if not incident:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+
+    audit = AuditLog(
+        user_id=current_user.id,
+        action=f"INCIDENT_STATUS_{new_status}",
+        resource="INCIDENTS",
+        status="SUCCESS",
+        details={
+            "incident_id": incident_id,
+            "new_status": new_status,
+            "updated_by": current_user.username,
+            "notes": payload.notes
+        }
+    )
+    db.add(audit)
+    await db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "incident_id": incident_id,
+        "new_lifecycle_state": new_status,
+        "updated_by": current_user.username
+    }

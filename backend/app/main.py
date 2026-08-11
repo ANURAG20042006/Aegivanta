@@ -25,6 +25,7 @@ from backend.app.api.v1.logs import router as logs_router
 from backend.app.api.v1.train import router as train_router
 from backend.app.api.v1.websockets import router as websockets_router
 from backend.app.api.v1.incidents import router as incidents_router
+from backend.app.api.v1.health import router as health_router
 
 
 DEFAULT_USERS = [
@@ -169,3 +170,4 @@ app.include_router(logs_router, prefix=settings.API_V1_STR)
 app.include_router(train_router, prefix=settings.API_V1_STR)
 app.include_router(websockets_router)
 app.include_router(incidents_router, prefix=settings.API_V1_STR)
+app.include_router(health_router, prefix=settings.API_V1_STR)

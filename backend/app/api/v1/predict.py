@@ -23,7 +23,7 @@ async def predict_single_packet(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
 ):
-    """Evaluates a single 78-feature network flow vector using selected ML model classifier."""
+    """Evaluates a single 78-feature network flow vector using loaded ML model classifier and real SHAP XAI."""
     result = await predict_service.predict_single_flow(
         db=db,
         features=payload.features,
@@ -91,14 +91,19 @@ async def dispatch_remediation(
         action=f"REMEDIATION_{payload.action.upper()}",
         resource="SECURITY_OPS",
         status="SUCCESS",
-        details={"target_ip": payload.target_ip, "action": payload.action}
+        details={
+            "target_ip": payload.target_ip,
+            "action": payload.action,
+            "mode": "SIMULATION MODE"
+        }
     )
     db.add(audit)
     await db.commit()
 
     return {
         "status": "SUCCESS",
+        "remediation_mode": "SIMULATION MODE",
         "target_ip": payload.target_ip,
         "action": payload.action,
-        "message": f"Automated Playbook [{payload.action.upper()}] dispatched successfully for target IP {payload.target_ip}."
+        "message": f"[SIMULATION MODE] Automated Playbook [{payload.action.upper()}] dispatched for target IP {payload.target_ip}."
     }
