@@ -12,8 +12,11 @@ class Settings(BaseSettings):
     # General Application Settings
     APP_NAME: str = "SentinelAI"
     APP_ENV: str = "development"
+    OPERATING_MODE: str = Field(default="DEMO", description="Operating Mode: DEMO, LAB, or PRODUCTION")
     DEBUG: bool = True
     API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development"
+    PROJECT_VERSION: str = "1.0.0"
     SECRET_KEY: str = INSECURE_DEVELOPMENT_SECRET
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
