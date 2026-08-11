@@ -180,7 +180,8 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
     cv_target_models = [RandomForestModel(), XGBoostModel()]
     raw_X = df.drop(columns=["Label"]).select_dtypes(include=[np.number]).fillna(0).values
     raw_X = np.nan_to_num(raw_X, nan=0.0, posinf=1e6, neginf=0.0)
-    raw_y = df["Label"].values
+    le = LabelEncoder()
+    raw_y = le.fit_transform(df["Label"].values)
 
     for model in cv_target_models:
         fold_idx = 1
