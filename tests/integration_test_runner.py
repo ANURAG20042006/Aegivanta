@@ -79,7 +79,8 @@ async def run_end_to_end_integration_test():
             )
             assert csv_res.status_code == 200, f"CSV prediction failed: {csv_res.text}"
             batch_info = csv_res.json()
-            print(f"    SUCCESS: CSV Ingested -> Total Packets: {batch_info['total_packets_inspected']}, Malicious: {batch_info['malicious_packets_count']}, Threat Ratio: {batch_info['threat_ratio_percentage']}%")
+            threat_ratio = round((batch_info['malicious_count'] / batch_info['total_records'] * 100), 2) if batch_info['total_records'] > 0 else 0
+            print(f"    SUCCESS: CSV Ingested -> Total Packets: {batch_info['total_records']}, Malicious: {batch_info['malicious_count']}, Threat Ratio: {threat_ratio}%")
 
             blank_value_csv = (
                 b"Source IP,Destination IP,Source Port,Destination Port,Protocol,Flow Duration,Flow Packets/s,Packet Length Mean\n"
