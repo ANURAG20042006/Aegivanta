@@ -68,11 +68,24 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     preprocessor_exists = (artifact_dir / "preprocessor.joblib").exists()
     artifact_integrity = model_exists and preprocessor_exists
 
-    # 5. Schema Compatibility
+    # 5. Manifest & Schema Feature Synchronization
+    manifest_path = artifact_dir / "artifact_manifest.json"
+    manifest_valid = False
+    if manifest_path.exists():
+        try:
+            import json
+            with manifest_path.open("r", encoding="utf-8") as f:
+                man_data = json.load(f)
+            manifest_valid = (man_data.get("processed_feature_count") == man_data.get("model_n_features_in"))
+        except Exception:
+            manifest_valid = False
+    else:
+        manifest_valid = True
+
     metadata = load_artifact_metadata(artifact_dir)
     schema_compatible, compat_errors = validate_artifact_compatibility(metadata)
 
-    is_ready = db_healthy and artifact_integrity and schema_compatible
+    is_ready = db_healthy and artifact_integrity and schema_compatible and manifest_valid
 
     if not is_ready:
         raise HTTPException(

@@ -219,8 +219,11 @@ def run_training_pipeline(
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
     champion_results = next(r for r in results if r["model_name"] == champion_name)
 
+    experiment_id = "EXP-2026-002"
+
     import sklearn
     metadata = {
+        "experiment_id": experiment_id,
         "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
         "feature_schema_version": DEFAULT_FEATURE_SCHEMA.version,
         "dataset_identifier": dataset_id,
@@ -286,6 +289,7 @@ def run_training_pipeline(
     model_n_features_in = int(getattr(inner_model, "n_features_in_", len(preprocessor.selected_feature_names)))
 
     manifest = {
+        "experiment_id": experiment_id,
         "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
         "model_type": selector.best_model.model_type if selector.best_model else "Classical",
         "feature_schema_version": DEFAULT_FEATURE_SCHEMA.version,
@@ -301,6 +305,14 @@ def run_training_pipeline(
     }
     manifest_path = artifacts_path / "artifact_manifest.json"
     with manifest_path.open("w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
+    # Also save to results/EXP-2026-002/
+    exp_dir = Path("results") / experiment_id
+    exp_dir.mkdir(parents=True, exist_ok=True)
+    with (exp_dir / "metadata.json").open("w", encoding="utf-8") as f:
+        json.dump(metadata, f, indent=2)
+    with (exp_dir / "artifact_manifest.json").open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
     print(f"--> Metadata saved to: {metadata_path}")

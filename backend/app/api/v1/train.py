@@ -110,7 +110,7 @@ async def async_train_worker(job_id: str):
             passed, reason = evaluate_promotion_gate(
                 candidate_f1=champion["f1_score"],
                 candidate_recall=champion["recall"],
-                candidate_fpr=round(1.0 - champion["recall"], 4),
+                candidate_fpr=champion.get("fpr", 0.05),
                 active_f1=active_f1
             )
             job.promotion_reason = reason

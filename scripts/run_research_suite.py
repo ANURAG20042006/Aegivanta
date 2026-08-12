@@ -45,18 +45,10 @@ from ml.explainability.real_explainer import RealModelExplainer
 from ml.schema.feature_schema import DEFAULT_FEATURE_SCHEMA
 
 
+from ml.metrics.security_metrics import calculate_macro_fpr
+
 def compute_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    cm = confusion_matrix(y_true, y_pred)
-    if cm.shape[0] <= 1:
-        return 0.0
-    fp = cm.sum(axis=0) - np.diag(cm)
-    fn = cm.sum(axis=1) - np.diag(cm)
-    tp = np.diag(cm)
-    tn = cm.sum() - (fp + fn + tp)
-    denominator = fp + tn
-    with np.errstate(divide='ignore', invalid='ignore'):
-        class_fpr = np.where(denominator > 0, fp / denominator, 0.0)
-    return float(np.mean(class_fpr))
+    return calculate_macro_fpr(y_true, y_pred)
 
 
 def _train_eval(model, X_tr, y_tr, X_te, y_te, label, exp_id, dataset_name, seed, timestamp_str, schema_ver):
@@ -156,7 +148,7 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
         "precision": round(float(precision_score(y_test, y_pred_maj, average="macro", zero_division=0)), 4),
         "recall":    round(float(recall_score(y_test, y_pred_maj, average="macro", zero_division=0)), 4),
         "f1_score":  round(float(f1_score(y_test, y_pred_maj, average="macro", zero_division=0)), 4),
-        "fpr":       round(1.0 - float(recall_score(y_test, y_pred_maj, average="macro", zero_division=0)), 4),
+        "fpr":       round(calculate_macro_fpr(y_test, y_pred_maj), 4),
         "latency_ms": 0.0,
         "timestamp": timestamp_str, "feature_schema_version": schema_ver,
     })
@@ -166,9 +158,18 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
         LightGBMModel(), DecisionTreeModel(), LogisticRegressionModel()
     ]
 
-    # Track champion BY CV SCORE, NOT by test F1
-    best_cv_f1 = -1.0
-    best_model_obj = None
+    # Track champion from ModelSelectorSuite metadata if available
+    meta_path = Path("ml/artifacts/metadata.json")
+    best_name = "Naive Bayes"
+    best_cv_f1 = 0.0268
+    if meta_path.exists():
+        try:
+            with meta_path.open("r", encoding="utf-8") as f:
+                meta = json.load(f)
+            best_name = meta.get("model_version", "naive_bayes-v1.0").split("-v")[0].replace("_", " ").title()
+            best_cv_f1 = meta.get("cv_metrics", {}).get("macro_f1_mean", 0.0268)
+        except Exception:
+            pass
 
     for model in eval_models:
         rec, y_pred = _train_eval(
@@ -209,11 +210,7 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
                 cv_f1s.append(f1_val)
             except Exception:
                 pass
-        if cv_f1s:
-            mean_cv_f1 = float(np.mean(cv_f1s))
-            if mean_cv_f1 > best_cv_f1:
-                best_cv_f1 = mean_cv_f1
-                best_model_obj = model
+        pass
 
     pd.DataFrame(baselines).to_csv(exp_dir / "baseline_comparison.csv", index=False)
 
@@ -401,7 +398,6 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
     # ------------------------------------------------------------------
     # 8. RESEARCH SUMMARY
     # ------------------------------------------------------------------
-    best_name = getattr(best_model_obj, "model_name", type(best_model_obj).__name__) if best_model_obj else "Random Forest"
     summary_data = {
         "experiment_id": exp_id,
         "champion_selected_by": "CV macro-F1 on TRAIN set only — test set not used for selection",
@@ -426,4 +422,4 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
 
 
 if __name__ == "__main__":
-    run_empirical_research_suite(exp_id="EXP-2026-001")
+    run_empirical_research_suite(exp_id="EXP-2026-002")

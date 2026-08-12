@@ -31,28 +31,36 @@ from backend.app.api.v1.incidents import router as incidents_router
 from backend.app.api.v1.health import router as health_router
 
 
-import base64
+import secrets
 import json
+
+def _get_required_user_password(env_var: str, default_dev_label: str) -> str:
+    pwd = os.environ.get(env_var)
+    if pwd:
+        return pwd
+    if settings.APP_ENV == "production":
+        raise RuntimeError(f"Production environment requires environment variable {env_var} to be set.")
+    return f"{default_dev_label}_Secure2026!"
 
 DEFAULT_USERS = [
     (
         "admin",
         "admin@sentinelai.io",
-        os.environ.get("SENTINEL_ADMIN_PASSWORD") or base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode(),
+        _get_required_user_password("SENTINEL_ADMIN_PASSWORD", "Admin"),
         "System Administrator",
         "admin"
     ),
     (
         "analyst",
         "analyst@sentinelai.io",
-        os.environ.get("SENTINEL_ANALYST_PASSWORD") or base64.b64decode(b"QW5hbHlzdFNlY3VyZTIwMjYh").decode(),
+        _get_required_user_password("SENTINEL_ANALYST_PASSWORD", "Analyst"),
         "Senior Security Analyst",
         "analyst"
     ),
     (
         "viewer",
         "viewer@sentinelai.io",
-        os.environ.get("SENTINEL_VIEWER_PASSWORD") or base64.b64decode(b"Vmlld2VyU2VjdXJlMjAyNiE=").decode(),
+        _get_required_user_password("SENTINEL_VIEWER_PASSWORD", "Viewer"),
         "Security Operations Viewer",
         "viewer"
     ),
@@ -77,6 +85,15 @@ async def initialize_application() -> None:
                 )
                 for username, email, raw_password, full_name, role in DEFAULT_USERS
             ])
+            await db.commit()
+        else:
+            # Update password hashes for default accounts if needed
+            for username, _, raw_password, _, _ in DEFAULT_USERS:
+                usr = (await db.execute(select(User).where(User.username == username))).scalar_one_or_none()
+                if usr and not verify_password(raw_password, usr.password_hash):
+                    usr.password_hash = hash_password(raw_password)
+                    db.add(usr)
+            await db.commit()
 
         model_exists = (await db.execute(select(ModelRegistry.id).limit(1))).scalar_one_or_none()
         if not model_exists:

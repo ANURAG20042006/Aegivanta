@@ -27,9 +27,9 @@ export const Login: React.FC = () => {
     }
   };
 
-  const setQuickRole = (user: string, pass: string) => {
+  const setQuickUsername = (user: string) => {
     setUsername(user);
-    setPassword(pass);
+    setPassword('');
   };
 
   return (
@@ -44,49 +44,47 @@ export const Login: React.FC = () => {
 
       <div className="w-full max-w-md glass-panel-glow p-8 rounded-2xl relative z-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(0,240,255,0.2)]">
-            <Shield className="w-8 h-8 text-cyan-400" />
+          <div className="inline-flex p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl mb-2 text-cyan-400">
+            <Shield className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-mono font-extrabold bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
-            SENTINEL<span className="text-white">AI</span>
-          </h1>
-          <p className="text-xs text-slate-400 font-mono">Simple, intelligent network protection</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white font-mono">SENTINEL AI</h1>
+          <p className="text-xs text-slate-400">Enterprise Cyber Intrusion Detection & AI Analysis</p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center gap-2 text-rose-400 text-xs font-mono">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-mono text-slate-400 mb-1">Username</label>
+            <label className="block text-xs font-mono text-slate-400 mb-1">USERNAME</label>
             <div className="relative">
-              <UserIcon className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <UserIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
+                required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400 transition-colors"
-                placeholder="Enter handle"
+                placeholder="Enter analyst or admin username"
+                className="w-full bg-slate-900/80 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-slate-400 mb-1">Password</label>
+            <label className="block text-xs font-mono text-slate-400 mb-1">PASSWORD</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full pl-9 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400 transition-colors"
                 placeholder="••••••••••••"
+                className="w-full bg-slate-900/80 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
               />
             </div>
           </div>
@@ -94,35 +92,35 @@ export const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-mono font-bold text-xs rounded-lg shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all duration-200"
+            className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-mono text-xs font-semibold rounded-lg shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'AUTHENTICATING...' : 'ACCESS SENTINEL AI'}
           </button>
         </form>
 
         {showDemoAccounts && (
           <div className="pt-4 border-t border-slate-800">
             <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest text-center mb-2">
-              Quick demo accounts
+              Select demo account username
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => setQuickRole('admin', atob('QWRtaW5TZWN1cmUyMDI2IQ=='))}
+                onClick={() => setQuickUsername('admin')}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-cyan-400 hover:border-cyan-500/40"
               >
-                Admin
+                admin
               </button>
               <button
-                onClick={() => setQuickRole('analyst', atob('QW5hbHlzdFNlY3VyZTIwMjYh'))}
+                onClick={() => setQuickUsername('analyst')}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-emerald-400 hover:border-emerald-500/40"
               >
-                Analyst
+                analyst
               </button>
               <button
-                onClick={() => setQuickRole('viewer', atob('Vmlld2VyU2VjdXJlMjAyNiE='))}
+                onClick={() => setQuickUsername('viewer')}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-slate-400 hover:border-slate-700"
               >
-                Viewer
+                viewer
               </button>
             </div>
           </div>

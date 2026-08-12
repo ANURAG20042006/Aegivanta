@@ -1,0 +1,40 @@
+{
+  "explanation_available": true,
+  "explanation_method": "SHAP TreeExplainer",
+  "model_version": "random_forest-research-v1.0",
+  "prediction": "1",
+  "confidence": 0.2,
+  "features": [
+    {
+      "feature": "Total Length of Fwd Packets",
+      "contribution": -0.0197,
+      "direction": "negative",
+      "rank": 1
+    },
+    {
+      "feature": "Packet Length Std",
+      "contribution": 0.0145,
+      "direction": "positive",
+      "rank": 2
+    },
+    {
+      "feature": "URG Flag Count",
+      "contribution": -0.0113,
+      "direction": "negative",
+      "rank": 3
+    },
+    {
+      "feature": "Flow Duration",
+      "contribution": -0.011,
+      "direction": "negative",
+      "rank": 4
+    },
+    {
+      "feature": "RST Flag Count",
+      "contribution": -0.0101,
+      "direction": "negative",
+      "rank": 5
+    }
+  ],
+  "confidence_source": "predict_proba"
+}

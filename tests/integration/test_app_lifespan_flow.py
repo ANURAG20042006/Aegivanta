@@ -1,3 +1,4 @@
+import os
 import pytest
 from httpx import AsyncClient, ASGITransport
 from backend.app.main import app
@@ -23,9 +24,7 @@ async def test_app_lifespan_e2e_flow():
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             # 1. Test Login
-            import base64
-            import os
-            admin_pwd = os.getenv("SENTINEL_ADMIN_PASSWORD", base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode())
+            admin_pwd = os.getenv("SENTINEL_ADMIN_PASSWORD", "Admin_Secure2026!")
             login_res = await client.post(
                 "/api/v1/auth/login",
                 data={"username": "admin", "password": admin_pwd}

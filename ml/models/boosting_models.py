@@ -98,7 +98,8 @@ class CatBoostModel(BaseSentinelModel):
         self.is_trained = True
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        return self.model.predict(X)
+        preds = self.model.predict(X)
+        return np.asarray(preds).ravel()
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         return self.model.predict_proba(X)

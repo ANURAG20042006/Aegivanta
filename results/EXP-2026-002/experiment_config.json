@@ -1,0 +1,12 @@
+{
+  "experiment_id": "EXP-2026-002",
+  "dataset_name": "CICIDS2017_Synthetic_Benchmark",
+  "seed": 42,
+  "num_samples": 1500,
+  "train_size": 15444,
+  "test_size": 300,
+  "feature_schema_version": "schema-v1.0",
+  "preprocessing_version": "split_first_smote_inside_folds_only",
+  "timestamp": "2026-08-12T20:03:56.539749+00:00",
+  "test_set_usage": "evaluated ONCE after champion frozen \u2014 never used for selection"
+}

@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def test_research_experiment_artifacts_exist():
     """Requirement 1 & 2 Proof: All research artifacts are generated dynamically under results/EXP-2026-001/."""
-    exp_dir = PROJECT_ROOT / "results" / "EXP-2026-001"
+    exp_dir = PROJECT_ROOT / "results" / "EXP-2026-002"
     
     # Required files
     required_files = [
@@ -32,7 +32,7 @@ def test_research_experiment_artifacts_exist():
 
 def test_research_summary_content():
     """Requirement 2 Proof: Research summary contains valid non-hardcoded metrics."""
-    summary_path = PROJECT_ROOT / "results" / "EXP-2026-001" / "research_summary.json"
+    summary_path = PROJECT_ROOT / "results" / "EXP-2026-002" / "research_summary.json"
     if summary_path.exists():
         with open(summary_path, "r") as f:
             data = json.load(f)

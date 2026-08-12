@@ -1,0 +1,27 @@
+{
+  "dataset_name": "CICIDS2017_Synthetic_Benchmark",
+  "total_samples": 1500,
+  "total_features": 81,
+  "seed": 42,
+  "class_distribution": {
+    "BENIGN": 1072,
+    "DDoS": 34,
+    "DoS GoldenEye": 31,
+    "FTP-Patator": 31,
+    "Ransomware": 29,
+    "SSH-Patator": 26,
+    "ARP Spoofing": 26,
+    "XSS": 26,
+    "Data Exfiltration": 26,
+    "MITM": 24,
+    "DoS Hulk": 23,
+    "Malware": 23,
+    "Port Scan": 23,
+    "DoS Slowloris": 23,
+    "SQL Injection": 22,
+    "Zero-Day Anomaly": 22,
+    "DNS Spoofing": 20,
+    "Botnet": 19
+  },
+  "timestamp": "2026-08-12T20:03:56.539749+00:00"
+}

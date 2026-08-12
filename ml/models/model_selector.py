@@ -25,19 +25,11 @@ from ml.models.boosting_models import XGBoostModel, LightGBMModel, CatBoostModel
 from ml.models.deep_learning import CNN1DModel, LSTMModel, AutoencoderModel
 
 
+from ml.metrics.security_metrics import calculate_macro_fpr, calculate_fpr
+
 def calculate_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Calculates mathematically exact One-vs-Rest False Positive Rate (FPR = FP / (FP + TN))."""
-    cm = confusion_matrix(y_true, y_pred)
-    if cm.shape[0] <= 1:
-        return 0.0
-    fp = cm.sum(axis=0) - np.diag(cm)
-    fn = cm.sum(axis=1) - np.diag(cm)
-    tp = np.diag(cm)
-    tn = cm.sum() - (fp + fn + tp)
-    denominator = fp + tn
-    with np.errstate(divide='ignore', invalid='ignore'):
-        class_fpr = np.where(denominator > 0, fp / denominator, 0.0)
-    return float(np.mean(class_fpr))
+    return calculate_macro_fpr(y_true, y_pred)
 
 
 class ModelSelectorSuite:

@@ -1,6 +1,6 @@
 # SentinelAI Empirical Machine Learning Performance & Failure Analysis
 
-**Experiment Reference**: EXP-2026-001  
+**Experiment Reference**: EXP-2026-002  
 **Dataset Identifier**: `synthetic_cicids2017_benchmark` (1500 samples, 78 raw features, 18 target attack classes)  
 **Methodological Protocol**: Decoupled split-first architecture with fold-local scaling, SelectKBest feature selection, and fold-local SMOTE. Single evaluation on frozen untouched test set.
 
