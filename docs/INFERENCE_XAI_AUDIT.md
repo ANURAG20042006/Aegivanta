@@ -18,13 +18,16 @@ Phase 4 completes **Real Production Inference & Explainable AI (XAI)**:
 
 ## 2. Structured XAI Explanation Schema
 
+> **Note**: The `confidence` value below (`0.9854`) is from a sample inference run and is **illustrative only**.
+> In production, `confidence` is always the output of `model.predict_proba()` on the actual input vector, or `null` if the model does not support probability outputs.
+
 ```json
 {
   "explanation_available": true,
   "explanation_method": "SHAP TreeExplainer",
   "model_version": "xgboost-v1.0",
   "prediction": "DDoS",
-  "confidence": 0.9854,
+  "confidence": "<float | null — from predict_proba()>",
   "features": [
     {
       "feature": "Flow Packets/s",
@@ -41,6 +44,7 @@ Phase 4 completes **Real Production Inference & Explainable AI (XAI)**:
   ]
 }
 ```
+
 
 ---
 

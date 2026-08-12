@@ -62,20 +62,25 @@ Evaluates a single network packet feature vector. Requires Bearer Token.
 }
 ```
 - **Response HTTP 200 OK**:
+
+> **Note**: Numeric values below (`confidence_score`, `attack_probabilities`) are **illustrative only**.
+> Actual values are always derived from live `model.predict_proba()` inference on the submitted feature vector.
+> `confidence_score` will be `null` if the active model does not support probability outputs.
+
 ```json
 {
   "incident_id": "c9a4b2e1-...",
   "source_ip": "192.168.1.105",
   "destination_ip": "10.0.0.1",
   "attack_type": "DDoS",
-  "confidence_score": 0.98,
+  "confidence_score": "<float | null — from predict_proba()>",
   "is_malicious": true,
   "severity": "Critical",
   "model_used": "Random Forest",
   "timestamp": "2026-08-05T12:00:00Z",
   "attack_probabilities": {
-    "BENIGN": 0.01,
-    "DDoS": 0.98
+    "BENIGN": "<float — from predict_proba()>",
+    "DDoS": "<float — from predict_proba()>"
   },
   "shap_explanation": {
     "flow_packets_s": 0.42,
