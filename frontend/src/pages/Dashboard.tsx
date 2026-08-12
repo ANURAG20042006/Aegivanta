@@ -77,10 +77,10 @@ export const Dashboard: React.FC = () => {
                 onChange={(e) => handleModelChange(e.target.value)}
                 className="bg-slate-950 border border-slate-700 text-cyan-400 font-mono text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-cyan-400 cursor-pointer appearance-none pr-8 shadow-inner"
               >
-                <option value="XGBoost v2.1">Model: XGBoost (99.12% Acc)</option>
-                <option value="Random Forest">Model: Random Forest (98.85% Acc)</option>
-                <option value="LightGBM">Model: LightGBM (98.95% Acc)</option>
-                <option value="1D-CNN DeepNet">Model: PyTorch 1D-CNN (98.60% Acc)</option>
+                <option value="XGBoost v2.1">Model: XGBoost</option>
+                <option value="Random Forest">Model: Random Forest</option>
+                <option value="LightGBM">Model: LightGBM</option>
+                <option value="1D-CNN DeepNet">Model: PyTorch 1D-CNN</option>
                 <option value="Autoencoder Zero-Day">Model: Deep Autoencoder (Zero-Day)</option>
               </select>
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />

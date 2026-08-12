@@ -176,12 +176,15 @@ def run_training_pipeline(
     preprocessor_path = artifacts_path / "preprocessor.joblib"
     joblib.dump(preprocessor, preprocessor_path)
 
-    # Step 4: Train & Compare Model Selector Suite
-    print("--> Training & comparing model selector suite...")
+    # Step 4: Train & Compare Model Selector Suite (Selection strictly on X_train via CV)
+    print("--> Training & selecting champion model via Train CV...")
     selector = ModelSelectorSuite(artifacts_dir=artifacts_dir)
-    results = selector.train_and_evaluate_all(X_train, y_train, X_test, y_test)
+    results = selector.train_and_select_champion(X_train, y_train, n_splits=n_splits)
 
-    # Step 5: Metadata Generation
+    # Evaluate frozen champion ONCE on test set
+    final_test_metrics = selector.evaluate_final_test_set(X_test, y_test)
+
+    # Step 5: Metadata Generation with 4 Required Metric Sections
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
     metadata = {
         "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
@@ -197,20 +200,28 @@ def run_training_pipeline(
             "pandas": pd.__version__
         },
         "selected_features": preprocessor.selected_feature_names,
+        "training_metrics": {
+            "train_sample_count": len(X_train),
+            "n_features": X_train.shape[1]
+        },
         "cv_metrics": {
             "n_splits": n_splits,
             "macro_f1_mean": round(cv_mean, 4),
             "macro_f1_std": round(cv_std, 4),
             "fold_details": fold_details
         },
+        "validation_metrics": {
+            "best_selection_score": selector.best_selection_score,
+            "selection_criteria_weights": selector.weights
+        },
+        "final_test_metrics": final_test_metrics,
         "leaderboard": [
             {
                 "model_name": r["model_name"],
                 "model_type": r["model_type"],
-                "accuracy": r["accuracy"],
-                "f1_score": r["f1_score"],
-                "precision": r["precision"],
-                "recall": r["recall"]
+                "cv_f1_mean": r["cv_f1_mean"],
+                "cv_recall_mean": r["cv_recall_mean"],
+                "selection_score": r["selection_score"]
             }
             for r in results
         ],

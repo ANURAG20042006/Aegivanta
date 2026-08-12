@@ -1,7 +1,7 @@
 # 🎓 SentinelAI: Viva Presentation Defense & Technical Guide
 
 ## 1. Project Elevator Pitch
-> **"SentinelAI is a production-grade, research-verified Network Intrusion Detection & Threat Analytics Platform. It combines a leakage-free 12-model ML inference engine, real SHAP feature explainability, asynchronous model retraining with multi-metric promotion gates, and an interactive React SOC dashboard to detect cyber threats with 99.12% accuracy."**
+> **"SentinelAI is a production-grade, research-verified Network Intrusion Detection & Threat Analytics Platform. It combines a leakage-free ML inference engine, real SHAP feature explainability, asynchronous model retraining with multi-metric promotion gates, and an interactive React SOC dashboard. Model performance metrics are computed empirically from `results/EXP-2026-001/` — see `research_summary.json` for the current champion accuracy."**
 
 ---
 
@@ -14,7 +14,7 @@
 
 ## 3. Top Examiner Viva Questions & Model Defense Answers
 
-### Q1: How do you guarantee your 99.12% accuracy is not caused by Data Leakage?
+### Q1: How do you guarantee your accuracy figures are not inflated by Data Leakage?
 > **Answer**: We enforce a strict **Split-First Architecture**. Raw data is split into 80% Train and 20% Test *before* any transformation. Preprocessors (`StandardScaler`, `SelectKBest`) and class balancers (`SMOTE`) fit strictly inside training folds. The 20% test set remains completely untouched until final single evaluation.
 
 ### Q2: Why distinguish Tree Models from 1D-CNN and Autoencoders?

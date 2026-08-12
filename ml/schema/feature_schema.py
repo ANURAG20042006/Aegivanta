@@ -142,3 +142,20 @@ def validate_artifact_compatibility(
         errors.append("Model version missing from artifact metadata.")
 
     return (len(errors) == 0, errors)
+
+
+def load_artifact_metadata(artifact_dir: Any) -> Dict[str, Any]:
+    """
+    Loads metadata.json from model artifacts directory.
+    Returns empty dict if missing or invalid.
+    """
+    from pathlib import Path
+    try:
+        path = Path(artifact_dir) / "metadata.json"
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+

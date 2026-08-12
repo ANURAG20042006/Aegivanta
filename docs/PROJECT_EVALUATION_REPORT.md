@@ -68,22 +68,28 @@ The ML pipeline ingests 78 statistical network packet flow features from the ben
 
 ### Benchmark Comparison (12 Classifiers):
 
-| Rank | Model | Category | Accuracy | Macro F1-Score | Precision | Recall | ROC-AUC | Inference Role |
-| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| 👑 1 | **XGBoost** | Gradient Boosting | **99.12%** | **0.9901** | **0.9920** | **0.9882** | **0.997** | **Champion Classifier** |
-| 2 | **CatBoost** | Gradient Boosting | 99.05% | 0.9892 | 0.9910 | 0.9874 | 0.996 | Active Secondary |
-| 3 | **LightGBM** | Gradient Boosting | 98.95% | 0.9880 | 0.9899 | 0.9861 | 0.995 | Ultra Low-Latency Stream |
-| 4 | **Random Forest** | Classical Ensemble | 98.85% | 0.9872 | 0.9890 | 0.9854 | 0.994 | High-Speed Baseline |
-| 5 | **LSTM** | Deep Learning | 98.75% | 0.9860 | 0.9880 | 0.9840 | 0.993 | Sequential Flow Inspector |
-| 6 | **1D-CNN** | Deep Learning | 98.60% | 0.9845 | 0.9870 | 0.9820 | 0.992 | Pattern Extraction |
-| 7 | **Autoencoder** | Deep Anomaly | 97.90% | 0.9770 | 0.9800 | 0.9740 | 0.987 | **Zero-Day Anomaly Detection** |
-| 8 | **Decision Tree** | Classical | 97.40% | 0.9721 | 0.9750 | 0.9692 | 0.981 | Fallback Ruleset |
-| 9 | **KNN** | Classical | 96.10% | 0.9580 | 0.9630 | 0.9531 | 0.978 | Benchmark Comparison |
-| 10 | **SVM** | Classical | 95.20% | 0.9490 | 0.9550 | 0.9431 | 0.972 | Benchmark Comparison |
-| 11 | **Logistic Regression**| Linear | 92.50% | 0.9210 | 0.9280 | 0.9142 | 0.950 | Linear Baseline |
-| 12 | **Naive Bayes** | Probabilistic | 88.40% | 0.8790 | 0.8890 | 0.8692 | 0.921 | Probabilistic Baseline |
+> [!IMPORTANT]
+> The metrics in this table are **prototype-era estimates** and are **not** from the current reproducible experiment suite.
+> The current empirically computed leaderboard is available in `results/EXP-2026-001/baseline_comparison.csv`.
+> Champion model and performance metrics update automatically after each training run.
+
+| Rank | Model | Category | Inference Role |
+| :---: | :--- | :--- | :--- |
+| 👑 1 | **XGBoost** | Gradient Boosting | Champion Classifier |
+| 2 | **CatBoost** | Gradient Boosting | Active Secondary |
+| 3 | **LightGBM** | Gradient Boosting | Ultra Low-Latency Stream |
+| 4 | **Random Forest** | Classical Ensemble | High-Speed Baseline |
+| 5 | **LSTM** | Deep Learning | Sequential Flow Inspector |
+| 6 | **1D-CNN** | Deep Learning | Pattern Extraction |
+| 7 | **Autoencoder** | Deep Anomaly | **Zero-Day Anomaly Detection** |
+| 8 | **Decision Tree** | Classical | Fallback Ruleset |
+| 9 | **KNN** | Classical | Benchmark Comparison |
+| 10 | **SVM** | Classical | Benchmark Comparison |
+| 11 | **Logistic Regression** | Linear | Linear Baseline |
+| 12 | **Naive Bayes** | Probabilistic | Probabilistic Baseline |
 
 ---
+
 
 ## 🔑 3. Key Strengths & Innovations
 

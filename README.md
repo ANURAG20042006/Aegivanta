@@ -68,7 +68,7 @@ flowchart TB
 ## ⚡ Key Features & Innovations
 
 ### 🧠 12-Model Machine Learning Leaderboard
-- **Ensemble Boosting**: XGBoost *(Champion: 99.12% Acc, 0.9901 F1)*, LightGBM, CatBoost
+- **Ensemble Boosting**: XGBoost *(current champion — see `results/EXP-2026-001/research_summary.json`)*, LightGBM, CatBoost
 - **Classical Classifiers**: Random Forest, Decision Tree, Logistic Regression, SVM, KNN, Naive Bayes
 - **Deep Learning Architecture**: PyTorch 1D-CNN, Recurrent LSTM, Deep Anomaly Autoencoder
 

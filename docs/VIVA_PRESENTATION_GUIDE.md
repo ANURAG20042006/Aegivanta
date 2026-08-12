@@ -31,15 +31,20 @@
 
 ## 3. Machine Learning Models & Performance Benchmarks
 
-| Model Name | Model Type | Accuracy | F1-Score | ROC-AUC | Primary Use Case |
-| :--- | :--- | :---: | :---: | :---: | :--- |
-| **Random Forest** | Classical Ensemble | **98.85%** | **98.72%** | **0.994** | Default production classifier for high speed & accuracy |
-| **XGBoost** | Gradient Boosting | **99.12%** | **99.01%** | **0.997** | Top accuracy on structured tabular flow data |
-| **LightGBM** | Gradient Boosting | **98.95%** | **98.80%** | **0.995** | High-speed low-latency threat classification |
-| **1D-CNN** | Deep Learning | **98.60%** | **98.45%** | **0.992** | Sequential feature pattern detection |
-| **Autoencoder** | Neural Anomaly | **97.90%** | **97.70%** | **0.987** | Zero-Day unknown threat anomaly detection |
+> [!NOTE]
+> The accuracy figures below are from the **prototype development phase** (not from the current reproducible experiment suite).
+> **For empirically generated, current results**, see `results/EXP-2026-001/baseline_comparison.csv` and `results/EXP-2026-001/research_summary.json`.
+> Examiners should direct performance questions to these live-generated artifacts.
 
----
+| Model Name | Model Type | Primary Use Case |
+| :--- | :--- | :--- |
+| **Random Forest** | Classical Ensemble | Default production classifier |
+| **XGBoost** | Gradient Boosting | Top accuracy on structured tabular flow data |
+| **LightGBM** | Gradient Boosting | High-speed low-latency threat classification |
+| **1D-CNN** | Deep Learning | Sequential feature pattern detection |
+| **Autoencoder** | Neural Anomaly | Zero-Day unknown threat anomaly detection |
+
+
 
 ## 4. Top Anticipated Viva Questions & Best Answers
 

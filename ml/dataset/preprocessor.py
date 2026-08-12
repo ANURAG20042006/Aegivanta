@@ -91,8 +91,12 @@ class CICIDS2017Preprocessor:
         # STEP 2: FIT PREPROCESSING ONLY ON X_TRAIN
         X_train_scaled = self.scaler.fit_transform(X_train_raw)
         
-        # Adjust n_features_to_select if feature count is smaller
-        actual_k = min(self.n_features_to_select, X_train_raw.shape[1])
+        # Adjust n_features_to_select if feature count is smaller.
+        # None means 'all features' (no selection step).
+        if self.n_features_to_select is None:
+            actual_k = "all"
+        else:
+            actual_k = min(self.n_features_to_select, X_train_raw.shape[1])
         self.feature_selector.k = actual_k
         
         X_train_selected = self.feature_selector.fit_transform(X_train_scaled, y_train_encoded)
@@ -137,7 +141,7 @@ class CICIDS2017Preprocessor:
         """Transforms a single raw feature dictionary for production inference using fitted transformers."""
         if not self.is_fitted:
             # Fallback if un-fitted
-            k = min(self.n_features_to_select, len(sample_dict))
+            k = len(sample_dict) if self.n_features_to_select is None else min(self.n_features_to_select, len(sample_dict))
             vals = [float(v) for v in list(sample_dict.values())[:k]]
             return np.array([vals])
 

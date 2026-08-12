@@ -1,9 +1,9 @@
 {
   "explanation_available": true,
   "explanation_method": "SHAP TreeExplainer",
-  "model_version": "random_forest-v1.0",
+  "model_version": "random_forest-research-v1.0",
   "prediction": "1",
-  "confidence": 0.985,
+  "confidence": 0.2,
   "features": [
     {
       "feature": "Total Length of Fwd Packets",
@@ -35,5 +35,6 @@
       "direction": "negative",
       "rank": 5
     }
-  ]
+  ],
+  "confidence_source": "predict_proba"
 }
