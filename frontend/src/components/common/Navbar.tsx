@@ -93,7 +93,9 @@ export const Navbar: React.FC = () => {
                             <span className="text-[9px] text-slate-500">{item.severity}</span>
                           </div>
                           <div className="text-[10px] text-slate-500 truncate">{item.source_ip} → {item.destination_ip}</div>
-                          <div className="text-[9px] text-cyan-400 mt-1">{(item.confidence_score * 100).toFixed(1)}% confidence</div>
+                          <div className="text-[9px] text-cyan-400 mt-1">
+                            {typeof item.confidence_score === 'number' ? `${(item.confidence_score * 100).toFixed(1)}% confidence` : 'Confidence N/A'}
+                          </div>
                         </div>
                       </div>
                     ))

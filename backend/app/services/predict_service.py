@@ -213,7 +213,8 @@ class PredictService:
                 top_n=5
             )
 
-            return attack_type, round(confidence_score, 4), is_malicious, severity, probabilities, shap_explanation
+            conf_out = round(confidence_score, 4) if confidence_score is not None else None
+            return attack_type, conf_out, is_malicious, severity, probabilities, shap_explanation
 
         except Exception as exc:
             logger.error("Error executing model inference for %s: %s", model_name, exc)

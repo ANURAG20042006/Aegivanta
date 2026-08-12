@@ -64,7 +64,8 @@ async def websocket_threat_stream(websocket: WebSocket):
                     "packet_length": random.randint(64, 1500),
                     "is_malicious": is_threat,
                     "attack_type": attack_type,
-                    "confidence_score": round(random.uniform(0.88, 0.99) if is_threat else random.uniform(0.95, 0.99), 4),
+                    "confidence_score": None,
+                    "confidence_available": False,
                     "severity": random.choice(["High", "Critical"]) if is_threat else "Low"
                 }
                 await websocket.send_json(packet_event)
@@ -82,7 +83,8 @@ async def websocket_threat_stream(websocket: WebSocket):
                     "packet_length": 512,
                     "is_malicious": False,
                     "attack_type": "BENIGN",
-                    "confidence_score": 0.9850,
+                    "confidence_score": None,
+                    "confidence_available": False,
                     "severity": "Low"
                 }
                 await websocket.send_json(packet_event)

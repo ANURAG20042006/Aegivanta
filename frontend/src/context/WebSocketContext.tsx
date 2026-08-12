@@ -9,7 +9,8 @@ export interface PacketEvent {
   packet_length: number;
   is_malicious: boolean;
   attack_type: string;
-  confidence_score: number;
+  confidence_score: number | null;
+  confidence_available?: boolean;
   severity: string;
   incident_id?: string;
   source_port?: number;
