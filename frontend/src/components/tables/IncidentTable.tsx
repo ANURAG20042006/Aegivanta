@@ -35,7 +35,11 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents }) => {
               <td className="p-3 text-cyan-400">{inc.source_ip}</td>
               <td className="p-3 text-slate-400">{inc.destination_ip}</td>
               <td className={`p-3 font-bold ${inc.is_malicious ? 'text-rose-400' : 'text-emerald-400'}`}>{inc.attack_type}</td>
-              <td className="p-3 text-slate-300">{(inc.confidence_score * 100).toFixed(1)}%</td>
+              <td className="p-3 text-slate-300">
+                {typeof inc.confidence_score === 'number'
+                  ? `${(inc.confidence_score * 100).toFixed(1)}%`
+                  : 'N/A'}
+              </td>
               <td className="p-3">
                 <ThreatBadge severity={inc.severity} isMalicious={inc.is_malicious} />
               </td>

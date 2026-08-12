@@ -16,21 +16,21 @@ export const ROCCurveChart: React.FC = () => {
     labels: ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'],
     datasets: [
       {
-        label: 'XGBoost (AUC = 0.997)',
+        label: 'XGBoost (Historical Baseline AUC = 0.997)',
         data: [0.0, 0.92, 0.96, 0.98, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0, 1.0],
         borderColor: '#00F0FF',
         borderWidth: 2,
         tension: 0.2,
       },
       {
-        label: 'Random Forest (AUC = 0.994)',
+        label: 'Random Forest (Historical Baseline AUC = 0.994)',
         data: [0.0, 0.88, 0.94, 0.97, 0.985, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0],
         borderColor: '#00FF9D',
         borderWidth: 2,
         tension: 0.2,
       },
       {
-        label: 'LSTM DeepNet (AUC = 0.993)',
+        label: 'LSTM DeepNet (Historical Baseline AUC = 0.993)',
         data: [0.0, 0.85, 0.92, 0.95, 0.97, 0.985, 0.99, 0.995, 1.0, 1.0, 1.0],
         borderColor: '#A855F7',
         borderWidth: 2,

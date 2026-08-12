@@ -49,7 +49,7 @@ class Incident(Base):
     flow_duration: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     
     attack_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
+    confidence_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     is_malicious: Mapped[bool] = mapped_column(Boolean, nullable=False, index=True)
     severity: Mapped[str] = mapped_column(String(15), nullable=False, default="Low")  # Low, Medium, High, Critical
     

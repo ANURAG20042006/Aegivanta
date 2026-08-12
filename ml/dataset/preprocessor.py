@@ -87,6 +87,8 @@ class CICIDS2017Preprocessor:
         X_train_raw, X_test_raw, y_train_encoded, y_test = train_test_split(
             X_raw, y_encoded, test_size=test_size, random_state=random_state, stratify=y_encoded
         )
+        self.X_train_raw = X_train_raw.values
+        self.y_train_encoded = y_train_encoded
 
         # STEP 2: FIT PREPROCESSING ONLY ON X_TRAIN
         X_train_scaled = self.scaler.fit_transform(X_train_raw)

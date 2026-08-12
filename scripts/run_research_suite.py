@@ -164,12 +164,33 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
         # CV selection uses TRAIN-only cross validation to pick champion
         skf_inner = StratifiedKFold(n_splits=3, shuffle=True, random_state=seed)
         cv_f1s = []
-        for tr_idx, val_idx in skf_inner.split(X_train, y_train):
-            Xf, Xv = X_train[tr_idx], X_train[val_idx]
-            yf, yv = y_train[tr_idx], y_train[val_idx]
+        for tr_idx, val_idx in skf_inner.split(preprocessor.X_train_raw, preprocessor.y_train_encoded):
+            Xf, Xv = preprocessor.X_train_raw[tr_idx], preprocessor.X_train_raw[val_idx]
+            yf, yv = preprocessor.y_train_encoded[tr_idx], preprocessor.y_train_encoded[val_idx]
             try:
-                model.fit(Xf, yf)
-                f1_val = float(f1_score(yv, model.predict(Xv), average="macro", zero_division=0))
+                # 1. Fit scaler on train fold ONLY
+                fold_scaler = StandardScaler()
+                Xf_scaled = fold_scaler.fit_transform(Xf)
+                
+                # 2. Fit feature selector on train fold ONLY
+                fold_selector = SelectKBest(score_func=f_classif, k=min(16, Xf.shape[1]))
+                Xf_selected = fold_selector.fit_transform(Xf_scaled, yf)
+                
+                # 3. Apply SMOTE on train fold ONLY
+                if HAS_SMOTE:
+                    try:
+                        sm = SMOTE(random_state=seed)
+                        Xf_selected, yf = sm.fit_resample(Xf_selected, yf)
+                    except Exception:
+                        pass
+                
+                model.fit(Xf_selected, yf)
+                
+                # Transform val fold using fitted fold transformers
+                Xv_scaled = fold_scaler.transform(Xv)
+                Xv_selected = fold_selector.transform(Xv_scaled)
+                
+                f1_val = float(f1_score(yv, model.predict(Xv_selected), average="macro", zero_division=0))
                 cv_f1s.append(f1_val)
             except Exception:
                 pass

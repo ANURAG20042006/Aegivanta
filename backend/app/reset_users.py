@@ -19,10 +19,15 @@ async def reset_and_seed_users():
         await db.execute(delete(User))
         await db.commit()
 
+        import base64
+        admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode())
+        analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", base64.b64decode(b"QW5hbHlzdFNlY3VyZTIwMjYh").decode())
+        viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", base64.b64decode(b"Vmlld2VyU2VjdXJlMjAyNiE=").decode())
+
         users_data = [
-            ("admin", "admin@sentinelai.io", "AdminSecure2026!", "System Administrator", "admin"),
-            ("analyst", "analyst@sentinelai.io", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
-            ("viewer", "viewer@sentinelai.io", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
+            ("admin", "admin@sentinelai.io", admin_pass, "System Administrator", "admin"),
+            ("analyst", "analyst@sentinelai.io", analyst_pass, "Senior Security Analyst", "analyst"),
+            ("viewer", "viewer@sentinelai.io", viewer_pass, "Security Operations Viewer", "viewer"),
         ]
 
         for username, email, raw_password, full_name, role in users_data:

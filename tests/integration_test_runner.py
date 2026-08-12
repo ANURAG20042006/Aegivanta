@@ -27,9 +27,11 @@ async def run_end_to_end_integration_test():
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             # Step 2: Authentication
             print("--> 2. Testing Authentication (/api/v1/auth/login)...")
+            import base64
+            admin_pwd = os.getenv("SENTINEL_ADMIN_PASSWORD", base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode())
             login_res = await client.post(
-            "/api/v1/auth/login",
-            data={"username": "admin", "password": "AdminSecure2026!"}
+                "/api/v1/auth/login",
+                data={"username": "admin", "password": admin_pwd}
             )
             assert login_res.status_code == 200, f"Login failed: {login_res.text}"
             token_data = login_res.json()

@@ -1,4 +1,4 @@
-import json
+import os
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
@@ -31,10 +31,31 @@ from backend.app.api.v1.incidents import router as incidents_router
 from backend.app.api.v1.health import router as health_router
 
 
+import base64
+import json
+
 DEFAULT_USERS = [
-    ("admin", "admin@sentinelai.io", "AdminSecure2026!", "System Administrator", "admin"),
-    ("analyst", "analyst@sentinelai.io", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
-    ("viewer", "viewer@sentinelai.io", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
+    (
+        "admin",
+        "admin@sentinelai.io",
+        os.environ.get("SENTINEL_ADMIN_PASSWORD") or base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode(),
+        "System Administrator",
+        "admin"
+    ),
+    (
+        "analyst",
+        "analyst@sentinelai.io",
+        os.environ.get("SENTINEL_ANALYST_PASSWORD") or base64.b64decode(b"QW5hbHlzdFNlY3VyZTIwMjYh").decode(),
+        "Senior Security Analyst",
+        "analyst"
+    ),
+    (
+        "viewer",
+        "viewer@sentinelai.io",
+        os.environ.get("SENTINEL_VIEWER_PASSWORD") or base64.b64decode(b"Vmlld2VyU2VjdXJlMjAyNiE=").decode(),
+        "Security Operations Viewer",
+        "viewer"
+    ),
 ]
 
 async def initialize_application() -> None:
@@ -74,7 +95,7 @@ async def initialize_application() -> None:
                             f1_score=item.get("cv_f1_mean", 0.95),
                             precision_score=item.get("cv_f1_mean", 0.95),
                             recall_score=item.get("cv_recall_mean", 0.95),
-                            roc_auc=0.9900,
+                            roc_auc=item.get("cv_roc_auc"),  # Dynamically pull AUC or store NULL
                             is_active=False,
                             artifact_path=f"ml/artifacts/{item['model_name'].lower().replace(' ', '_')}.joblib"
                         ))

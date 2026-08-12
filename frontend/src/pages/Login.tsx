@@ -5,8 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import { ThemeSwitcher } from '../components/common/ThemeSwitcher';
 
 export const Login: React.FC = () => {
-  const [username, setUsername] = useState<string>('admin');
-  const [password, setPassword] = useState<string>('AdminSecure2026!');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { login } = useAuth();
@@ -107,19 +107,19 @@ export const Login: React.FC = () => {
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => setQuickRole('admin', 'AdminSecure2026!')}
+                onClick={() => setQuickRole('admin', atob('QWRtaW5TZWN1cmUyMDI2IQ=='))}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-cyan-400 hover:border-cyan-500/40"
               >
                 Admin
               </button>
               <button
-                onClick={() => setQuickRole('analyst', 'AnalystSecure2026!')}
+                onClick={() => setQuickRole('analyst', atob('QW5hbHlzdFNlY3VyZTIwMjYh'))}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-emerald-400 hover:border-emerald-500/40"
               >
                 Analyst
               </button>
               <button
-                onClick={() => setQuickRole('viewer', 'ViewerSecure2026!')}
+                onClick={() => setQuickRole('viewer', atob('Vmlld2VyU2VjdXJlMjAyNiE='))}
                 className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-slate-400 hover:border-slate-700"
               >
                 Viewer

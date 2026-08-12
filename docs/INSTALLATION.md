@@ -81,4 +81,4 @@ chmod +x docker/deployment.sh
 
 ## Verification & Troubleshooting
 - **Backend Health Check**: Open `http://localhost:8000/health`. Should return `{"status": "HEALTHY"}`.
-- **Frontend Dashboard**: Open `http://localhost:5173` or `http://localhost:80`. Login using `admin` / `AdminSecure2026!`, `analyst` / `AnalystSecure2026!`, or `viewer` / `ViewerSecure2026!`.
+- **Frontend Dashboard**: Open `http://localhost:5173` or `http://localhost:80`. Login using `admin`, `analyst`, or `viewer` roles with their configured passwords (defined via environment variables or seeder defaults in `.env`).

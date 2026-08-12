@@ -162,11 +162,13 @@ npm run dev
 
 ## 🔑 Demo Role Credentials
 
-| Role | Username | Password | Privileges |
+Default user accounts are initialized on startup. Passwords can be configured in your local `.env` configuration file using the variables below:
+
+| Role | Username | Environment Variable (Configure in `.env`) | Privileges |
 | :--- | :--- | :--- | :--- |
-| 👑 **Administrator** | `admin` | `AdminSecure2026!` | Full System Control & Model Retraining |
-| 🔬 **Security Analyst** | `analyst` | `AnalystSecure2026!` | Traffic Inspection, Playbooks & Reports |
-| 👁️ **Operations Viewer** | `viewer` | `ViewerSecure2026!` | Read-Only Dashboard Monitoring |
+| 👑 **Administrator** | `admin` | `SENTINEL_ADMIN_PASSWORD` | Full System Control & Model Retraining |
+| 🔬 **Security Analyst** | `analyst` | `SENTINEL_ANALYST_PASSWORD` | Traffic Inspection, Playbooks & Reports |
+| 👁️ **Operations Viewer** | `viewer` | `SENTINEL_VIEWER_PASSWORD` | Read-Only Dashboard Monitoring |
 
 ---
 

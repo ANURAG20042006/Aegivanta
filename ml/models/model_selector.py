@@ -5,6 +5,14 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, List, Tuple, Any, Optional
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_classif
+try:
+    from imblearn.over_sampling import SMOTE
+    HAS_SMOTE = True
+except ImportError:
+    HAS_SMOTE = False
+
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
 )
@@ -75,6 +83,8 @@ class ModelSelectorSuite:
         self,
         X_train: np.ndarray,
         y_train: np.ndarray,
+        X_train_raw: Optional[np.ndarray] = None,
+        y_train_raw: Optional[np.ndarray] = None,
         n_splits: int = 5
     ) -> List[Dict[str, Any]]:
         """
@@ -85,6 +95,10 @@ class ModelSelectorSuite:
         self.best_model = None
         self.best_selection_score = -1.0
 
+        # Run CV on raw training features if provided to prevent target/preprocessor leakage
+        X_cv = X_train_raw if X_train_raw is not None else X_train
+        y_cv = y_train_raw if y_train_raw is not None else y_train
+
         skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
         for model in self.models:
@@ -92,24 +106,100 @@ class ModelSelectorSuite:
             fold_f1s, fold_recalls, fold_fprs, fold_latencies = [], [], [], []
 
             try:
-                for train_idx, val_idx in skf.split(X_train, y_train):
-                    X_tr_fold, X_val_fold = X_train[train_idx], X_train[val_idx]
-                    y_tr_fold, y_val_fold = y_train[train_idx], y_train[val_idx]
+                for train_idx, val_idx in skf.split(X_cv, y_cv):
+                    X_tr_fold, X_val_fold = X_cv[train_idx], X_cv[val_idx]
+                    y_tr_fold, y_val_fold = y_cv[train_idx], y_cv[val_idx]
 
-                    t0 = time.time()
-                    model.fit(X_tr_fold, y_tr_fold)
-                    t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
+                    if X_train_raw is not None:
+                        # 1. Fit scaling inside the fold
+                        fold_scaler = StandardScaler()
+                        X_tr_scaled = fold_scaler.fit_transform(X_tr_fold)
+                        
+                        # 2. Fit feature selection inside the fold
+                        actual_k = min(30, X_tr_fold.shape[1])
+                        fold_selector = SelectKBest(score_func=f_classif, k=actual_k)
+                        X_tr_selected = fold_selector.fit_transform(X_tr_scaled, y_tr_fold)
+                        
+                        # 3. Apply SMOTE inside the fold
+                        if HAS_SMOTE:
+                            try:
+                                unique_classes, counts = np.unique(y_tr_fold, return_counts=True)
+                                min_samples = min(counts)
+                                k_neighbors = min(5, max(1, min_samples - 1))
+                                if k_neighbors >= 1:
+                                    smote = SMOTE(k_neighbors=k_neighbors, random_state=42)
+                                    X_tr_final, y_tr_final = smote.fit_resample(X_tr_selected, y_tr_fold)
+                                else:
+                                    X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
+                            except Exception:
+                                X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
+                        else:
+                            X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
 
-                    y_val_pred = model.predict(X_val_fold)
+                fold_records = []
+                for train_idx, val_idx in skf.split(X_cv, y_cv):
+                    X_tr_fold, X_val_fold = X_cv[train_idx], X_cv[val_idx]
+                    y_tr_fold, y_val_fold = y_cv[train_idx], y_cv[val_idx]
+
+                    if X_train_raw is not None:
+                        # 1. Fit scaling inside the fold
+                        fold_scaler = StandardScaler()
+                        X_tr_scaled = fold_scaler.fit_transform(X_tr_fold)
+                        
+                        # 2. Fit feature selection inside the fold
+                        actual_k = min(30, X_tr_fold.shape[1])
+                        fold_selector = SelectKBest(score_func=f_classif, k=actual_k)
+                        X_tr_selected = fold_selector.fit_transform(X_tr_scaled, y_tr_fold)
+                        
+                        # 3. Apply SMOTE inside the fold
+                        if HAS_SMOTE:
+                            try:
+                                unique_classes, counts = np.unique(y_tr_fold, return_counts=True)
+                                min_samples = min(counts)
+                                k_neighbors = min(5, max(1, min_samples - 1))
+                                if k_neighbors >= 1:
+                                    smote = SMOTE(k_neighbors=k_neighbors, random_state=42)
+                                    X_tr_final, y_tr_final = smote.fit_resample(X_tr_selected, y_tr_fold)
+                                else:
+                                    X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
+                            except Exception:
+                                X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
+                        else:
+                            X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
+
+                        t0 = time.time()
+                        model.fit(X_tr_final, y_tr_final)
+                        t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
+
+                        # Transform validation fold using fitted fold parameters
+                        X_val_scaled = fold_scaler.transform(X_val_fold)
+                        X_val_selected = fold_selector.transform(X_val_scaled)
+                        y_val_pred = model.predict(X_val_selected)
+
+                    else:
+                        t0 = time.time()
+                        model.fit(X_tr_fold, y_tr_fold)
+                        t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
+                        y_val_pred = model.predict(X_val_fold)
 
                     f1 = float(f1_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
                     rec = float(recall_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
                     fpr = float(1.0 - rec)
+                    acc = float(accuracy_score(y_val_fold, y_val_pred))
+                    prec = float(precision_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
 
                     fold_f1s.append(f1)
                     fold_recalls.append(rec)
                     fold_fprs.append(fpr)
                     fold_latencies.append(t_lat)
+
+                    fold_records.append({
+                        "Fold": len(fold_f1s),
+                        "Accuracy": round(acc, 4),
+                        "Macro F1": round(f1, 4),
+                        "Precision": round(prec, 4),
+                        "Recall": round(rec, 4)
+                    })
 
                 avg_f1 = float(np.mean(fold_f1s))
                 avg_rec = float(np.mean(fold_recalls))
@@ -126,7 +216,8 @@ class ModelSelectorSuite:
                     "cv_fpr_mean": round(avg_fpr, 4),
                     "cv_latency_ms": round(avg_lat, 4),
                     "selection_score": round(selection_score, 4),
-                    "instance": model
+                    "instance": model,
+                    "fold_details": fold_records
                 }
                 self.evaluation_results.append(result)
 
@@ -137,7 +228,7 @@ class ModelSelectorSuite:
             except Exception as e:
                 print(f"Error evaluating model {model.model_name} during CV selection: {str(e)}")
 
-        # Refit champion model on 100% of X_train
+        # Refit champion model on 100% of the preprocessed training dataset (X_train)
         if self.best_model:
             print(f"=== Champion Model Selected: {self.best_model.model_name} (Selection Score: {self.best_selection_score:.4f}) ===")
             print(f"--> Refitting {self.best_model.model_name} on full X_train dataset...")

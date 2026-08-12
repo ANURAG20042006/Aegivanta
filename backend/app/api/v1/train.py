@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional, Tuple
+import json
 from fastapi import APIRouter, Depends, status, BackgroundTasks, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -95,6 +96,17 @@ async def async_train_worker(job_id: str):
             active_model = active_res.scalar_one_or_none()
             active_f1 = active_model.f1_score if active_model else 0.85
 
+            # Load metadata to get final test metrics (such as real roc_auc)
+            meta_path = Path("ml/artifacts/metadata.json")
+            candidate_roc_auc = None
+            if meta_path.exists():
+                try:
+                    with meta_path.open("r", encoding="utf-8") as f:
+                        meta_data = json.load(f)
+                    candidate_roc_auc = meta_data.get("final_test_metrics", {}).get("roc_auc")
+                except Exception:
+                    pass
+
             passed, reason = evaluate_promotion_gate(
                 candidate_f1=champion["f1_score"],
                 candidate_recall=champion["recall"],
@@ -118,7 +130,7 @@ async def async_train_worker(job_id: str):
                     f1_score=champion["f1_score"],
                     precision_score=champion["precision"],
                     recall_score=champion["recall"],
-                    roc_auc=0.9900,
+                    roc_auc=candidate_roc_auc,  # Expose real AUC value
                     latency_ms=0.45,
                     is_active=True,
                     artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
@@ -145,7 +157,7 @@ async def async_train_worker(job_id: str):
                     f1_score=champion["f1_score"],
                     precision_score=champion["precision"],
                     recall_score=champion["recall"],
-                    roc_auc=0.9900,
+                    roc_auc=candidate_roc_auc,  # Expose real AUC value
                     latency_ms=0.45,
                     is_active=False,
                     artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",

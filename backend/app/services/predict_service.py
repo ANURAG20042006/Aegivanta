@@ -153,14 +153,19 @@ class PredictService:
             cls._drift_detector.add_observation(processed_matrix)
 
             # Actual Model Prediction
+            confidence_score = None
             if hasattr(model, "predict_proba"):
-                probs_arr = model.predict_proba(processed_matrix)[0]
-                class_idx = int(np.argmax(probs_arr))
-                confidence_score = float(np.max(probs_arr))
+                probs_arr = model.predict_proba(processed_matrix)
+                if probs_arr is not None and len(probs_arr) > 0:
+                    probs_arr = probs_arr[0]
+                    class_idx = int(np.argmax(probs_arr))
+                    confidence_score = float(np.max(probs_arr))
+                else:
+                    preds_arr = model.predict(processed_matrix)
+                    class_idx = int(preds_arr[0])
             else:
                 preds_arr = model.predict(processed_matrix)
                 class_idx = int(preds_arr[0])
-                confidence_score = 0.95
 
             # Map predicted index to Attack Class Name
             classes = getattr(preprocessor, "label_encoder", None)

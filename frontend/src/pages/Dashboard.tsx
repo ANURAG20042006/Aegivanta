@@ -168,7 +168,6 @@ export const Dashboard: React.FC = () => {
               </div>
             ) : (
               alerts.map((alert, i) => {
-                const confScore = typeof alert?.confidence_score === 'number' ? alert.confidence_score : 0.95;
                 const attack = alert?.attack_type || 'Malicious Flow';
                 const ip = alert?.source_ip || '192.168.1.100';
                 const sev = alert?.severity || 'High';
@@ -184,7 +183,11 @@ export const Dashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-slate-400">
                       <span className="font-mono">{ip}</span>
-                      <span>Confidence: {(confScore * 100).toFixed(0)}%</span>
+                      <span>
+                        Confidence: {typeof alert?.confidence_score === 'number'
+                          ? `${(alert.confidence_score * 100).toFixed(0)}%`
+                          : 'N/A'}
+                      </span>
                     </div>
                   </div>
                 );

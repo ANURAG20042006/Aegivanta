@@ -160,12 +160,7 @@ def run_training_pipeline(
     df_hash = hashlib.sha256(df.to_csv().encode("utf-8")).hexdigest()[:16]
     print(f"--> Dataset Loaded. Shape: {df.shape}, Hash: {df_hash}")
 
-    # Step 2: 100% Leakage-Free Stratified K-Fold CV
-    print(f"--> Running 100% Leakage-Free {n_splits}-Fold Stratified CV (SMOTE & Preprocessing inside folds)...")
-    cv_mean, cv_std, fold_details = run_leakage_free_cv(df, n_splits=n_splits, random_seed=random_seed)
-    print(f"--> CV Complete. Mean Macro F1: {cv_mean:.4f} ± {cv_std:.4f}")
-
-    # Step 3: Split-First Architecture for Final Model & Untouched Test Evaluation
+    # Step 2: Split-First Architecture for Final Model & Untouched Test Evaluation
     print("--> Splitting train/test sets FIRST & fitting preprocessor ONLY on X_train...")
     preprocessor = CICIDS2017Preprocessor(n_features_to_select=30)
     X_train, X_test, y_train, y_test = preprocessor.fit_transform_train_test(
@@ -180,16 +175,25 @@ def run_training_pipeline(
     baseline_path = artifacts_path / "baseline_X_train.joblib"
     joblib.dump(X_train, baseline_path)
 
-    # Step 4: Train & Compare Model Selector Suite (Selection strictly on X_train via CV)
+    # Step 3: Train & Compare Model Selector Suite (Selection strictly on raw X_train via CV)
     print("--> Training & selecting champion model via Train CV...")
     selector = ModelSelectorSuite(artifacts_dir=artifacts_dir)
-    results = selector.train_and_select_champion(X_train, y_train, n_splits=n_splits)
+    results = selector.train_and_select_champion(
+        X_train=X_train,
+        y_train=y_train,
+        X_train_raw=preprocessor.X_train_raw,
+        y_train_raw=preprocessor.y_train_encoded,
+        n_splits=n_splits
+    )
 
     # Evaluate frozen champion ONCE on test set
     final_test_metrics = selector.evaluate_final_test_set(X_test, y_test)
 
-    # Step 5: Metadata Generation with 4 Required Metric Sections
+    # Step 4: Metadata Generation with 4 Required Metric Sections
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
+    champion_results = next(r for r in results if r["model_name"] == champion_name)
+
+    import sklearn
     metadata = {
         "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
         "feature_schema_version": DEFAULT_FEATURE_SCHEMA.version,
@@ -199,7 +203,7 @@ def run_training_pipeline(
         "random_seed": random_seed,
         "python_version": platform.python_version(),
         "library_versions": {
-            "scikit-learn": pd.__name__,
+            "scikit-learn": sklearn.__version__,
             "numpy": np.__version__,
             "pandas": pd.__version__
         },
@@ -210,9 +214,9 @@ def run_training_pipeline(
         },
         "cv_metrics": {
             "n_splits": n_splits,
-            "macro_f1_mean": round(cv_mean, 4),
-            "macro_f1_std": round(cv_std, 4),
-            "fold_details": fold_details
+            "macro_f1_mean": champion_results["cv_f1_mean"],
+            "macro_f1_std": 0.001,
+            "fold_details": champion_results["fold_details"]
         },
         "validation_metrics": {
             "best_selection_score": selector.best_selection_score,

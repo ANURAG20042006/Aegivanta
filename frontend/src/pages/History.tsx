@@ -51,7 +51,7 @@ export const HistoryPage: React.FC = () => {
       destination_port: alert.destination_port || 80,
       protocol: alert.protocol || 'TCP',
       attack_type: alert.attack_type || 'Malicious Flow',
-      confidence_score: alert.confidence_score || 0.95,
+      confidence_score: typeof alert.confidence_score === 'number' ? alert.confidence_score : null,
       is_malicious: alert.is_malicious,
       severity: alert.severity || 'High',
       model_name: 'Live monitor',

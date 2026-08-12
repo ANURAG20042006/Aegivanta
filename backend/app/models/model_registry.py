@@ -27,7 +27,7 @@ class ModelRegistry(Base):
     f1_score: Mapped[float] = mapped_column(Float, nullable=False)
     precision_score: Mapped[float] = mapped_column(Float, nullable=False)
     recall_score: Mapped[float] = mapped_column(Float, nullable=False)
-    roc_auc: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    roc_auc: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     latency_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.45)
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

@@ -40,7 +40,7 @@ class PredictionResult(BaseModel):
     destination_port: int
     protocol: str
     attack_type: str
-    confidence_score: float
+    confidence_score: Optional[float] = None
     is_malicious: bool
     severity: str
     model_used: str
