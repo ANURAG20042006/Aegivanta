@@ -176,6 +176,10 @@ def run_training_pipeline(
     preprocessor_path = artifacts_path / "preprocessor.joblib"
     joblib.dump(preprocessor, preprocessor_path)
 
+    # Save training baseline matrix (X_train) for drift detection
+    baseline_path = artifacts_path / "baseline_X_train.joblib"
+    joblib.dump(X_train, baseline_path)
+
     # Step 4: Train & Compare Model Selector Suite (Selection strictly on X_train via CV)
     print("--> Training & selecting champion model via Train CV...")
     selector = ModelSelectorSuite(artifacts_dir=artifacts_dir)

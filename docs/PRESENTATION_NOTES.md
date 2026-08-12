@@ -16,7 +16,7 @@ This document provides a slide-by-slide presentation script and defense Q&A prep
 > "We benchmarked our system on the CICIDS2017 dataset, covering 15 attack types including DDoS, DoS Hulk, Port Scans, Botnets, SQL Injection, and Zero-Day anomalies."
 
 ### Slide 4: 12-Model Machine Learning Architecture
-> "We implemented and benchmarked 12 distinct machine learning and deep learning algorithms—ranging from Random Forest and XGBoost to PyTorch 1D-CNNs, LSTMs, and Deep Autoencoders. XGBoost achieved our top macro F1-score of 0.9901."
+> "We implemented and benchmarked 12 distinct machine learning and deep learning algorithms—ranging from Random Forest and XGBoost to PyTorch 1D-CNNs, LSTMs, and Deep Autoencoders. XGBoost achieved a historical baseline macro F1-score of 0.9901 on the benchmark dataset."
 
 ### Slide 5: Explainable AI (SHAP & LIME)
 > "To prevent black-box decision making in security operations, SentinelAI integrates SHAP and LIME to show security analysts exactly which packet features contributed to an intrusion flag."

@@ -3,7 +3,7 @@
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "2acdcd9c8cb49635",
-  "training_timestamp": "2026-08-12T06:50:29.943256+00:00",
+  "training_timestamp": "2026-08-12T07:50:31.107487+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -76,7 +76,7 @@
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.9898314453797927,
+    "best_selection_score": 0.9891604916225597,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -91,7 +91,7 @@
     "recall": 0.053,
     "fpr": 0.947,
     "roc_auc": 0.4902,
-    "inference_latency_ms": 0.1205,
+    "inference_latency_ms": 0.1918,
     "confusion_matrix": [
       [
         0,
@@ -462,35 +462,35 @@
       "model_type": "Classical",
       "cv_f1_mean": 0.9845,
       "cv_recall_mean": 0.9855,
-      "selection_score": 0.9844
+      "selection_score": 0.9843
     },
     {
       "model_name": "XGBoost",
       "model_type": "Boosting",
       "cv_f1_mean": 0.9816,
       "cv_recall_mean": 0.9824,
-      "selection_score": 0.9675
+      "selection_score": 0.9706
     },
     {
       "model_name": "LightGBM",
       "model_type": "Boosting",
       "cv_f1_mean": 0.9844,
       "cv_recall_mean": 0.985,
-      "selection_score": 0.9684
+      "selection_score": 0.9733
     },
     {
       "model_name": "CatBoost",
       "model_type": "Boosting",
       "cv_f1_mean": 0.9832,
       "cv_recall_mean": 0.9842,
-      "selection_score": 0.9375
+      "selection_score": 0.9299
     },
     {
       "model_name": "Decision Tree",
       "model_type": "Classical",
       "cv_f1_mean": 0.8997,
       "cv_recall_mean": 0.9061,
-      "selection_score": 0.9122
+      "selection_score": 0.9121
     },
     {
       "model_name": "Logistic Regression",
@@ -504,7 +504,7 @@
       "model_type": "Classical",
       "cv_f1_mean": 0.9967,
       "cv_recall_mean": 0.9967,
-      "selection_score": 0.9898
+      "selection_score": 0.9892
     },
     {
       "model_name": "KNN",
@@ -523,25 +523,25 @@
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.9733,
-      "cv_recall_mean": 0.9748,
-      "selection_score": 0.957
+      "cv_f1_mean": 0.97,
+      "cv_recall_mean": 0.9717,
+      "selection_score": 0.9566
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.8132,
-      "cv_recall_mean": 0.8447,
-      "selection_score": 0.8379
+      "cv_f1_mean": 0.8135,
+      "cv_recall_mean": 0.844,
+      "selection_score": 0.8376
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
       "cv_f1_mean": 0.0058,
       "cv_recall_mean": 0.0556,
-      "selection_score": 0.1275
+      "selection_score": 0.1271
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "886614d39e8ec8f98afa720261f813fea14697c4"
+  "git_commit": "6b5281a34c036fbdc0f7fa5d1226bd6220553894"
 }

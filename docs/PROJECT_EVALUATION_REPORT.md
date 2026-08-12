@@ -14,7 +14,7 @@
 | Evaluation Metric | Rating | Comments / Verdict |
 | :--- | :---: | :--- |
 | **System Architecture & Design** | **9.7 / 10** | Clean asynchronous FastAPI backend coupled with a responsive React 18 + TypeScript single-page application. |
-| **Machine Learning Engineering** | **9.8 / 10** | Comprehensive benchmark comparing 12 ML/DL algorithms with peak **0.9901 F1-score** (XGBoost). Includes Zero-Day Autoencoder anomaly detection. |
+| **Machine Learning Engineering** | **9.8 / 10** | Comprehensive benchmark comparing 12 ML/DL algorithms with peak **0.9901 historical baseline F1-score** (XGBoost). Includes Zero-Day Autoencoder anomaly detection. |
 | **Explainable AI (XAI)** | **9.5 / 10** | Implements SHAP & LIME feature attributions to convert "black-box" predictions into interpretable security insights. |
 | **Security & Operational Controls** | **9.4 / 10** | Enforces strict Role-Based Access Control (RBAC) via JWTs, automated ReportLab PDF reports, and perimeter firewall drop playbooks. |
 | **Documentation & Viva Preparedness** | **9.8 / 10** | Complete set of documentation guides in `docs/` including architectural, database, UML, and viva defense guides. |

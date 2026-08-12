@@ -63,6 +63,18 @@ class PredictService:
             preprocessor_path = artifact_dir / "preprocessor.joblib"
             try:
                 cls._preprocessor_artifact = joblib.load(preprocessor_path)
+                
+                # Load training baseline distribution and set up drift detector baseline
+                baseline_path = artifact_dir / "baseline_X_train.joblib"
+                if baseline_path.exists():
+                    baseline_matrix = joblib.load(baseline_path)
+                    feature_names = getattr(cls._preprocessor_artifact, "selected_feature_names", [])
+                    cls._drift_detector.update_baseline(
+                        baseline_matrix=baseline_matrix,
+                        feature_names=feature_names,
+                        reference_version=getattr(cls._preprocessor_artifact, "version", "schema-v1.0")
+                    )
+                    logger.info("Drift detector baseline updated successfully.")
             except Exception as exc:
                 logger.warning("Unable to load preprocessing artifact '%s': %s", preprocessor_path, exc)
 
@@ -186,7 +198,7 @@ class PredictService:
             explainer = cls.get_explainer(model_name, getattr(model, "model", model), feature_names)
             
             shap_explanation = explainer.explain_instance(
-                processed_matrix=processed_matrix,
+                processed_vector=processed_matrix,
                 model_version=model_ver,
                 prediction=attack_type,
                 confidence=confidence_score,

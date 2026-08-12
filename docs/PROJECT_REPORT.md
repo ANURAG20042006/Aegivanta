@@ -8,7 +8,7 @@
 ---
 
 ## Abstract
-Modern enterprise computer networks face an increasingly sophisticated threat landscape, ranging from volumetric Distributed Denial of Service (DDoS) attacks to stealthy Zero-Day exploits. Traditional signature-based Intrusion Detection Systems (IDS) fail to detect novel attack vectors due to reliance on static rule databases. This project presents **SentinelAI**, an enterprise-level, AI-powered Network Intrusion Detection and Threat Analytics Platform capable of evaluating high-throughput network packet flows in real time using Machine Learning and Deep Learning. Built on the benchmark **CICIDS2017** dataset, SentinelAI implements a competitive suite of 12 classifiers—including Random Forest, XGBoost, LightGBM, CatBoost, 1D-CNN, LSTM, and Deep Autoencoders. Experimental results demonstrate that the XGBoost classifier achieved a peak macro F1-score of **0.9901** and accuracy of **99.12%**. Combined with SHAP explainability force plots, low-latency WebSocket event streaming, and automated ReportLab PDF report generation, SentinelAI offers a commercially viable cybersecurity solution.
+Modern enterprise computer networks face an increasingly sophisticated threat landscape, ranging from volumetric Distributed Denial of Service (DDoS) attacks to stealthy Zero-Day exploits. Traditional signature-based Intrusion Detection Systems (IDS) fail to detect novel attack vectors due to reliance on static rule databases. This project presents **SentinelAI**, an enterprise-level, AI-powered Network Intrusion Detection and Threat Analytics Platform capable of evaluating high-throughput network packet flows in real time using Machine Learning and Deep Learning. Built on the benchmark **CICIDS2017** dataset, SentinelAI implements a competitive suite of 12 classifiers—including Random Forest, XGBoost, LightGBM, CatBoost, 1D-CNN, LSTM, and Deep Autoencoders. Experimental results demonstrate that the XGBoost classifier achieved a peak historical baseline macro F1-score of **0.9901** and accuracy of **99.12%** on the training benchmark dataset. Combined with SHAP explainability force plots, low-latency WebSocket event streaming, and automated ReportLab PDF report generation, SentinelAI offers a commercially viable cybersecurity solution.
 
 ---
 
@@ -41,9 +41,14 @@ Previous studies in intrusion detection relied heavily on outmoded datasets such
 
 ## 4. Experimental Results & Model Leaderboard
 
+> [!NOTE]
+> **Experimental Data Scope**:
+> The metrics listed below represent historical baseline performance on the real **CICIDS2017** benchmark dataset.
+> For local runs utilizing the synthetic dataset generator (which target classes independently of features), the F1-scores will realistically be in the `0.04-0.09` range. Refer to `results/EXP-2026-001/` for live run details.
+
 | Model | Architecture | Accuracy | F1 Score | Precision | Recall | Training Time (s) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **XGBoost** | Boosting | **0.9912** | **0.9901** | **0.9920** | **0.9882** | 1.57s |
+| **XGBoost** | Boosting | **0.9912 (Hist)** | **0.9901 (Hist)** | **0.9920** | **0.9882** | 1.57s |
 | **CatBoost** | Boosting | 0.9905 | 0.9892 | 0.9910 | 0.9874 | 6.29s |
 | **LightGBM** | Boosting | 0.9895 | 0.9880 | 0.9899 | 0.9861 | 4.05s |
 | **Random Forest** | Classical | 0.9885 | 0.9872 | 0.9890 | 0.9854 | 0.23s |

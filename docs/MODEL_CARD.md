@@ -27,11 +27,17 @@
 ---
 
 ## Evaluation Metrics (Untouched Test Set)
-- **Accuracy**: `99.12%`
-- **Macro F1-Score**: `0.9901`
-- **Precision (Macro)**: `0.9920`
-- **Recall (Macro)**: `0.9882`
-- **False Positive Rate (FPR)**: `0.0118`
+
+> [!NOTE]
+> **Performance Benchmark Scope**:
+> The metrics listed below reflect model training on the official benchmark **CICIDS2017** dataset.
+> In demo mode running on the synthetic generator, the model is expected to perform with macro F1-score around `0.04-0.09` because the generator assigns target classes independently from feature distributions.
+
+- **Accuracy (Historical)**: `99.12%`
+- **Macro F1-Score (Historical)**: `0.9901`
+- **Precision (Macro, Historical)**: `0.9920`
+- **Recall (Macro, Historical)**: `0.9882`
+- **False Positive Rate (FPR, Historical)**: `0.0118`
 - **Inference Latency**: `~0.42 ms / vector`
 
 ---

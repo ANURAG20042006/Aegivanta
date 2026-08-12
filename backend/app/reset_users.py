@@ -20,9 +20,9 @@ async def reset_and_seed_users():
         await db.commit()
 
         users_data = [
-            ("admin", "admin@sentinelai.local", "AdminSecure2026!", "System Administrator", "admin"),
-            ("analyst", "analyst@sentinelai.local", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
-            ("viewer", "viewer@sentinelai.local", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
+            ("admin", "admin@sentinelai.io", "AdminSecure2026!", "System Administrator", "admin"),
+            ("analyst", "analyst@sentinelai.io", "AnalystSecure2026!", "Senior Security Analyst", "analyst"),
+            ("viewer", "viewer@sentinelai.io", "ViewerSecure2026!", "Security Operations Viewer", "viewer"),
         ]
 
         for username, email, raw_password, full_name, role in users_data:

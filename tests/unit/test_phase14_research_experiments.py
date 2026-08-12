@@ -39,6 +39,6 @@ def test_research_summary_content():
         
         assert "experiment_id" in data
         assert "best_model" in data
-        assert "best_macro_f1" in data
-        assert isinstance(data["best_macro_f1"], float)
-        assert data["best_macro_f1"] > 0.0
+        assert "best_cv_f1" in data
+        assert isinstance(data["best_cv_f1"], float)
+        assert data["best_cv_f1"] > 0.0

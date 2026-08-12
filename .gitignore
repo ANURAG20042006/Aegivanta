@@ -41,6 +41,12 @@ ml/artifacts/*.onnx
 *.pcap
 *.h5
 
+# Exceptions to allow seeding and integration testing out of the box
+!backend/app/sample_traffic.csv
+!ml/artifacts/*.joblib
+!ml/artifacts/metadata.json
+!results/EXP-2026-001/*.csv
+
 # Node / React
 node_modules/
 npm-debug.log*

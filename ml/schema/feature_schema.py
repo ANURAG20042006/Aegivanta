@@ -86,7 +86,7 @@ def validate_input_vector(
             errors.append(f"Missing required feature: '{req}'")
 
     # 2. Data type and Range validation
-    meta_keys = ["source_ip", "destination_ip", "protocol", "timestamp"]
+    meta_keys = ["source_ip", "destination_ip", "protocol", "timestamp", "extra_features"]
     for key, val in sample_dict.items():
         if val is None:
             continue
@@ -144,18 +144,16 @@ def validate_artifact_compatibility(
     return (len(errors) == 0, errors)
 
 
-def load_artifact_metadata(artifact_dir: Any) -> Dict[str, Any]:
-    """
-    Loads metadata.json from model artifacts directory.
-    Returns empty dict if missing or invalid.
-    """
+def load_artifact_metadata(artifact_dir) -> Dict[str, Any]:
+    """Loads metadata.json from artifact_dir if present, else returns {}."""
     from pathlib import Path
+    import json
+    p = Path(artifact_dir) / "metadata.json"
+    if not p.exists():
+        return {}
     try:
-        path = Path(artifact_dir) / "metadata.json"
-        if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
+        with p.open("r", encoding="utf-8") as f:
+            return json.load(f)
     except Exception:
-        pass
-    return {}
+        return {}
 

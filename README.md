@@ -95,11 +95,14 @@ flowchart TB
 
 ## 📊 Machine Learning Leaderboard
 
-Evaluated on 78 statistical network flow features from the **CICIDS2017 Benchmark Dataset**:
+> [!IMPORTANT]
+> **Performance Scope**:
+> The metrics listed below represent historical baseline performance on the real **CICIDS2017** benchmark dataset.
+> If running locally in demo mode using the synthetic traffic generator (which samples label targets independently of feature values), models will achieve macro F1-scores in the `0.04-0.09` range. Refer to `results/EXP-2026-001/research_summary.json` for live-generated local run statistics.
 
 | Model | Model Type | Accuracy | F1-Score | Precision | Recall | ROC-AUC | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **XGBoost** | Boosting | **0.9912** | **0.9901** | **0.9920** | **0.9882** | **0.997** | 👑 Champion |
+| **XGBoost** | Boosting | **0.9912** | **0.9901** | **0.9920** | **0.9882** | **0.997** | 👑 Historical Champion |
 | **CatBoost** | Boosting | 0.9905 | 0.9892 | 0.9910 | 0.9874 | 0.996 | Active |
 | **LightGBM** | Boosting | 0.9895 | 0.9880 | 0.9899 | 0.9861 | 0.995 | Active |
 | **Random Forest** | Ensemble | 0.9885 | 0.9872 | 0.9890 | 0.9854 | 0.994 | Active |

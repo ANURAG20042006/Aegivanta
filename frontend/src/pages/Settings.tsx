@@ -99,12 +99,12 @@ export const SettingsPage: React.FC = () => {
             onChange={(e) => setActiveModel(e.target.value)}
             className="w-full bg-slate-900 border border-slate-700 text-cyan-400 px-3 py-2 rounded-lg"
           >
-            <option value="XGBoost">XGBoost (Boosting Champion - F1: 0.9901)</option>
-            <option value="Random Forest">Random Forest (Ensemble - F1: 0.9872)</option>
-            <option value="LightGBM">LightGBM (Boosting - F1: 0.9880)</option>
-            <option value="CatBoost">CatBoost (Boosting - F1: 0.9892)</option>
-            <option value="1D-CNN">1D-CNN (Deep Spatial Net - F1: 0.9845)</option>
-            <option value="LSTM">LSTM (Sequence Net - F1: 0.9860)</option>
+            <option value="XGBoost">XGBoost (Boosting Champion)</option>
+            <option value="Random Forest">Random Forest (Ensemble)</option>
+            <option value="LightGBM">LightGBM (Boosting)</option>
+            <option value="CatBoost">CatBoost (Boosting)</option>
+            <option value="1D-CNN">1D-CNN (Deep Spatial Net)</option>
+            <option value="LSTM">LSTM (Sequence Net)</option>
           </select>
         </div>
 

@@ -53,7 +53,7 @@ services:
         condition: service_healthy
     environment:
       - APP_NAME=SentinelAI
-      - APP_ENV=production
+      - APP_ENV=development
       - DEBUG=False
       - API_V1_STR=/api/v1
       - SECRET_KEY=${SECRET_KEY:-sentinelai_super_secret_jwt_key_2026_change_in_production_32bytes_min}

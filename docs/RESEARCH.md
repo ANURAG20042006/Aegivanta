@@ -44,6 +44,12 @@ RAW DATASET (CICIDS2017 / Synthetic Benchmark)
 
 All numbers reported below were generated directly from actual execution runs exported to `results/`:
 
+> [!IMPORTANT]
+> **Synthetic Data Demo Performance Note**:
+> The performance metrics listed in the tables below represent historical baseline benchmarks on the real **CICIDS2017** dataset.
+> In a local run utilizing the bundled synthetic flow generator (e.g. `scripts/run_research_suite.py`), the models will exhibit macro F1-scores in the `0.04-0.09` range. This is the mathematically correct and expected outcome because the synthetic generator samples the `Label` column independently from the features (i.e. there is zero learnable correlation by design). This mode acts as a structural validation/wiring demo for the NIDS pipeline.
+> To reproduce the high-accuracy NIDS benchmarks, configure the data loaders to read the original raw CSV files from the Canadian Institute for Cybersecurity (CICIDS2017).
+
 ### A. Baseline Model Comparison (`results/baseline_comparison.csv`):
 | Model | Category | Accuracy | Precision | Recall | Macro F1 | FPR | Latency (ms) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |

@@ -4,9 +4,9 @@ These accounts are configured by default in the SentinelAI seed database for dem
 
 | Account Title | Username | Default Email | Role | Status |
 |---|---|---|---|---|
-| System Administrator | `admin` | `admin@sentinelai.local` | Administrator | Active |
-| Senior Security Analyst | `analyst` | `analyst@sentinelai.local` | Security Analyst | Active |
-| Operations Viewer | `viewer` | `viewer@sentinelai.local` | Read-Only Viewer | Active |
+| System Administrator | `admin` | `admin@sentinelai.io` | Administrator | Active |
+| Senior Security Analyst | `analyst` | `analyst@sentinelai.io` | Security Analyst | Active |
+| Operations Viewer | `viewer` | `viewer@sentinelai.io` | Read-Only Viewer | Active |
 
 > [!IMPORTANT]
 > Always change default passwords before deploying to production.

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Any
 from pydantic import BaseModel, Field
 
 
@@ -46,7 +46,7 @@ class PredictionResult(BaseModel):
     model_used: str
     timestamp: datetime
     attack_probabilities: Dict[str, float]
-    shap_explanation: Optional[Dict[str, float]] = None
+    shap_explanation: Optional[Dict[str, Any]] = None
 
 
 # Aliases for API routers

@@ -131,6 +131,7 @@ async def async_train_worker(job_id: str):
 
                 # Invalidate PredictService cached artifact memory
                 PredictService._model_artifacts.clear()
+                PredictService._preprocessor_artifact = None
                 PredictService._explainers.clear()
             else:
                 job.status = "REJECTED"
@@ -332,6 +333,7 @@ async def rollback_model_version(
 
     # Invalidate PredictService cached artifact memory
     PredictService._model_artifacts.clear()
+    PredictService._preprocessor_artifact = None
     PredictService._explainers.clear()
 
     audit = AuditLog(
