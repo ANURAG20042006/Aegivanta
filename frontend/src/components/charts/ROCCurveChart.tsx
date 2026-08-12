@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   LinearScale,
@@ -8,13 +8,52 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { analyticsService } from '../../services/analytics';
 
 ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 export const ROCCurveChart: React.FC = () => {
-  const chartData = {
-    labels: ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'],
-    datasets: [
+  const [curves, setCurves] = useState<any>(null);
+
+  useEffect(() => {
+    analyticsService.getROCCurves()
+      .then(data => {
+        setCurves(data);
+      })
+      .catch(err => {
+        console.error('Error fetching ROC curves data', err);
+      });
+  }, []);
+
+  const datasets = [];
+
+  if (curves) {
+    if (curves.active_model) {
+      const active = curves.active_model;
+      datasets.push({
+        label: `${active.model_name} (Active Model AUC = ${active.auc ?? 'N/A'})`,
+        data: active.tpr,
+        borderColor: '#FF7A00',
+        borderWidth: 3,
+        tension: 0.2,
+      });
+    }
+
+    if (curves.historical_baselines) {
+      const colors = ['#00F0FF', '#00FF9D', '#A855F7'];
+      curves.historical_baselines.forEach((model: any, index: number) => {
+        datasets.push({
+          label: `${model.model_name} (Historical Baseline AUC = ${model.auc})`,
+          data: model.tpr,
+          borderColor: colors[index % colors.length],
+          borderWidth: 2,
+          tension: 0.2,
+        });
+      });
+    }
+  } else {
+    // Fallback loading states
+    datasets.push(
       {
         label: 'XGBoost (Historical Baseline AUC = 0.997)',
         data: [0.0, 0.92, 0.96, 0.98, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0, 1.0],
@@ -28,22 +67,22 @@ export const ROCCurveChart: React.FC = () => {
         borderColor: '#00FF9D',
         borderWidth: 2,
         tension: 0.2,
-      },
-      {
-        label: 'LSTM DeepNet (Historical Baseline AUC = 0.993)',
-        data: [0.0, 0.85, 0.92, 0.95, 0.97, 0.985, 0.99, 0.995, 1.0, 1.0, 1.0],
-        borderColor: '#A855F7',
-        borderWidth: 2,
-        tension: 0.2,
-      },
-      {
-        label: 'Random Baseline (AUC = 0.500)',
-        data: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-        borderColor: '#64748B',
-        borderWidth: 1,
-        borderDash: [5, 5],
-      },
-    ],
+      }
+    );
+  }
+
+  // Random reference baseline
+  datasets.push({
+    label: 'Random Baseline (AUC = 0.500)',
+    data: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    borderColor: '#64748B',
+    borderWidth: 1,
+    borderDash: [5, 5],
+  });
+
+  const chartData = {
+    labels: ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'],
+    datasets,
   };
 
   const options = {

@@ -16,4 +16,9 @@ export const analyticsService = {
     const response = await api.post('/train/trigger');
     return response.data;
   },
+
+  getROCCurves: async (): Promise<any> => {
+    const response = await api.get('/analytics/roc');
+    return response.data;
+  },
 };

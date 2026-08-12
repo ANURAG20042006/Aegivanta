@@ -56,7 +56,7 @@ services:
       - APP_ENV=development
       - DEBUG=False
       - API_V1_STR=/api/v1
-      - SECRET_KEY=${SECRET_KEY:-sentinelai_super_secret_jwt_key_2026_change_in_production_32bytes_min}
+      - SECRET_KEY=${SECRET_KEY}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-sentinel_admin}:${POSTGRES_PASSWORD:-sentinel_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-sentinelai_db}
       - REDIS_URL=redis://redis:6379/0
       - LOG_FILE_PATH=logs/sentinelai.log

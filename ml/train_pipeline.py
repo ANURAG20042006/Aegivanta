@@ -160,36 +160,58 @@ def run_training_pipeline(
     df_hash = hashlib.sha256(df.to_csv().encode("utf-8")).hexdigest()[:16]
     print(f"--> Dataset Loaded. Shape: {df.shape}, Hash: {df_hash}")
 
-    # Step 2: Split-First Architecture for Final Model & Untouched Test Evaluation
-    print("--> Splitting train/test sets FIRST & fitting preprocessor ONLY on X_train...")
+    # Step 2: Decoupled Split-First Architecture for Model Selection & Final Evaluation
+    print("--> Cleaning dataset and splitting Train/Test FIRST on raw features...")
     preprocessor = CICIDS2017Preprocessor(n_features_to_select=30)
-    X_train, X_test, y_train, y_test = preprocessor.fit_transform_train_test(
-        df, target_column="Label", balance_data=True, test_size=0.20, random_state=random_seed
+    cleaned_df = preprocessor.clean_dataset(df)
+    
+    X_raw = cleaned_df.drop(columns=["Label"])
+    y_raw = cleaned_df["Label"]
+    
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y_raw.astype(str))
+    preprocessor.label_encoder = label_encoder
+    
+    # Perform raw Stratified Train/Test split
+    from sklearn.model_selection import train_test_split
+    X_train_raw, X_test_raw, y_train_raw, y_test_raw = train_test_split(
+        X_raw, y_encoded, test_size=0.20, random_state=random_seed, stratify=y_encoded
     )
+
+    # Step 3: Train & Compare Model Selector Suite (Selection strictly on raw X_train via K-Fold CV)
+    print("--> Training & selecting champion model via Train K-Fold CV...")
+    selector = ModelSelectorSuite(artifacts_dir=artifacts_dir)
+    results = selector.train_and_select_champion(
+        X_train=X_train_raw.values,
+        y_train=y_train_raw,
+        X_train_raw=X_train_raw.values,
+        y_train_raw=y_train_raw,
+        n_splits=n_splits
+    )
+
+    # Step 4: Final Preprocessing Fit & model training on full X_train_raw
+    print("--> Fitting final preprocessor and training champion model on complete training split...")
+    X_train_preprocessed, y_train_preprocessed = preprocessor.fit_transform_train(
+        X_train_raw, y_train_raw, balance_data=True, random_state=random_seed
+    )
+    
+    if selector.best_model:
+        print(f"--> Refitting {selector.best_model.model_name} on preprocessed X_train dataset...")
+        selector.best_model.fit(X_train_preprocessed, y_train_preprocessed)
 
     # Save Preprocessor Artifact
     preprocessor_path = artifacts_path / "preprocessor.joblib"
     joblib.dump(preprocessor, preprocessor_path)
 
-    # Save training baseline matrix (X_train) for drift detection
+    # Save training baseline matrix (X_train_preprocessed) for drift detection
     baseline_path = artifacts_path / "baseline_X_train.joblib"
-    joblib.dump(X_train, baseline_path)
+    joblib.dump(X_train_preprocessed, baseline_path)
 
-    # Step 3: Train & Compare Model Selector Suite (Selection strictly on raw X_train via CV)
-    print("--> Training & selecting champion model via Train CV...")
-    selector = ModelSelectorSuite(artifacts_dir=artifacts_dir)
-    results = selector.train_and_select_champion(
-        X_train=X_train,
-        y_train=y_train,
-        X_train_raw=preprocessor.X_train_raw,
-        y_train_raw=preprocessor.y_train_encoded,
-        n_splits=n_splits
-    )
+    # Step 5: Evaluate frozen champion ONCE on test set
+    X_test_preprocessed = preprocessor.transform_test(X_test_raw)
+    final_test_metrics = selector.evaluate_final_test_set(X_test_preprocessed, y_test_raw)
 
-    # Evaluate frozen champion ONCE on test set
-    final_test_metrics = selector.evaluate_final_test_set(X_test, y_test)
-
-    # Step 4: Metadata Generation with 4 Required Metric Sections
+    # Step 6: Metadata Generation with 4 Required Metric Sections
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
     champion_results = next(r for r in results if r["model_name"] == champion_name)
 
@@ -209,8 +231,8 @@ def run_training_pipeline(
         },
         "selected_features": preprocessor.selected_feature_names,
         "training_metrics": {
-            "train_sample_count": len(X_train),
-            "n_features": X_train.shape[1]
+            "train_sample_count": len(X_train_preprocessed),
+            "n_features": X_train_preprocessed.shape[1]
         },
         "cv_metrics": {
             "n_splits": n_splits,
@@ -229,6 +251,8 @@ def run_training_pipeline(
                 "model_type": r["model_type"],
                 "cv_f1_mean": r["cv_f1_mean"],
                 "cv_recall_mean": r["cv_recall_mean"],
+                "cv_precision_mean": r["cv_precision_mean"],
+                "cv_accuracy_mean": r["cv_accuracy_mean"],
                 "selection_score": r["selection_score"]
             }
             for r in results

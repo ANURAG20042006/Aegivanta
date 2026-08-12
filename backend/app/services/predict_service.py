@@ -179,20 +179,19 @@ class PredictService:
             is_malicious = (attack_type != "BENIGN")
 
             # Map Probability Dictionary
-            probabilities = {}
+            probabilities = None
             if hasattr(model, "predict_proba") and hasattr(preprocessor, "label_encoder"):
+                probabilities = {}
                 for idx, name in enumerate(preprocessor.label_encoder.classes_):
                     if idx < len(probs_arr):
                         probabilities[str(name)] = round(float(probs_arr[idx]), 4)
-            else:
-                probabilities = {attack: (0.95 if attack == attack_type else 0.003) for attack in ATTACK_CLASSES}
 
             # Map Severity
             if not is_malicious:
                 severity = "Low"
-            elif confidence_score > 0.95:
+            elif confidence_score is not None and confidence_score > 0.95:
                 severity = "Critical"
-            elif confidence_score > 0.90:
+            elif confidence_score is not None and confidence_score > 0.90:
                 severity = "High"
             else:
                 severity = "Medium"

@@ -45,7 +45,7 @@ class PredictionResult(BaseModel):
     severity: str
     model_used: str
     timestamp: datetime
-    attack_probabilities: Dict[str, float]
+    attack_probabilities: Optional[Dict[str, float]] = None
     shap_explanation: Optional[Dict[str, Any]] = None
 
 

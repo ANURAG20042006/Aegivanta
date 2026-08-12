@@ -54,62 +54,31 @@ class CICIDS2017Preprocessor:
         df = df.fillna(0)
         return df
 
-    def fit_transform_train_test(
+    def fit_transform_train(
         self,
-        df: pd.DataFrame,
-        target_column: str = "Label",
+        X_train_raw: pd.DataFrame,
+        y_train_encoded: np.ndarray,
         balance_data: bool = True,
-        test_size: float = 0.20,
         random_state: int = 42
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """
-        Leakage-Free Execution:
-        1. Clean dataset.
-        2. Split X, y into Train and Test splits FIRST.
-        3. Fit scaler & feature selector ONLY on X_train.
-        4. Transform X_train and X_test independently using fitted parameters.
-        5. Apply SMOTE ONLY on X_train.
-        """
-        cleaned_df = self.clean_dataset(df)
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Fits scaler, feature selector, and SMOTE strictly on training raw features only."""
+        self.feature_names = list(X_train_raw.columns)
 
-        if target_column not in cleaned_df.columns:
-            raise KeyError(f"Target column '{target_column}' not found in dataset.")
-
-        X_raw = cleaned_df.drop(columns=[target_column])
-        y_raw = cleaned_df[target_column]
-
-        self.feature_names = list(X_raw.columns)
-
-        # Encode labels
-        y_encoded = self.label_encoder.fit_transform(y_raw.astype(str))
-
-        # STEP 1: TRAIN / TEST SPLIT FIRST (Untouched Test Set Rule)
-        X_train_raw, X_test_raw, y_train_encoded, y_test = train_test_split(
-            X_raw, y_encoded, test_size=test_size, random_state=random_state, stratify=y_encoded
-        )
-        self.X_train_raw = X_train_raw.values
-        self.y_train_encoded = y_train_encoded
-
-        # STEP 2: FIT PREPROCESSING ONLY ON X_TRAIN
+        # 1. Fit & transform scaler
         X_train_scaled = self.scaler.fit_transform(X_train_raw)
-        
-        # Adjust n_features_to_select if feature count is smaller.
-        # None means 'all features' (no selection step).
+
+        # 2. Fit & transform feature selector
         if self.n_features_to_select is None:
             actual_k = "all"
         else:
             actual_k = min(self.n_features_to_select, X_train_raw.shape[1])
         self.feature_selector.k = actual_k
-        
+
         X_train_selected = self.feature_selector.fit_transform(X_train_scaled, y_train_encoded)
         selected_indices = self.feature_selector.get_support(indices=True)
         self.selected_feature_names = [self.feature_names[i] for i in selected_indices]
 
-        # STEP 3: TRANSFORM UNTOUCHED TEST SET USING FITTED SCALER & SELECTOR
-        X_test_scaled = self.scaler.transform(X_test_raw)
-        X_test_selected = self.feature_selector.transform(X_test_scaled)
-
-        # STEP 4: SMOTE CLASS BALANCING ONLY ON X_TRAIN
+        # 3. Apply SMOTE class balancing
         if balance_data and HAS_SMOTE:
             try:
                 # Determine min samples per class to set k_neighbors safely
@@ -128,6 +97,56 @@ class CICIDS2017Preprocessor:
             X_train_final, y_train_final = X_train_selected, y_train_encoded
 
         self.is_fitted = True
+        return X_train_final, y_train_final
+
+    def transform_test(self, X_test_raw: pd.DataFrame) -> np.ndarray:
+        """Transforms untouched test set using fitted scaler and selector."""
+        if not self.is_fitted:
+            raise RuntimeError("Preprocessor must be fitted on training data first.")
+        X_test_scaled = self.scaler.transform(X_test_raw)
+        X_test_selected = self.feature_selector.transform(X_test_scaled)
+        return X_test_selected
+
+    def fit_transform_train_test(
+        self,
+        df: pd.DataFrame,
+        target_column: str = "Label",
+        balance_data: bool = True,
+        test_size: float = 0.20,
+        random_state: int = 42
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Leakage-Free Execution (Backward Compatible):
+        1. Clean dataset.
+        2. Split X, y into Train and Test splits FIRST.
+        3. Fit scaler & feature selector ONLY on X_train.
+        4. Transform X_train and X_test independently using fitted parameters.
+        5. Apply SMOTE ONLY on X_train.
+        """
+        cleaned_df = self.clean_dataset(df)
+
+        if target_column not in cleaned_df.columns:
+            raise KeyError(f"Target column '{target_column}' not found in dataset.")
+
+        X_raw = cleaned_df.drop(columns=[target_column])
+        y_raw = cleaned_df[target_column]
+
+        # Encode labels
+        y_encoded = self.label_encoder.fit_transform(y_raw.astype(str))
+
+        # STEP 1: TRAIN / TEST SPLIT FIRST (Untouched Test Set Rule)
+        X_train_raw, X_test_raw, y_train_encoded, y_test = train_test_split(
+            X_raw, y_encoded, test_size=test_size, random_state=random_state, stratify=y_encoded
+        )
+        self.X_train_raw = X_train_raw.values
+        self.y_train_encoded = y_train_encoded
+
+        # STEP 2 & 3 & 4: Process using decoupled methods
+        X_train_final, y_train_final = self.fit_transform_train(
+            X_train_raw, y_train_encoded, balance_data=balance_data, random_state=random_state
+        )
+        X_test_selected = self.transform_test(X_test_raw)
+
         return X_train_final, X_test_selected, y_train_final, y_test
 
     def fit_transform(

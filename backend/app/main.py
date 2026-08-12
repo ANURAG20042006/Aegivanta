@@ -91,11 +91,11 @@ async def initialize_application() -> None:
                             model_name=item["model_name"],
                             model_version=f"{item['model_name'].lower().replace(' ', '_')}-v1.0",
                             model_type=item["model_type"],
-                            accuracy=item.get("cv_f1_mean", 0.95),
-                            f1_score=item.get("cv_f1_mean", 0.95),
-                            precision_score=item.get("cv_f1_mean", 0.95),
-                            recall_score=item.get("cv_recall_mean", 0.95),
-                            roc_auc=item.get("cv_roc_auc"),  # Dynamically pull AUC or store NULL
+                            accuracy=item.get("cv_accuracy_mean", 0.0),
+                            f1_score=item.get("cv_f1_mean", 0.0),
+                            precision_score=item.get("cv_precision_mean", 0.0),
+                            recall_score=item.get("cv_recall_mean", 0.0),
+                            roc_auc=item.get("cv_roc_auc"),
                             is_active=False,
                             artifact_path=f"ml/artifacts/{item['model_name'].lower().replace(' ', '_')}.joblib"
                         ))
