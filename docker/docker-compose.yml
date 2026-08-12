@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-sentinel_admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sentinel_secure_pass_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}
       POSTGRES_DB: ${POSTGRES_DB:-sentinelai_db}
     ports:
       - "5432:5432"
@@ -56,8 +56,8 @@ services:
       - APP_ENV=development
       - DEBUG=False
       - API_V1_STR=/api/v1
-      - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-sentinel_admin}:${POSTGRES_PASSWORD:-sentinel_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-sentinelai_db}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable must be set}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-sentinel_admin}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}@postgres:5432/${POSTGRES_DB:-sentinelai_db}
       - REDIS_URL=redis://redis:6379/0
       - LOG_FILE_PATH=logs/sentinelai.log
     ports:

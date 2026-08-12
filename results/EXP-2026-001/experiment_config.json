@@ -7,6 +7,6 @@
   "test_size": 300,
   "feature_schema_version": "schema-v1.0",
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "timestamp": "2026-08-12T08:38:34.928608+00:00",
+  "timestamp": "2026-08-12T18:46:48.001347+00:00",
   "test_set_usage": "evaluated ONCE after champion frozen \u2014 never used for selection"
 }

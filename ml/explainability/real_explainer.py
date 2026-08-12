@@ -41,7 +41,7 @@ class RealModelExplainer:
         processed_vector: np.ndarray,
         model_version: str = "xgboost-v1.0",
         prediction: str = "BENIGN",
-        confidence: float = 0.95,
+        confidence: Optional[float] = None,
         top_n: int = 5
     ) -> Dict[str, Any]:
         """
@@ -91,7 +91,7 @@ class RealModelExplainer:
                     "explanation_method": "SHAP TreeExplainer",
                     "model_version": model_version,
                     "prediction": prediction,
-                    "confidence": round(confidence, 4),
+                    "confidence": round(confidence, 4) if confidence is not None else None,
                     "features": feature_items
                 }
             except Exception as e:
@@ -122,7 +122,7 @@ class RealModelExplainer:
                         "explanation_method": "Tree Feature Importances",
                         "model_version": model_version,
                         "prediction": prediction,
-                        "confidence": round(confidence, 4),
+                        "confidence": round(confidence, 4) if confidence is not None else None,
                         "features": feature_items
                     }
             except Exception as e:
@@ -134,6 +134,6 @@ class RealModelExplainer:
             "explanation_method": None,
             "model_version": model_version,
             "prediction": prediction,
-            "confidence": round(confidence, 4),
+            "confidence": round(confidence, 4) if confidence is not None else None,
             "features": []
         }

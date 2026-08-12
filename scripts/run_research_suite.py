@@ -14,6 +14,7 @@ import sys
 import time
 import json
 import uuid
+from typing import Dict, List, Tuple, Any, Optional
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -44,6 +45,20 @@ from ml.explainability.real_explainer import RealModelExplainer
 from ml.schema.feature_schema import DEFAULT_FEATURE_SCHEMA
 
 
+def compute_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    cm = confusion_matrix(y_true, y_pred)
+    if cm.shape[0] <= 1:
+        return 0.0
+    fp = cm.sum(axis=0) - np.diag(cm)
+    fn = cm.sum(axis=1) - np.diag(cm)
+    tp = np.diag(cm)
+    tn = cm.sum() - (fp + fn + tp)
+    denominator = fp + tn
+    with np.errstate(divide='ignore', invalid='ignore'):
+        class_fpr = np.where(denominator > 0, fp / denominator, 0.0)
+    return float(np.mean(class_fpr))
+
+
 def _train_eval(model, X_tr, y_tr, X_te, y_te, label, exp_id, dataset_name, seed, timestamp_str, schema_ver):
     """Train model on X_tr/y_tr, evaluate on X_te/y_te. Returns result dict."""
     t0 = time.time()
@@ -60,7 +75,7 @@ def _train_eval(model, X_tr, y_tr, X_te, y_te, label, exp_id, dataset_name, seed
         "precision": round(float(precision_score(y_te, y_pred, average="macro", zero_division=0)), 4),
         "recall":    round(float(recall_score(y_te, y_pred, average="macro", zero_division=0)), 4),
         "f1_score":  round(float(f1_score(y_te, y_pred, average="macro", zero_division=0)), 4),
-        "fpr":       round(1.0 - float(recall_score(y_te, y_pred, average="macro", zero_division=0)), 4),
+        "fpr":       round(compute_true_fpr(y_te, y_pred), 4),
         "latency_ms": lat,
         "timestamp": timestamp_str,
         "feature_schema_version": schema_ver,
@@ -250,7 +265,7 @@ def run_empirical_research_suite(exp_id: str = "EXP-2026-001", seed: int = 42, n
                 "precision": round(float(precision_score(y_val_fold, y_val_pred, average="macro", zero_division=0)), 4),
                 "recall":    round(float(recall_score(y_val_fold, y_val_pred, average="macro", zero_division=0)), 4),
                 "f1_score":  round(float(f1_score(y_val_fold, y_val_pred, average="macro", zero_division=0)), 4),
-                "fpr":       round(1.0 - float(recall_score(y_val_fold, y_val_pred, average="macro", zero_division=0)), 4),
+                "fpr":       round(compute_true_fpr(y_val_fold, y_val_pred), 4),
                 "latency_ms": lat,
                 "timestamp": timestamp_str, "feature_schema_version": schema_ver,
             })

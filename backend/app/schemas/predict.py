@@ -41,6 +41,7 @@ class PredictionResult(BaseModel):
     protocol: str
     attack_type: str
     confidence_score: Optional[float] = None
+    confidence_available: bool = True
     is_malicious: bool
     severity: str
     model_used: str

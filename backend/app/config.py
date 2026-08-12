@@ -25,9 +25,9 @@ class Settings(BaseSettings):
     # Database Settings
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str = "sentinel_admin"
-    POSTGRES_PASSWORD: str = "sentinel_secure_pass_2026"
-    POSTGRES_DB: str = "sentinelai_db"
+    POSTGRES_USER: str = Field(default_factory=lambda: os.environ.get("POSTGRES_USER", "sentinel_admin"))
+    POSTGRES_PASSWORD: str = Field(default_factory=lambda: os.environ.get("POSTGRES_PASSWORD", ""))
+    POSTGRES_DB: str = Field(default_factory=lambda: os.environ.get("POSTGRES_DB", "sentinelai_db"))
     DATABASE_URL: str = Field(
         default="sqlite+aiosqlite:///./sentinelai.db",
         description="Async Database Connection URL"

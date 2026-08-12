@@ -138,11 +138,15 @@ class PredictService:
                 detail=f"Artifact compatibility validation failed: {compat_errors}"
             )
 
-        if model is None or preprocessor is None:
+        # Verify preprocessor and model feature count synchronization (Phase 1C)
+        selected_feats = len(getattr(preprocessor, "selected_feature_names", []))
+        inner_model = getattr(model, "model", model)
+        n_features_in = getattr(inner_model, "n_features_in_", None)
+        if n_features_in is not None and selected_feats > 0 and n_features_in != selected_feats:
             from fastapi import HTTPException
             raise HTTPException(
                 status_code=503,
-                detail=f"Model artifact '{model_name}' or preprocessor is currently unavailable/corrupt. Please run model training pipeline."
+                detail=f"MODEL_PREPROCESSOR_SCHEMA_MISMATCH: Preprocessor produces {selected_feats} features but model expects {n_features_in}."
             )
 
         try:
@@ -263,6 +267,7 @@ class PredictService:
             protocol=incident.protocol,
             attack_type=incident.attack_type,
             confidence_score=incident.confidence_score,
+            confidence_available=(incident.confidence_score is not None),
             is_malicious=incident.is_malicious,
             severity=incident.severity,
             model_used=incident.model_name,

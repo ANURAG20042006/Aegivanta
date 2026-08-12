@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional, Dict, Any, List
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import IsolationForest
 from ml.models.base_model import BaseSentinelModel
@@ -215,30 +216,20 @@ class AutoencoderModel(BaseSentinelModel):
         self.is_trained = True
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        probs = self.predict_proba(X)
-        return np.argmax(probs, axis=1)
-
-    def predict_proba(self, X: np.ndarray) -> np.ndarray:
         if HAS_TORCH:
             self.net.eval()
             with torch.no_grad():
                 x_tensor = torch.tensor(X, dtype=torch.float32).to(self.device)
                 reconstructed = self.net(x_tensor)
                 mse = torch.mean((reconstructed - x_tensor) ** 2, dim=1).cpu().numpy()
-
-            probs = np.zeros((len(X), self.num_classes))
-            for i, loss in enumerate(mse):
-                if loss > self.threshold:
-                    probs[i, 1] = 0.95
-                else:
-                    probs[i, 0] = 0.95
-            return probs
+            return (mse > self.threshold).astype(int)
 
         preds = self.model.predict(X)
-        probs = np.zeros((len(X), self.num_classes))
-        for i, pred in enumerate(preds):
-            if pred == -1:
-                probs[i, 1] = 0.95  # Anomaly
-            else:
-                probs[i, 0] = 0.95  # Normal
-        return probs
+        return np.where(preds == -1, 1, 0)
+
+    def predict_proba(self, X: np.ndarray) -> Optional[np.ndarray]:
+        """
+        An Autoencoder based on reconstruction error does not naturally output calibrated class probabilities.
+        Returns None to ensure no fake/fabricated probability estimation is returned.
+        """
+        return None

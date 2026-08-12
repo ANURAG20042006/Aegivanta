@@ -32,6 +32,7 @@
   "historical_baselines": [
     {
       "model_name": "XGBoost",
+      "dataset": "CICIDS2017",
       "auc": 0.997,
       "fpr": [
         0.0,
@@ -62,6 +63,7 @@
     },
     {
       "model_name": "Random Forest",
+      "dataset": "CICIDS2017",
       "auc": 0.994,
       "fpr": [
         0.0,
@@ -92,6 +94,7 @@
     },
     {
       "model_name": "LSTM DeepNet",
+      "dataset": "CICIDS2017",
       "auc": 0.993,
       "fpr": [
         0.0,

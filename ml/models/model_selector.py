@@ -1,5 +1,6 @@
 import time
 import os
+import json
 import joblib
 import numpy as np
 from pathlib import Path
@@ -14,7 +15,7 @@ except ImportError:
     HAS_SMOTE = False
 
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
+    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
 )
 from ml.models.base_model import BaseSentinelModel
 from ml.models.classical_models import (
@@ -24,12 +25,27 @@ from ml.models.boosting_models import XGBoostModel, LightGBMModel, CatBoostModel
 from ml.models.deep_learning import CNN1DModel, LSTMModel, AutoencoderModel
 
 
+def calculate_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Calculates mathematically exact One-vs-Rest False Positive Rate (FPR = FP / (FP + TN))."""
+    cm = confusion_matrix(y_true, y_pred)
+    if cm.shape[0] <= 1:
+        return 0.0
+    fp = cm.sum(axis=0) - np.diag(cm)
+    fn = cm.sum(axis=1) - np.diag(cm)
+    tp = np.diag(cm)
+    tn = cm.sum() - (fp + fn + tp)
+    denominator = fp + tn
+    with np.errstate(divide='ignore', invalid='ignore'):
+        class_fpr = np.where(denominator > 0, fp / denominator, 0.0)
+    return float(np.mean(class_fpr))
+
+
 class ModelSelectorSuite:
     """
     Leakage-Free Model Selection Suite:
     - Fits models and evaluates selection criteria strictly on X_train / y_train via Stratified K-Fold CV.
     - Champion selection uses configurable multi-metric weighting (F1, Recall, FPR, Latency).
-    - The frozen champion model is evaluated ONCE on the untouched X_test set after selection completes.
+    - The frozen champion model is evaluated ONCE on the untouched X_test set after model selection.
     """
 
     def __init__(
@@ -53,7 +69,6 @@ class ModelSelectorSuite:
             LSTMModel(),
             AutoencoderModel()
         ]
-        # Configurable multi-metric selection weights (must sum to 1.0)
         self.weights = weights or {
             "f1": 0.40,
             "recall": 0.30,
@@ -65,11 +80,14 @@ class ModelSelectorSuite:
         self.best_selection_score: float = -1.0
         self.final_test_metrics: Optional[Dict[str, Any]] = None
 
-    def compute_selection_score(self, f1: float, recall: float, fpr: float, latency_ms: float) -> float:
-        """
-        Calculates a composite selection score based on CV metrics:
-        Score = w_f1 * F1 + w_rec * Recall + w_fpr * (1 - FPR) + w_lat * max(0, 1 - latency/10)
-        """
+    def compute_selection_score(
+        self,
+        f1: float,
+        recall: float,
+        fpr: float,
+        latency_ms: float
+    ) -> float:
+        """Computes weighted multi-objective selection score."""
         norm_latency = max(0.0, 1.0 - (latency_ms / 10.0))
         score = (
             self.weights["f1"] * f1 +
@@ -77,7 +95,7 @@ class ModelSelectorSuite:
             self.weights["low_fpr"] * (1.0 - fpr) +
             self.weights["latency"] * norm_latency
         )
-        return float(score)
+        return float(np.clip(score, 0.0, 1.0))
 
     def train_and_select_champion(
         self,
@@ -88,14 +106,13 @@ class ModelSelectorSuite:
         n_splits: int = 5
     ) -> List[Dict[str, Any]]:
         """
-        Performs leakage-free cross-validation strictly on X_train / y_train to select the champion model.
+        Performs leakage-free cross-validation strictly on X_train / y_train to select the champion model configuration.
         Does NOT look at X_test or y_test during model selection.
         """
         self.evaluation_results = []
         self.best_model = None
         self.best_selection_score = -1.0
 
-        # Run CV on raw training features if provided to prevent target/preprocessor leakage
         X_cv = X_train_raw if X_train_raw is not None else X_train
         y_cv = y_train_raw if y_train_raw is not None else y_train
 
@@ -112,16 +129,13 @@ class ModelSelectorSuite:
                     y_tr_fold, y_val_fold = y_cv[train_idx], y_cv[val_idx]
 
                     if X_train_raw is not None:
-                        # 1. Fit scaling inside the fold
                         fold_scaler = StandardScaler()
                         X_tr_scaled = fold_scaler.fit_transform(X_tr_fold)
                         
-                        # 2. Fit feature selection inside the fold
                         actual_k = min(30, X_tr_fold.shape[1])
                         fold_selector = SelectKBest(score_func=f_classif, k=actual_k)
                         X_tr_selected = fold_selector.fit_transform(X_tr_scaled, y_tr_fold)
                         
-                        # 3. Apply SMOTE inside the fold
                         if HAS_SMOTE:
                             try:
                                 unique_classes, counts = np.unique(y_tr_fold, return_counts=True)
@@ -141,7 +155,6 @@ class ModelSelectorSuite:
                         model.fit(X_tr_final, y_tr_final)
                         t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
 
-                        # Transform validation fold using fitted fold parameters
                         X_val_scaled = fold_scaler.transform(X_val_fold)
                         X_val_selected = fold_selector.transform(X_val_scaled)
                         y_val_pred = model.predict(X_val_selected)
@@ -154,7 +167,7 @@ class ModelSelectorSuite:
 
                     f1 = float(f1_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
                     rec = float(recall_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
-                    fpr = float(1.0 - rec)
+                    fpr = float(calculate_true_fpr(y_val_fold, y_val_pred))
                     acc = float(accuracy_score(y_val_fold, y_val_pred))
                     prec = float(precision_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
 
@@ -170,15 +183,20 @@ class ModelSelectorSuite:
                         "Accuracy": round(acc, 4),
                         "Macro F1": round(f1, 4),
                         "Precision": round(prec, 4),
-                        "Recall": round(rec, 4)
+                        "Recall": round(rec, 4),
+                        "FPR": round(fpr, 4)
                     })
 
                 avg_f1 = float(np.mean(fold_f1s))
+                std_f1 = float(np.std(fold_f1s, ddof=1)) if len(fold_f1s) > 1 else 0.0
                 avg_rec = float(np.mean(fold_recalls))
+                std_rec = float(np.std(fold_recalls, ddof=1)) if len(fold_recalls) > 1 else 0.0
+                avg_prec = float(np.mean(fold_precisions))
+                std_prec = float(np.std(fold_precisions, ddof=1)) if len(fold_precisions) > 1 else 0.0
+                avg_acc = float(np.mean(fold_accuracies))
+                std_acc = float(np.std(fold_accuracies, ddof=1)) if len(fold_accuracies) > 1 else 0.0
                 avg_fpr = float(np.mean(fold_fprs))
                 avg_lat = float(np.mean(fold_latencies))
-                avg_prec = float(np.mean(fold_precisions))
-                avg_acc = float(np.mean(fold_accuracies))
 
                 selection_score = self.compute_selection_score(avg_f1, avg_rec, avg_fpr, avg_lat)
 
@@ -186,9 +204,13 @@ class ModelSelectorSuite:
                     "model_name": model.model_name,
                     "model_type": model.model_type,
                     "cv_f1_mean": round(avg_f1, 4),
+                    "cv_f1_std": round(std_f1, 4),
                     "cv_recall_mean": round(avg_rec, 4),
+                    "cv_recall_std": round(std_rec, 4),
                     "cv_precision_mean": round(avg_prec, 4),
+                    "cv_precision_std": round(std_prec, 4),
                     "cv_accuracy_mean": round(avg_acc, 4),
+                    "cv_accuracy_std": round(std_acc, 4),
                     "cv_fpr_mean": round(avg_fpr, 4),
                     "cv_latency_ms": round(avg_lat, 4),
                     "selection_score": round(selection_score, 4),
@@ -204,15 +226,8 @@ class ModelSelectorSuite:
             except Exception as e:
                 print(f"Error evaluating model {model.model_name} during CV selection: {str(e)}")
 
-        # Refit champion model on 100% of the preprocessed training dataset (X_train)
         if self.best_model:
             print(f"=== Champion Model Selected: {self.best_model.model_name} (Selection Score: {self.best_selection_score:.4f}) ===")
-            print(f"--> Refitting {self.best_model.model_name} on full X_train dataset...")
-            self.best_model.fit(X_train, y_train)
-
-            # Persist Champion Model
-            champion_path = self.artifacts_dir / "best_model.joblib"
-            self.best_model.save(str(champion_path))
 
         return self.evaluation_results
 
@@ -237,10 +252,9 @@ class ModelSelectorSuite:
         prec = float(precision_score(y_test, y_pred, average="macro", zero_division=0))
         rec = float(recall_score(y_test, y_pred, average="macro", zero_division=0))
         f1 = float(f1_score(y_test, y_pred, average="macro", zero_division=0))
-        fpr = float(1.0 - rec)
+        fpr = float(calculate_true_fpr(y_test, y_pred))
         cm = confusion_matrix(y_test, y_pred).tolist()
 
-        # Compute ROC-AUC without fabricated fallbacks
         roc_auc = None
         probs = self.best_model.predict_proba(X_test)
         if probs is not None:
@@ -251,8 +265,6 @@ class ModelSelectorSuite:
 
             # Calculate and save actual ROC curve points dynamically
             try:
-                import json
-                from sklearn.metrics import roc_curve
                 # Convert multiclass test labels to binary (0=Normal, >0=Malicious)
                 y_test_bin = (y_test > 0).astype(int)
                 probs_mal = 1.0 - probs[:, 0]
@@ -261,6 +273,17 @@ class ModelSelectorSuite:
                 # Interpolate to standard 11 points for chart display
                 standard_fpr = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
                 standard_tpr = np.interp(standard_fpr, fpr_pts, tpr_pts).tolist()
+
+                # Read reference historical baselines
+                historical_file = Path("research/reference/historical_benchmarks.json")
+                historical_baselines = []
+                if historical_file.exists():
+                    try:
+                        with open(historical_file, "r", encoding="utf-8") as f:
+                            ref_data = json.load(f)
+                            historical_baselines = ref_data.get("baselines", [])
+                    except Exception:
+                        pass
                 
                 roc_curves_data = {
                     "active_model": {
@@ -269,26 +292,7 @@ class ModelSelectorSuite:
                         "fpr": standard_fpr,
                         "tpr": [round(x, 4) for x in standard_tpr]
                     },
-                    "historical_baselines": [
-                        {
-                            "model_name": "XGBoost",
-                            "auc": 0.997,
-                            "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-                            "tpr": [0.0, 0.92, 0.96, 0.98, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0, 1.0]
-                        },
-                        {
-                            "model_name": "Random Forest",
-                            "auc": 0.994,
-                            "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-                            "tpr": [0.0, 0.88, 0.94, 0.97, 0.985, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0]
-                        },
-                        {
-                            "model_name": "LSTM DeepNet",
-                            "auc": 0.993,
-                            "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-                            "tpr": [0.0, 0.85, 0.92, 0.95, 0.97, 0.985, 0.99, 0.995, 1.0, 1.0, 1.0]
-                        }
-                    ]
+                    "historical_baselines": historical_baselines
                 }
                 
                 roc_file = self.artifacts_dir / "roc_curves.json"

@@ -198,6 +198,10 @@ def run_training_pipeline(
     if selector.best_model:
         print(f"--> Refitting {selector.best_model.model_name} on preprocessed X_train dataset...")
         selector.best_model.fit(X_train_preprocessed, y_train_preprocessed)
+        
+        # Save Authoritative Champion Model Artifact (matching preprocessor selected features)
+        champion_path = artifacts_path / "best_model.joblib"
+        selector.best_model.save(str(champion_path))
 
     # Save Preprocessor Artifact
     preprocessor_path = artifacts_path / "preprocessor.joblib"
@@ -237,7 +241,13 @@ def run_training_pipeline(
         "cv_metrics": {
             "n_splits": n_splits,
             "macro_f1_mean": champion_results["cv_f1_mean"],
-            "macro_f1_std": 0.001,
+            "macro_f1_std": champion_results["cv_f1_std"],
+            "precision_mean": champion_results["cv_precision_mean"],
+            "precision_std": champion_results["cv_precision_std"],
+            "recall_mean": champion_results["cv_recall_mean"],
+            "recall_std": champion_results["cv_recall_std"],
+            "accuracy_mean": champion_results["cv_accuracy_mean"],
+            "accuracy_std": champion_results["cv_accuracy_std"],
             "fold_details": champion_results["fold_details"]
         },
         "validation_metrics": {
@@ -250,9 +260,13 @@ def run_training_pipeline(
                 "model_name": r["model_name"],
                 "model_type": r["model_type"],
                 "cv_f1_mean": r["cv_f1_mean"],
+                "cv_f1_std": r["cv_f1_std"],
                 "cv_recall_mean": r["cv_recall_mean"],
+                "cv_recall_std": r["cv_recall_std"],
                 "cv_precision_mean": r["cv_precision_mean"],
+                "cv_precision_std": r["cv_precision_std"],
                 "cv_accuracy_mean": r["cv_accuracy_mean"],
+                "cv_accuracy_std": r["cv_accuracy_std"],
                 "selection_score": r["selection_score"]
             }
             for r in results
@@ -265,7 +279,32 @@ def run_training_pipeline(
     with metadata_path.open("w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
 
+    # Save Artifact Manifest (Phase 1C)
+    prep_bytes = preprocessor_path.read_bytes()
+    model_bytes = (artifacts_path / "best_model.joblib").read_bytes()
+    inner_model = getattr(selector.best_model, "model", selector.best_model)
+    model_n_features_in = int(getattr(inner_model, "n_features_in_", len(preprocessor.selected_feature_names)))
+
+    manifest = {
+        "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
+        "model_type": selector.best_model.model_type if selector.best_model else "Classical",
+        "feature_schema_version": DEFAULT_FEATURE_SCHEMA.version,
+        "raw_feature_count": X_train_raw.shape[1],
+        "processed_feature_count": len(preprocessor.selected_feature_names),
+        "selected_features": preprocessor.selected_feature_names,
+        "model_n_features_in": model_n_features_in,
+        "preprocessor_hash": hashlib.sha256(prep_bytes).hexdigest(),
+        "model_hash": hashlib.sha256(model_bytes).hexdigest(),
+        "training_timestamp": datetime.now(timezone.utc).isoformat(),
+        "dataset_hash": df_hash,
+        "git_commit": get_git_commit_hash()
+    }
+    manifest_path = artifacts_path / "artifact_manifest.json"
+    with manifest_path.open("w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
     print(f"--> Metadata saved to: {metadata_path}")
+    print(f"--> Manifest saved to: {manifest_path}")
     return results
 
 

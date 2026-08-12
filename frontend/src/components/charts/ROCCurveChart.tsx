@@ -41,7 +41,7 @@ export const ROCCurveChart: React.FC = () => {
   if (curves && curves.active_model) {
     const active = curves.active_model;
     datasets.push({
-      label: `${active.model_name} (Active Model AUC = ${active.auc ?? 'N/A'})`,
+      label: `[CURRENT MODEL] ${active.model_name} (AUC = ${active.auc ?? 'N/A'})`,
       data: active.tpr,
       borderColor: '#FF7A00',
       borderWidth: 3,
@@ -53,7 +53,7 @@ export const ROCCurveChart: React.FC = () => {
     const colors = ['#00F0FF', '#00FF9D', '#A855F7'];
     curves.historical_baselines.forEach((model: any, index: number) => {
       datasets.push({
-        label: `${model.model_name} (Historical Baseline AUC = ${model.auc})`,
+        label: `[HISTORICAL REFERENCE] ${model.model_name} (AUC = ${model.auc})`,
         data: model.tpr,
         borderColor: colors[index % colors.length],
         borderWidth: 2,
