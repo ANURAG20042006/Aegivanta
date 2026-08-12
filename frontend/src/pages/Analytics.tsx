@@ -84,11 +84,11 @@ export const Analytics: React.FC = () => {
                 >
                   <td className="p-3 font-bold text-slate-100">{m.model_name}</td>
                   <td className="p-3 text-cyan-400">{m.model_type}</td>
-                  <td className="p-3 text-slate-200">{(m.accuracy * 100).toFixed(2)}%</td>
-                  <td className="p-3 font-bold text-emerald-400">{(m.f1_score * 100).toFixed(2)}%</td>
-                  <td className="p-3 text-slate-300">{(m.precision_score * 100).toFixed(2)}%</td>
-                  <td className="p-3 text-slate-300">{(m.recall_score * 100).toFixed(2)}%</td>
-                  <td className="p-3 text-slate-300">{m.roc_auc.toFixed(3)}</td>
+                  <td className="p-3 text-slate-200">{m.accuracy != null ? `${(m.accuracy * 100).toFixed(2)}%` : 'N/A'}</td>
+                  <td className="p-3 font-bold text-emerald-400">{m.f1_score != null ? `${(m.f1_score * 100).toFixed(2)}%` : 'N/A'}</td>
+                  <td className="p-3 text-slate-300">{m.precision_score != null ? `${(m.precision_score * 100).toFixed(2)}%` : 'N/A'}</td>
+                  <td className="p-3 text-slate-300">{m.recall_score != null ? `${(m.recall_score * 100).toFixed(2)}%` : 'N/A'}</td>
+                  <td className="p-3 text-slate-300">{m.roc_auc != null ? m.roc_auc.toFixed(3) : 'N/A'}</td>
                   <td className="p-3">
                     {m.is_active ? (
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">

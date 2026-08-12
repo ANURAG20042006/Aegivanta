@@ -1,9 +1,10 @@
 import os
+import secrets
 from typing import List
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-INSECURE_DEVELOPMENT_SECRET = "sentinelai_super_secret_jwt_key_2026_change_in_production_32bytes_min"
+_RUNTIME_DEV_SECRET = secrets.token_urlsafe(32)
 
 
 class Settings(BaseSettings):
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
     PROJECT_VERSION: str = "1.0.0"
-    SECRET_KEY: str = INSECURE_DEVELOPMENT_SECRET
+    SECRET_KEY: str = Field(default_factory=lambda: os.environ.get("SECRET_KEY", _RUNTIME_DEV_SECRET))
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
@@ -69,10 +70,10 @@ settings = Settings()
 
 
 def validate_production_settings() -> None:
-    """Stops accidental production deployments with known development secrets."""
+    """Stops accidental production deployments with insecure development configurations."""
     if settings.APP_ENV.lower() != "production":
         return
-    if settings.SECRET_KEY == INSECURE_DEVELOPMENT_SECRET or "CHANGE_ME" in settings.SECRET_KEY or len(settings.SECRET_KEY) < 32:
-        raise RuntimeError("Production requires a unique SECRET_KEY of at least 32 characters.")
+    if not os.environ.get("SECRET_KEY") or len(settings.SECRET_KEY) < 32:
+        raise RuntimeError("Production requires a unique SECRET_KEY of at least 32 characters in environment variables.")
     if any(origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in settings.CORS_ORIGINS):
         raise RuntimeError("Production CORS_ORIGINS must not use localhost entries.")

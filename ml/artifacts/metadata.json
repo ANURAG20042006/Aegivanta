@@ -3,7 +3,7 @@
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "2acdcd9c8cb49635",
-  "training_timestamp": "2026-08-12T09:07:07.592431+00:00",
+  "training_timestamp": "2026-08-12T17:43:37.706643+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -76,7 +76,7 @@
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.14517013407028595,
+    "best_selection_score": 0.14609160034030721,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -91,7 +91,7 @@
     "recall": 0.0139,
     "fpr": 0.9861,
     "roc_auc": 0.4787,
-    "inference_latency_ms": 0.0,
+    "inference_latency_ms": 0.01,
     "confusion_matrix": [
       [
         0,
@@ -464,7 +464,7 @@
       "cv_recall_mean": 0.0521,
       "cv_precision_mean": 0.0351,
       "cv_accuracy_mean": 0.6,
-      "selection_score": 0.0535
+      "selection_score": 0.1037
     },
     {
       "model_name": "XGBoost",
@@ -500,7 +500,7 @@
       "cv_recall_mean": 0.0709,
       "cv_precision_mean": 0.0719,
       "cv_accuracy_mean": 0.265,
-      "selection_score": 0.1452
+      "selection_score": 0.1461
     },
     {
       "model_name": "Logistic Regression",
@@ -509,7 +509,7 @@
       "cv_recall_mean": 0.0347,
       "cv_precision_mean": 0.0423,
       "cv_accuracy_mean": 0.23,
-      "selection_score": 0.1224
+      "selection_score": 0.1155
     },
     {
       "model_name": "SVM",
@@ -527,7 +527,7 @@
       "cv_recall_mean": 0.0614,
       "cv_precision_mean": 0.0477,
       "cv_accuracy_mean": 0.05,
-      "selection_score": 0.1439
+      "selection_score": 0.1438
     },
     {
       "model_name": "Naive Bayes",
@@ -536,25 +536,25 @@
       "cv_recall_mean": 0.0521,
       "cv_precision_mean": 0.0547,
       "cv_accuracy_mean": 0.1049,
-      "selection_score": 0.1389
+      "selection_score": 0.1385
     },
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0345,
-      "cv_recall_mean": 0.036,
-      "cv_precision_mean": 0.0334,
-      "cv_accuracy_mean": 0.4151,
-      "selection_score": 0.0318
+      "cv_f1_mean": 0.0549,
+      "cv_recall_mean": 0.0527,
+      "cv_precision_mean": 0.062,
+      "cv_accuracy_mean": 0.4526,
+      "selection_score": 0.0483
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
       "cv_f1_mean": 0.0444,
-      "cv_recall_mean": 0.0957,
-      "cv_precision_mean": 0.0306,
-      "cv_accuracy_mean": 0.0375,
-      "selection_score": 0.0656
+      "cv_recall_mean": 0.088,
+      "cv_precision_mean": 0.0331,
+      "cv_accuracy_mean": 0.035,
+      "selection_score": 0.0617
     },
     {
       "model_name": "Autoencoder",
@@ -563,9 +563,9 @@
       "cv_recall_mean": 0.0556,
       "cv_precision_mean": 0.0356,
       "cv_accuracy_mean": 0.64,
-      "selection_score": 0.0702
+      "selection_score": 0.0725
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "ff9899a8b6101c9bbf954a98db988833aba4636c"
+  "git_commit": "9915d51ab3616bb006253c5ea129ad5cd9a9574a"
 }

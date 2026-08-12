@@ -46,7 +46,7 @@ export interface PredictionResult {
   destination_port?: number;
   protocol: string;
   attack_type: string;
-  confidence_score: number;
+  confidence_score: number | null;
   is_malicious: boolean;
   severity: string;
   model_used?: string;
@@ -78,7 +78,7 @@ export interface IncidentItem {
   destination_port?: number;
   protocol: string;
   attack_type: string;
-  confidence_score: number;
+  confidence_score: number | null;
   is_malicious: boolean;
   severity: string;
   model_name?: string;
@@ -97,11 +97,11 @@ export interface ModelPerformanceItem {
   id?: string;
   model_name: string;
   model_type: string;
-  accuracy: number;
-  f1_score: number;
-  precision_score: number;
-  recall_score: number;
-  roc_auc: number;
+  accuracy: number | null;
+  f1_score: number | null;
+  precision_score: number | null;
+  recall_score: number | null;
+  roc_auc: number | null;
   is_active: boolean;
   trained_at?: string;
 }

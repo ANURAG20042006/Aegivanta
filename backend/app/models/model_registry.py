@@ -23,10 +23,10 @@ class ModelRegistry(Base):
     model_type: Mapped[str] = mapped_column(String(30), nullable=False)  # Classical, Boosting, DeepLearning
     status: Mapped[str] = mapped_column(String(20), default="CANDIDATE", nullable=False)
     
-    accuracy: Mapped[float] = mapped_column(Float, nullable=False)
-    f1_score: Mapped[float] = mapped_column(Float, nullable=False)
-    precision_score: Mapped[float] = mapped_column(Float, nullable=False)
-    recall_score: Mapped[float] = mapped_column(Float, nullable=False)
+    accuracy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    f1_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    precision_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    recall_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     roc_auc: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     latency_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.45)
     

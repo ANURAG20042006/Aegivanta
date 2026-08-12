@@ -50,7 +50,11 @@ export const PacketTable: React.FC<PacketTableProps> = ({ packets, onSelectPacke
               <td className="p-3 text-slate-400">{pkt.destination_ip}:{pkt.destination_port}</td>
               <td className="p-3 text-cyan-400">{pkt.protocol}</td>
               <td className="p-3 font-bold text-slate-100">{pkt.attack_type}</td>
-              <td className="p-3 text-slate-300">{(pkt.confidence_score * 100).toFixed(1)}%</td>
+              <td className="p-3 text-slate-300">
+                {pkt.confidence_score !== null && pkt.confidence_score !== undefined
+                  ? `${(pkt.confidence_score * 100).toFixed(1)}%`
+                  : 'N/A'}
+              </td>
               <td className="p-3">
                 <ThreatBadge severity={pkt.severity} isMalicious={pkt.is_malicious} />
               </td>

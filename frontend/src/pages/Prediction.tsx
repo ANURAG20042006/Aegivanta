@@ -264,7 +264,11 @@ export const Prediction: React.FC = () => {
                 singleResult.is_malicious ? 'bg-rose-500/10 border-rose-500/40 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
               }`}>
                 <div className="text-xl font-bold">{singleResult.attack_type}</div>
-                <div className="text-xs text-slate-300 mt-1">Confidence: {(singleResult.confidence_score * 100).toFixed(1)}% · Priority: {singleResult.severity}</div>
+                <div className="text-xs text-slate-300 mt-1">
+                  Confidence: {singleResult.confidence_score !== null && singleResult.confidence_score !== undefined
+                    ? `${(singleResult.confidence_score * 100).toFixed(1)}%`
+                    : 'N/A'} · Priority: {singleResult.severity}
+                </div>
               </div>
 
               {/* SHAP Explanation Attribution */}

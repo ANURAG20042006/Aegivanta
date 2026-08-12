@@ -1,0 +1,26 @@
+{
+  "_description": "Historical CICIDS2017 baseline benchmark results. These are reference values from prior research, NOT the current live model. Source: SentinelAI experimental design (EXP-2026-001). See results/EXP-2026-001/baseline_comparison.csv.",
+  "baselines": [
+    {
+      "model_name": "XGBoost",
+      "dataset": "CICIDS2017",
+      "auc": 0.997,
+      "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "tpr": [0.0, 0.92, 0.96, 0.98, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0, 1.0]
+    },
+    {
+      "model_name": "Random Forest",
+      "dataset": "CICIDS2017",
+      "auc": 0.994,
+      "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "tpr": [0.0, 0.88, 0.94, 0.97, 0.985, 0.99, 0.995, 0.998, 1.0, 1.0, 1.0]
+    },
+    {
+      "model_name": "LSTM DeepNet",
+      "dataset": "CICIDS2017",
+      "auc": 0.993,
+      "fpr": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+      "tpr": [0.0, 0.85, 0.92, 0.95, 0.97, 0.985, 0.99, 0.995, 1.0, 1.0, 1.0]
+    }
+  ]
+}
