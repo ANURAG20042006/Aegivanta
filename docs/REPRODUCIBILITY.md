@@ -29,8 +29,8 @@ source .venv/bin/activate
 # 4. Upgrade pip
 python -m pip install --upgrade pip
 
-# 5. Install exact runtime and test dependencies
-pip install -r requirements.txt
+# 5. Install exact runtime and test dependencies (Single Source of Truth)
+python -m pip install -r requirements.txt
 
 # 6. Verify dependency installation
 python scripts/verify_environment.py

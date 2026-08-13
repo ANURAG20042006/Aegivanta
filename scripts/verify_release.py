@@ -153,20 +153,25 @@ def main():
         print("[PASS] Pytest suite executed with 0 failures and 0 collection errors.")
 
     # -------------------------------------------------------------------
-    # STAGE 6: Frontend Build Verification
+    # STAGE 6: Frontend Production Build Verification (Fresh Build Required)
     # -------------------------------------------------------------------
-    print_step("STAGE 6: Frontend Production Build Verification")
-    dist_html = PROJECT_ROOT / "frontend" / "dist" / "index.html"
-    if dist_html.exists():
-        print(f"[PASS] Frontend production build artifact verified ({dist_html}).")
+    print_step("STAGE 6: Frontend Production Build Verification (Fresh Build)")
+    print("--> Executing fresh 'npm ci' and 'npm run build' in frontend/...")
+    
+    # Force clean build execution — existing dist/ is NEVER accepted as proof
+    code_ci, stdout_ci, stderr_ci = run_command(["npm.cmd" if sys.platform == "win32" else "npm", "ci"], cwd=PROJECT_ROOT / "frontend")
+    if code_ci != 0:
+        print(f"[FAIL] 'npm ci' failed in frontend/:\n{stderr_ci}")
+        failed_stages.append("Stage 6: Frontend npm ci")
     else:
-        print("[WARN] frontend/dist/index.html not found. Running frontend build...")
-        code, stdout, stderr = run_command(["npm", "run", "build"], cwd=PROJECT_ROOT / "frontend")
-        if code == 0 and dist_html.exists():
-            print("[PASS] Frontend production build succeeded.")
+        print("[PASS] 'npm ci' clean dependency installation succeeded.")
+        code_b, stdout_b, stderr_b = run_command(["npm.cmd" if sys.platform == "win32" else "npm", "run", "build"], cwd=PROJECT_ROOT / "frontend")
+        dist_html = PROJECT_ROOT / "frontend" / "dist" / "index.html"
+        if code_b == 0 and dist_html.exists():
+            print(f"[PASS] Fresh frontend build succeeded. Emitted asset: {dist_html}")
         else:
-            print(f"[FAIL] Frontend build failed:\n{stderr}")
-            failed_stages.append("Stage 6: Frontend Build")
+            print(f"[FAIL] Frontend build failed:\n{stderr_b}")
+            failed_stages.append("Stage 6: Frontend Production Build")
 
     # -------------------------------------------------------------------
     # STAGE 7: Final Master Integrity Audit
@@ -181,12 +186,14 @@ def main():
         print("[PASS] Final integrity audit reported 0 critical failures.")
 
     # -------------------------------------------------------------------
-    # FINAL SUMMARY
+    # FINAL SUMMARY & REPRODUCIBILITY STATUS
     # -------------------------------------------------------------------
     print("\n" + "=" * 70)
     print("                     MASTER VERIFICATION SUMMARY                      ")
     print("=" * 70)
     if not failed_stages:
+        print("STATUS: ENVIRONMENT VERIFIED")
+        print("STATUS: CLEAN ENVIRONMENT REPRODUCED")
         print("RESULT: ALL RELEASE VERIFICATION STAGES PASSED (0 FAILURES)")
         print("SentinelAI is 100% verified, reproducible, and ready for submission.")
         sys.exit(0)
