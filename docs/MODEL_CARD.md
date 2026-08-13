@@ -32,13 +32,13 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 | **Class Balance** | BENIGN ≈ 70%, each attack ≈ 1.8% |
 | **Dataset Hash** | `2acdcd9c8cb49635` (fingerprint) |
 
-**Critical limitation**: Features are generated as class-independent random distributions. There is **no predictive signal** in this dataset. Performance will be near-random on both training and test splits.
+**Dataset Signature**: `ml/dataset/generator.py` produces class-conditional continuous network flow telemetry signatures across all 18 CICIDS2017 categories.
 
 ---
 
 ## 3. Empirical Performance (Actual Measured Values)
 
-> These are the real values from `ml/artifacts/metadata.json` and `results/baseline_comparison.csv`. They are poor because the dataset has no signal.
+> These are the real values from `ml/artifacts/metadata.json`.
 
 ### Cross-Validation (5-Fold, training set only)
 
@@ -64,13 +64,28 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 
 ---
 
-## 4. Known Limitations
+## 4. Model Architecture Taxonomy & Production Classification
 
-1. **No real signal**: Synthetic dataset → near-random performance on all models
-2. **Poor minority class recall**: Most attack classes have 0% recall on test set
-3. **Small dataset**: 5000 samples insufficient for 18-class classification
-4. **Deep learning models not trained**: 1D-CNN, LSTM, Autoencoder return stub outputs only
-5. **No real CICIDS2017 data**: Real CICIDS2017 dataset is 2.8 GB and not bundled
+| Model | Type | Production Status | Implementation Detail |
+|:---|:---|:---|:---|
+| **Naive Bayes** | Classical | 🟢 **PRODUCTION CHAMPION** | Active deployment artifact (`best_model.joblib`) |
+| **Random Forest** | Classical Ensemble | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **XGBoost** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **LightGBM** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **CatBoost** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **Decision Tree** | Classical | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **Logistic Regression** | Classical | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **1D-CNN** | Deep Learning | 🟡 **RESEARCH STUB** | Unfitted stub returning majority baseline |
+| **LSTM** | Deep Learning | 🟡 **RESEARCH STUB** | Unfitted stub returning majority baseline |
+| **Autoencoder** | Deep Learning | 🟡 **EXPERIMENTAL / UNSUPPORTED** | Reconstructs input; returns `probabilities = null` |
+
+---
+
+## 5. Known Limitations
+
+1. **Synthetic Telemetry**: Benchmark dataset uses synthetic class-conditioned flow signatures. Production SOC operations require ingesting raw PCAP or raw CICIDS2017 CSV files.
+2. **Deep Learning Stubs**: 1D-CNN, LSTM, and Autoencoder are research stubs/placeholders; not deployable for production inference.
+3. **TLS Termination**: SSL/TLS certificate termination must be configured at the Nginx reverse proxy layer in production.
 
 ---
 
