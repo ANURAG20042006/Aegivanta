@@ -3,6 +3,11 @@
 **Target Version**: 1.0.0  
 **Supported Python**: Python 3.11.x  
 
+> [!IMPORTANT]
+> **Virtual Environment Activation Required**:
+> To verify all 23 packages, 129 pytest assertions, and 35 integrity checks, commands MUST be executed inside an activated virtual environment (`.venv`) where `pip install -r requirements.txt` has been installed.
+> Running `python` directly against un-isolated system Python before activating `.venv` will report missing dependencies (`aiosqlite`, `asyncpg`, `python-jose`, `passlib`) or outer global scikit-learn version mismatches.
+
 ---
 
 ## 1. Clean Environment Setup Procedure

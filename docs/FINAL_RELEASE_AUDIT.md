@@ -5,6 +5,9 @@
 **Auditor**: Senior Architecture & QA Integrity Auditor  
 **Execution Environment**: Python 3.11.5 | Windows 10 | React 18 + Vite 5  
 
+> [!IMPORTANT]
+> **Execution Context Note**: All verification results below were measured inside an isolated virtual environment (`.venv`) created via `python -m venv .venv` and `pip install -r requirements.txt`. Running `verify_environment.py` or `pytest` against un-isolated global Python without activating `.venv` will report missing dependencies (`aiosqlite`, `asyncpg`, etc.) or global scikit-learn version mismatches.
+
 ---
 
 ## 1. Clean Environment & Dependency Verification
