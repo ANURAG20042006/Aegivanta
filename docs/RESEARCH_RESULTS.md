@@ -2,84 +2,86 @@
 
 **Experiment Suite**: `EXP-2026-002`  
 **Execution Timestamp**: 2026-08-13  
-**Research Integrity Status**: 100% PASS (Zero hardcoded metrics, zero synthetic offsets, zero test set leakage)  
+**Script**: `scripts/run_research_suite.py`  
+
+> **Research Integrity Note**: All metrics in this document are taken directly from execution-generated CSV files (`results/*.csv`) and `ml/artifacts/metadata.json`. No values have been manually entered or altered. Some metrics differ significantly from the Phase 7 walkthrough, which contained fabricated placeholder numbers. This document is the authoritative corrected version.
 
 ---
 
 ## 1. Research Questions (RQs) & Findings
 
-### RQ1: Can supervised ML detect network intrusion attacks reliably?
-**Finding**: **YES.** Tree-based ensemble models (Random Forest, XGBoost, CatBoost, LightGBM) achieve Macro F1 scores $> 0.93$ and False Positive Rates (FPR) $< 0.005$ ($0.5\%$) on 78-attribute flow telemetry.
+### RQ1: Can supervised ML detect network attacks reliably?
+**Finding**: **NOT on this synthetic dataset.** All classifiers achieve Macro F1 of 0.02–0.07, which is near-random performance. The root cause is that `ml/dataset/generator.py` generates features as class-independent random distributions — there is no predictive signal. On the real CICIDS2017 dataset, the literature reports F1 > 0.95 for Random Forest.
 
 ### RQ2: Which model provides the optimal trade-off between detection performance and latency?
-**Finding**: **Random Forest Classifier** achieved the optimal balance of Macro F1 ($0.9385$) and FPR ($0.0045$) with sub-millisecond inference latency ($0.088\text{ ms}$ per sample), outperforming linear baselines ($F1 = 0.5210$) and majority class baselines ($F1 = 0.0268$).
+**Finding**: XGBoost achieves the best Macro F1 (0.0626) on the baseline comparison with low latency (0.013 ms). However, all models perform comparably near-random, making this comparison largely meaningless on this dataset.
 
 ### RQ3: What is the quantitative impact of feature selection and SMOTE?
-**Finding**: SelectKBest (16 features) + SMOTE rebalancing increased minority attack class recall from $0.7820$ to $0.9310$ without inflating FPR.
+**Finding**: On this synthetic dataset, removing SMOTE and feature selection slightly increases accuracy (from 0.52 to 0.72) because models without rebalancing learn to predict the majority class (BENIGN=70%) more aggressively. F1 scores remain near-random across all ablation variants.
 
 ### RQ4: How robust is the system under noise and distribution shift?
-**Finding**: Under Gaussian feature noise perturbation up to $\sigma = 0.10$, Macro F1 remained stable above $0.8800$. Under severe distribution shift ($\sigma = 0.20$), PSI exceeded $0.25$, successfully triggering the production drift detector alert.
+**Finding**: Performance degrades further under Gaussian noise as expected. The drift detector correctly triggers `DRIFT_DETECTED` alerts at high noise levels. See `results/robustness.csv` for per-noise-level results.
 
 ---
 
-## 2. Baseline Model Comparison (`results/baseline_comparison.csv`)
+## 2. Baseline Model Comparison
+**Source**: `results/baseline_comparison.csv` (frozen holdout test set, N=400 samples)
 
-Evaluated on frozen test set ($N = 400$ samples):
-
-| Model Name | Accuracy | Precision (Macro) | Recall (Macro) | Macro F1 | False Positive Rate (FPR) | Latency (ms) |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Random Forest** | **0.9580** | **0.9472** | **0.9310** | **0.9385** | **0.0045** | **0.088** |
-| XGBoost | 0.9520 | 0.9410 | 0.9250 | 0.9328 | 0.0052 | 0.112 |
-| LightGBM | 0.9480 | 0.9350 | 0.9180 | 0.9264 | 0.0058 | 0.095 |
-| CatBoost | 0.9500 | 0.9380 | 0.9210 | 0.9294 | 0.0055 | 0.145 |
-| Decision Tree | 0.9120 | 0.8950 | 0.8810 | 0.8879 | 0.0120 | 0.015 |
-| Logistic Regression | 0.7200 | 0.5400 | 0.5100 | 0.5210 | 0.0450 | 0.010 |
-| Majority Baseline | 0.2140 | 0.0268 | 0.1250 | 0.0268 | 0.0000 | 0.001 |
-
----
-
-## 3. Stratified 5-Fold Cross-Validation (`results/cross_validation.csv`)
-
-Evaluated exclusively on training set folds ($N = 1600$ samples, 5 folds):
-
-| Model | Fold 1 F1 | Fold 2 F1 | Fold 3 F1 | Fold 4 F1 | Fold 5 F1 | Mean F1 ± Std | Mean FPR |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Random Forest** | 0.9450 | 0.9380 | 0.9410 | 0.9480 | 0.9380 | **0.9420 ± 0.0040** | **0.0042** |
-| XGBoost | 0.9360 | 0.9280 | 0.9320 | 0.9390 | 0.9300 | 0.9330 ± 0.0041 | 0.0050 |
-| LightGBM | 0.9280 | 0.9210 | 0.9250 | 0.9310 | 0.9240 | 0.9258 ± 0.0034 | 0.0056 |
-
----
-
-## 4. Pipeline Component Ablation Study (`results/ablation.csv`)
-
-| Ablation Variant | Accuracy | Precision | Recall | Macro F1 | FPR |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Full Pipeline (Selection + SMOTE)** | **0.9580** | **0.9472** | **0.9310** | **0.9385** | **0.0045** |
-| Without Feature Selection (All 78) | 0.9420 | 0.9310 | 0.9120 | 0.9214 | 0.0062 |
-| Without SMOTE Balancing | 0.9250 | 0.9410 | 0.8120 | 0.8718 | 0.0038 |
-
----
-
-## 5. Perturbation & Noise Robustness (`results/robustness.csv`)
-
-| Noise Level ($\sigma$) | Accuracy | Macro F1 | FPR | System Reaction |
+| Model Name | Accuracy | Macro F1 | FPR | Latency (ms) |
 | :--- | :--- | :--- | :--- | :--- |
-| `0.00` (Baseline) | 0.9580 | 0.9385 | 0.0045 | Normal Operation |
-| `0.05` (Low Noise) | 0.9350 | 0.9120 | 0.0068 | Normal Operation |
-| `0.10` (Moderate Noise) | 0.8920 | 0.8640 | 0.0125 | Monitoring Warning |
-| `0.20` (High Shift) | 0.7450 | 0.7100 | 0.0380 | **DRIFT_DETECTED Alert** |
+| LightGBM | 0.6125 | 0.0502 | 0.0579 | 0.042 |
+| XGBoost | 0.490 | **0.0626** | 0.0569 | 0.013 |
+| **Random Forest** | 0.545 | 0.0487 | 0.0565 | 0.065 |
+| CatBoost | 0.335 | 0.051 | 0.0559 | 0.008 |
+| Decision Tree | 0.223 | 0.034 | 0.055 | 0.000 |
+| Logistic Regression | 0.030 | 0.040 | 0.055 | 0.000 |
+| Majority Baseline | 0.020 | 0.002 | 0.056 | 0.001 |
 
 ---
 
-## 6. Generated Visualizations
-- `results/plots/f1_vs_fpr.png`: F1-Score vs FPR trade-off across candidate models.
-- `results/plots/latency_comparison.png`: Per-sample inference latency (ms).
-- `results/plots/ablation_study.png`: Pipeline component ablation comparison.
+## 3. Stratified 5-Fold Cross-Validation
+**Source**: `results/cross_validation.csv` (training set only, N=4000)
+
+### Random Forest (Champion by selection score)
+
+| Fold | Accuracy | Macro F1 | FPR | Latency (ms) |
+| :--- | :--- | :--- | :--- | :--- |
+| fold_1 | 0.535 | 0.0619 | 0.054 | 3.922 |
+| fold_2 | 0.575 | 0.0516 | 0.054 | 3.944 |
+| fold_3 | 0.548 | 0.0614 | 0.055 | 4.129 |
+| fold_4 | 0.535 | 0.0404 | 0.057 | 4.037 |
+| fold_5 | 0.548 | 0.0646 | 0.055 | 4.428 |
+| **Mean** | **0.548** | **0.0560 ± 0.009** | **0.055** | **4.09** |
 
 ---
 
-## 7. Research Integrity Verification
-- **Test Set Isolation**: Test set frozen before any model training. Never used for hyperparameter tuning or model selection.
-- **Cross-Validation**: 5-Fold Stratified K-Fold CV executed on training set only.
-- **Ablation Validity**: Each ablation variant was an independently trained separate pipeline. No metric was arithmetically derived.
-- **Zero Fabrication**: All metrics were generated via real execution of `scripts/run_research_suite.py`.
+## 4. Pipeline Component Ablation Study
+**Source**: `results/ablation.csv`
+
+| Ablation Variant | Accuracy | Macro F1 | FPR |
+| :--- | :--- | :--- | :--- |
+| Full Pipeline (Selection + SMOTE) | 0.518 | 0.040 | 0.056 |
+| Without Feature Selection | 0.668 | 0.045 | 0.056 |
+| Without SMOTE Balancing | 0.715 | 0.046 | 0.056 |
+
+---
+
+## 5. Generated Visualizations
+- `results/plots/f1_vs_fpr.png`: F1-Score vs FPR trade-off across candidate models
+- `results/plots/latency_comparison.png`: Per-sample inference latency (ms)
+- `results/plots/ablation_study.png`: Pipeline component ablation comparison
+
+---
+
+## 6. Research Integrity Verification
+
+- **Test Set Isolation**: Test set frozen before any model training. Never used for hyperparameter tuning or model selection. ✓
+- **CV Isolation**: 5-Fold CV executed on training set only. ✓
+- **No Fabricated Metrics**: All values sourced from actual CSV execution. See `results/*.csv`. ✓
+- **Limitation Disclosed**: Synthetic dataset with no class-conditional signal. ✓
+
+---
+
+## 7. Corrected From Phase 7 Walkthrough
+
+The Phase 7 walkthrough document contained fabricated metrics (Macro F1 ≈ 0.94). Those numbers were placeholders and do not reflect actual execution. The correct values are in this document and traceable to `results/*.csv` and `ml/artifacts/metadata.json`.

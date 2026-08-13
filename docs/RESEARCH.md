@@ -1,85 +1,98 @@
-# 🔬 SentinelAI: Research Methodology & Empirical Evaluation Document
+# SentinelAI — Research Documentation
 
-**Title**: Leakage-Free Explainable Machine Learning for High-Throughput Network Intrusion Detection Systems  
-**Primary Dataset**: CICIDS2017 Benchmark Dataset (Canadian Institute for Cybersecurity)  
-**Authors**: SentinelAI Engineering & Research Team  
-
----
-
-## 1. Research Problem & Core Questions
-
-Modern enterprise Network Intrusion Detection Systems (NIDS) face a fundamental trade-off between **high-speed predictive throughput**, **minority-class attack detection (e.g. Infiltration, Web Attacks)**, and **explainability for Security Operations Center (SOC) analysts**.
-
-### Research Questions (RQs):
-- **RQ1**: *Can a leakage-free preprocessing pipeline combined with gradient-boosted decision trees maintain >98% Macro F1-score across 15 attack categories without incurring feature distribution leakage?*
-- **RQ2**: *How much does Synthetic Minority Over-sampling (SMOTE) inside isolated cross-validation folds contribute to minority class recall compared to un-balanced baseline models?*
-- **RQ3**: *What is the inference latency overhead of extracting real SHAP feature importance attributions during real-time flow evaluation?*
+**Last Updated**: 2026-08-13  
+**Experiment ID**: EXP-2026-002  
 
 ---
 
-## 2. Leakage-Free Preprocessing & Evaluation Methodology
+## 1. Research Questions
 
-To ensure 100% research integrity, SentinelAI enforces a strict **Split-First Architecture**:
+**RQ1**: Can supervised ML classifiers detect network attacks when trained on CICIDS2017-schema flow features?
 
-```
-RAW DATASET (CICIDS2017 / Synthetic Benchmark)
-        │
-        ▼
-[ 80% Train Split ] ─── (Untouched 20% Test Split Set Aside)
-        │
-        ├── 1. Median Imputer & StandardScaler (Fit on Train Split ONLY)
-        ├── 2. SelectKBest Feature Isolator (Fit on Train Split ONLY)
-        └── 3. SMOTE Class Balancer (Applied ONLY to Train Split)
-        │
-        ▼
-[ Model Training & Stratified 5-Fold Cross-Validation ]
-        │
-        ▼
-[ Final Evaluation ONCE on Untouched 20% Test Set ]
-```
+**RQ2**: Which model architecture provides the best trade-off between detection performance (F1, FPR) and inference latency?
+
+**RQ3**: What is the quantitative impact of feature selection and SMOTE class rebalancing on classifier performance?
+
+**RQ4**: How robust are trained models under increasing feature noise and distribution shift?
 
 ---
 
-## 3. Empirical Experimental Results
+## 2. Methodology
 
-All numbers reported below were generated directly from actual execution runs exported to `results/`:
+### 2.1 Experimental Design
+- **Data**: CICIDS2017 synthetic benchmark, 5000 samples, 78 features, 18 classes
+- **Seed**: 42 (fixed for reproducibility)
+- **Split**: 80/20 stratified train/test — frozen before training
+- **CV**: 5-Fold Stratified K-Fold on training set only
+- **Model Selection**: Highest composite score (0.4×F1 + 0.3×Recall + 0.2×(1−FPR) + 0.1×(1/latency))
+- **Final test**: Evaluated ONCE after champion selection
 
-> [!IMPORTANT]
-> **Synthetic Data Demo Performance Note**:
-> The performance metrics listed in the tables below represent historical baseline benchmarks on the real **CICIDS2017** dataset.
-> In a local run utilizing the bundled synthetic flow generator (e.g. `scripts/run_research_suite.py`), the models will exhibit macro F1-scores in the `0.04-0.09` range. This is the mathematically correct and expected outcome because the synthetic generator samples the `Label` column independently from the features (i.e. there is zero learnable correlation by design). This mode acts as a structural validation/wiring demo for the NIDS pipeline.
-> To reproduce the high-accuracy NIDS benchmarks, configure the data loaders to read the original raw CSV files from the Canadian Institute for Cybersecurity (CICIDS2017).
-
-### A. Baseline Model Comparison (`results/baseline_comparison.csv`):
-| Model | Category | Accuracy | Precision | Recall | Macro F1 | FPR | Latency (ms) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Majority Class Baseline** | Dummy | 0.5000 | 0.2500 | 0.5000 | 0.3333 | 0.5000 | 0.01ms |
-| **Logistic Regression** | Linear | 0.9250 | 0.9280 | 0.9142 | 0.9210 | 0.0858 | 0.12ms |
-| **Decision Tree** | Classical | 0.9740 | 0.9750 | 0.9692 | 0.9721 | 0.0308 | 0.15ms |
-| **Random Forest** | Ensemble | 0.9885 | 0.9890 | 0.9854 | 0.9872 | 0.0146 | 0.35ms |
-| 👑 **XGBoost** | Boosting | **0.9912** | **0.9920** | **0.9882** | **0.9901** | **0.0118** | **0.42ms** |
-| **CatBoost** | Boosting | 0.9905 | 0.9910 | 0.9874 | 0.9892 | 0.0126 | 0.48ms |
-| **LightGBM** | Boosting | 0.9895 | 0.9899 | 0.9861 | 0.9880 | 0.0139 | 0.38ms |
-
-### B. Pipeline Ablation Study (`results/ablation.csv`):
-| Pipeline Configuration | Macro F1 | Recall | FPR | Latency (ms) | Key Contribution |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **A. Baseline Logistic Regression** | 0.9250 | 0.9142 | 0.0858 | 0.12ms | Basic linear boundary |
-| **B. Decision Tree Baseline** | 0.9721 | 0.9692 | 0.0308 | 0.15ms | Non-linear tree splits |
-| **C. Random Forest + Scaling** | 0.9820 | 0.9810 | 0.0190 | 0.35ms | Variance reduction via bagging |
-| **D. RF + Feature Selection (30)** | 0.9872 | 0.9854 | 0.0146 | 0.28ms | Dimensionality & noise reduction |
-| **E. XGBoost + Selection + SMOTE** | **0.9901** | **0.9882** | **0.0118** | **0.42ms** | Minority class recall boost |
+### 2.2 Leakage Prevention
+Preprocessing (`StandardScaler`, `SelectKBest`, `SMOTE`) fitted **inside each CV fold** on training fold only, then applied to validation fold without refitting.
 
 ---
 
-## 4. Reproducibility & Research Integrity
+## 3. Results
 
-All experimental artifacts and metadata are serialized with complete execution parameters (`seed=42`, `schema_version=schema-v1.0`, dataset sha256 hash). Commands to reproduce:
+### 3.1 RQ1 — Answer: POOR performance due to synthetic dataset limitation
+
+All classifiers perform near-randomly (Macro F1 = 0.02–0.07) because the synthetic generator creates class-independent feature distributions. There is no learnable signal. On real CICIDS2017 data (e.g. Panigrahi & Borah, 2018), Random Forest achieves F1 > 0.95.
+
+### 3.2 RQ2 — Baseline Model Comparison (Actual Results from `results/baseline_comparison.csv`)
+
+| Model | Accuracy | Macro F1 | FPR | Latency (ms) |
+|:---|:---|:---|:---|:---|
+| **LightGBM** | 0.6125 | **0.0502** | 0.0579 | 0.042 |
+| **XGBoost** | 0.490 | 0.0626 | 0.0569 | 0.013 |
+| **Random Forest** | 0.545 | 0.0487 | 0.0565 | 0.065 |
+| **CatBoost** | 0.335 | 0.051 | 0.0559 | 0.008 |
+| Decision Tree | 0.223 | 0.034 | 0.055 | 0.000 |
+| Logistic Regression | 0.030 | 0.040 | 0.0548 | 0.000 |
+| Majority Baseline | 0.020 | 0.002 | 0.056 | 0.001 |
+
+### 3.3 RQ3 — Ablation Study (Actual from `results/ablation.csv`)
+
+| Variant | Accuracy | Macro F1 | FPR |
+|:---|:---|:---|:---|
+| Full Pipeline (Selection + SMOTE) | 0.518 | 0.040 | 0.056 |
+| Without Feature Selection | 0.668 | 0.045 | 0.056 |
+| Without SMOTE | 0.715 | 0.046 | 0.056 |
+
+**Finding**: In this synthetic dataset, removing SMOTE and feature selection slightly improves accuracy (model learns to predict majority class more). F1 remains near-random across all variants, confirming no learnable signal.
+
+### 3.4 RQ4 — Robustness (Actual from `results/robustness.csv`)
+See `results/robustness.csv` for noise perturbation results. Models degrade further under increased Gaussian noise. Drift detector correctly triggers `DRIFT_DETECTED` at σ=0.20.
+
+---
+
+## 4. Limitations
+
+1. **Primary limitation**: Synthetic dataset → no real signal → near-random performance
+2. **18-class imbalance with tiny test set** (100 samples for 18 classes): Most classes have 0–2 test samples
+3. **All baseline models fail** (Macro F1 < 0.07): Confirms absence of learnable pattern, not model deficiency
+4. **Deep learning stubs**: 1D-CNN, LSTM, Autoencoder not trained — stub outputs only
+
+---
+
+## 5. Future Work
+
+1. Replace synthetic generator with real CICIDS2017 CSV dataset (available from Canadian Institute for Cybersecurity)
+2. Extend to CICIDS2018 for temporal generalization testing
+3. Implement trained deep learning architectures (1D-CNN for sequential flow data)
+4. Evaluate on real network traffic captures in a testbed environment
+5. Integrate online learning for continuous model adaptation
+
+---
+
+## 6. Reproducibility
 
 ```bash
-# Execute empirical research experiment suite
+# Regenerate all research results
 python scripts/run_research_suite.py
 
-# Execute end-to-end integration test runner
-python -c "import sys; sys.path.insert(0, '.'); import asyncio; from tests.integration_test_runner import run_end_to_end_integration_test; asyncio.run(run_end_to_end_integration_test())"
+# Results saved to: results/cross_validation.csv, baseline_comparison.csv,
+#                   ablation.csv, robustness.csv, latency.csv
+#                   results/plots/*.png
 ```
+
+All results generated from real execution with `random_seed=42`. No metrics were manually entered.

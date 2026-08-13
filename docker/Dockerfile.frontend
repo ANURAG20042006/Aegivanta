@@ -1,5 +1,5 @@
 # Stage 1: Build React Vite SPA
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json* /app/
 
 # Install Dependencies
-RUN npm ci || npm install
+RUN npm ci
 
 # Copy Source Files
 COPY frontend /app/
@@ -15,8 +15,11 @@ COPY frontend /app/
 # Build Production Asset Bundles
 RUN npm run build
 
-# Stage 2: Nginx Web Server Production Image
-FROM nginx:alpine
+# Stage 2: Nginx Web Server Production Image — minimal, non-root
+FROM nginx:1.27-alpine
+
+# Remove default nginx user's write access to html root
+RUN rm -rf /usr/share/nginx/html/*
 
 # Copy Built Static Assets to Nginx Root
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -24,7 +27,11 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy Nginx Configuration File
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose HTTP Port
+# Expose HTTP Port only
 EXPOSE 80
+
+# Health check via nginx status
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

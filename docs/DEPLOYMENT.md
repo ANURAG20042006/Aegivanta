@@ -1,92 +1,198 @@
-# SentinelAI Production Deployment & DevOps Guide
+# SentinelAI — Deployment Guide
 
-This document covers enterprise production deployment strategies for SentinelAI using Docker Compose, PostgreSQL 16, Redis 7, Nginx Reverse Proxy, and SSL/TLS security configuration.
-
----
-
-## 1. Production Architecture Topology
-
-```
-                   Internet / Security Operations Center (SOC)
-                                        |
-                                  HTTPS (Port 443)
-                                        |
-                              +---------v---------+
-                              |   Nginx Gateway   |
-                              |  (Docker: Port 80)|
-                              +----+---------+----+
-                                   |         |
-                      /api & /ws   |         |  Static Assets
-                                   v         v
-                      +------------+----+  +-+-----------------+
-                      | FastAPI Backend |  | React SPA Build   |
-                      | (Port 8000)     |  | (/usr/share/html) |
-                      +----+-------+----+  +-------------------+
-                           |       |
-                           v       v
-                     +-----+---+ +-+-------+
-                     |Postgres | | Redis 7 |
-                     | (5432)  | |  (6379) |
-                     +---------+ +---------+
-```
+**Version**: 1.0.0  
+**Last Updated**: 2026-08-13  
 
 ---
 
-## 2. Docker Compose Production Configuration
+## 1. Prerequisites
 
-The `docker/docker-compose.yml` orchestrates 4 core containers:
-1. `postgres`: Managed PostgreSQL 16 database storing user accounts, incident history, and audit logs.
-2. `redis`: High-speed Redis 7 cache for token revocation and live stream telemetry.
-3. `backend`: Scalable FastAPI container with Uvicorn worker pool.
-4. `frontend`: Nginx Alpine container serving compressed Vite bundle.
+| Requirement | Minimum Version |
+|:---|:---|
+| Python | 3.11 |
+| Node.js | 20.x LTS |
+| npm | 9.x |
+| Docker | 24.x (optional) |
+| Docker Compose | 2.x (optional) |
+| Git | 2.x |
 
-### Deploying the Stack:
+---
+
+## 2. Environment Setup
+
 ```bash
-docker-compose -f docker/docker-compose.yml up -d --build
+# Clone the repository
+git clone https://github.com/ANURAG20042006/SENTINELAI.git
+cd SENTINELAI
+
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your actual values
+# REQUIRED fields:
+#   SECRET_KEY           — at least 32 character random hex string
+#   POSTGRES_PASSWORD    — strong database password (production only)
+#   SENTINEL_ADMIN_PASSWORD
+#   SENTINEL_ANALYST_PASSWORD
+#   SENTINEL_VIEWER_PASSWORD
+```
+
+Generate a secure `SECRET_KEY`:
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 ---
 
-## 3. SSL / HTTPS Security Configuration (Let's Encrypt / Certbot)
+## 3. Database Setup
 
-For production deployments, terminate SSL at Nginx:
+### Option A — SQLite (Development / Demo)
+SQLite is used by default and requires no additional setup. The database file `sentinelai.db` is created automatically on first startup.
 
-1. Install Certbot:
-```bash
-sudo apt-get install certbot python3-certbot-nginx
+```ini
+DATABASE_URL=sqlite+aiosqlite:///./sentinelai.db
 ```
 
-2. Generate Certificates:
-```bash
-sudo certbot --nginx -d sentinelai.yourdomain.com
-```
-
-3. Update `docker/nginx.conf` with SSL certificate paths:
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name sentinelai.yourdomain.com;
-
-    ssl_certificate /etc/letsencrypt/live/sentinelai.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/sentinelai.yourdomain.com/privkey.pem;
-
-    location / {
-        root /usr/share/nginx/html;
-        try_files $uri $uri/ /index.html;
-    }
-}
+### Option B — PostgreSQL (Production)
+```ini
+DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@localhost:5432/sentinelai_db
+POSTGRES_USER=sentinel_admin
+POSTGRES_PASSWORD=<strong-password>
+POSTGRES_DB=sentinelai_db
 ```
 
 ---
 
-## 4. Monitoring & Backup Procedures
+## 4. ML Artifact Generation
 
-### Database Backup (PostgreSQL):
+The backend requires trained ML artifacts to make predictions. Generate them by running the training pipeline:
+
 ```bash
-docker exec -t sentinel_postgres pg_dump -U sentinel_admin sentinelai_db > sentinelai_backup_$(date +%Y%m%d).sql
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Run the full training pipeline
+python -m ml.train_pipeline
+
+# Verify artifacts were created
+ls ml/artifacts/
+# Expected: best_model.joblib, preprocessor.joblib, metadata.json, artifact_manifest.json
 ```
 
-### Log Inspection:
+> **Note**: The training pipeline uses a synthetic CICIDS2017-schema dataset. For production use, replace `ml/dataset/generator.py` with a loader for the real CICIDS2017 dataset.
+
+---
+
+## 5. Backend Startup (Local)
+
 ```bash
-docker-compose -f docker/docker-compose.yml logs -f backend
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Start the FastAPI backend (development)
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Access API documentation
+# Swagger UI: http://localhost:8000/docs
+# ReDoc:      http://localhost:8000/redoc
+# Health:     http://localhost:8000/health
+# Readiness:  http://localhost:8000/ready
 ```
+
+---
+
+## 6. Frontend Startup (Local)
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Access: http://localhost:5173
+```
+
+---
+
+## 7. Docker Compose Startup
+
+### 7.1 Set required environment variables
+```bash
+export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+export POSTGRES_PASSWORD=<strong-db-password>
+export SENTINEL_ADMIN_PASSWORD=<admin-password>
+export SENTINEL_ANALYST_PASSWORD=<analyst-password>
+export SENTINEL_VIEWER_PASSWORD=<viewer-password>
+```
+
+Or add them to a `.env` file in the project root.
+
+### 7.2 Validate the compose configuration
+```bash
+docker compose -f docker/docker-compose.yml config
+```
+
+### 7.3 Build and start all services
+```bash
+docker compose -f docker/docker-compose.yml up --build -d
+```
+
+### 7.4 Verify service health
+```bash
+docker compose -f docker/docker-compose.yml ps
+curl http://localhost:8000/health
+curl http://localhost:8000/ready
+```
+
+### 7.5 View logs
+```bash
+docker compose -f docker/docker-compose.yml logs -f backend
+```
+
+### 7.6 Stop all services
+```bash
+docker compose -f docker/docker-compose.yml down
+```
+
+---
+
+## 8. Operating Modes
+
+| Mode | Description | Production Secrets Required |
+|:---|:---|:---|
+| `DEMO` | Development/demo mode — dev password fallbacks active | No |
+| `LAB` | Research mode — training and experiments enabled | No |
+| `PRODUCTION` | Full enforcement — all env vars required, localhost CORS rejected | Yes |
+
+Set via `.env`:
+```ini
+OPERATING_MODE=PRODUCTION
+APP_ENV=production
+```
+
+---
+
+## 9. Default User Accounts
+
+Seeded on first startup (development mode only):
+
+| Username | Role | Password (Development) |
+|:---|:---|:---|
+| `admin` | admin | Set via `SENTINEL_ADMIN_PASSWORD` or `Admin_Secure2026!` |
+| `analyst` | analyst | Set via `SENTINEL_ANALYST_PASSWORD` or `Analyst_Secure2026!` |
+| `viewer` | viewer | Set via `SENTINEL_VIEWER_PASSWORD` or `Viewer_Secure2026!` |
+
+> **Security**: In production, always set `SENTINEL_ADMIN_PASSWORD`, `SENTINEL_ANALYST_PASSWORD`, and `SENTINEL_VIEWER_PASSWORD` via environment variables.
+
+---
+
+## 10. Production Checklist
+
+- [ ] Generate unique `SECRET_KEY` (min 32 chars)
+- [ ] Set strong `POSTGRES_PASSWORD`
+- [ ] Set `SENTINEL_*_PASSWORD` for all seeded users
+- [ ] Set `OPERATING_MODE=PRODUCTION`
+- [ ] Set `APP_ENV=production`
+- [ ] Set `DEBUG=false`
+- [ ] Configure `CORS_ORIGINS` with specific frontend origins (no wildcards, no localhost)
+- [ ] Run ML training pipeline to generate artifacts before backend startup
+- [ ] Verify `/health` and `/ready` endpoints respond correctly
+- [ ] Ensure no secrets are committed to version control

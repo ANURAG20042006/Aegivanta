@@ -1,91 +1,112 @@
-# SentinelAI System Architecture Document
+# SentinelAI — Architecture Overview
 
-## Executive Overview
-SentinelAI is an enterprise-grade Network Intrusion Detection System (NIDS) and Threat Analytics Platform designed to detect cyber threats in real time using Machine Learning and Deep Learning. The architecture follows modern microservice-ready modular monolith design patterns, adhering strictly to **SOLID design principles**, **Clean Architecture**, and **Domain-Driven Design (DDD)** principles.
+**Version**: 1.0.0 | **Last Updated**: 2026-08-13
 
 ---
 
-## 1. High-Level Architectural Layers
+## 1. System Overview
+
+SentinelAI is a network intrusion detection and threat analytics platform. It consists of five integrated layers:
 
 ```
-                                  +---------------------------------------+
-                                  |     React 18 SPA (Vite / TS / MUI)    |
-                                  |   Framer Motion / Chart.js / Tailwind |
-                                  +-------------------+-------------------+
-                                                      |
-                                       HTTPS / REST   |   WebSockets (WSS)
-                                                      v
-                                  +-------------------+-------------------+
-                                  |        FastAPI ASGI Application       |
-                                  |     (Authentication / WebSockets)     |
-                                  +---------+-------------------+---------+
-                                            |                   |
-                     +----------------------+                   +----------------------+
-                     |                                                                 |
-                     v                                                                 v
-+--------------------+--------------------+                         +------------------+------------------+
-|           Database Layer               |                         |         Machine Learning Engine          |
-|  PostgreSQL 16 Async + Redis 7 Cache   |                         |   12 Models (Scikit-Learn, PyTorch,  |
-|  SQLAlchemy 2.0 ORM + Alembic Schema   |                         |   XGBoost, CatBoost, LightGBM, SHAP) |
-+-----------------------------------------+                         +-------------------------------------+
+┌─────────────────────────────────────────────────────┐
+│                  React SPA (Vite)                   │
+│         SOC Dashboard / Predictions / Reports        │
+└──────────────────────┬──────────────────────────────┘
+                       │ HTTP / WebSocket
+┌──────────────────────▼──────────────────────────────┐
+│               FastAPI Backend (Python)               │
+│   Auth │ RBAC │ Predict │ Analytics │ Train │ Incidents │
+└──────┬─────────────────────────────┬────────────────┘
+       │                             │
+┌──────▼──────┐             ┌────────▼───────┐
+│  SQLite /   │             │   ML Engine    │
+│ PostgreSQL  │             │  (scikit-learn)│
+│  (SQLAlchemy│             │  ml/artifacts/ │
+│   Async)    │             └────────────────┘
+└──────────────┘
 ```
 
 ---
 
-## 2. Technology Stack Matrix
+## 2. Frontend Layer
 
-| Layer | Primary Technology | Supporting Frameworks / Libraries |
-| :--- | :--- | :--- |
-| **Frontend Framework** | React 18 (Vite SPA) | TypeScript 5.2, React Router v6 |
-| **Styling & Design** | Tailwind CSS v3 | Material UI (MUI v5), Lucide Icons |
-| **Data Visualization** | Chart.js & react-chartjs-2 | Custom Canvas Heatmaps & ROC Curves |
-| **Animations** | Framer Motion v11 | CSS Grid Cyberpunk Keyframes |
-| **Backend API** | Python 3.11+ / FastAPI | Pydantic v2, Uvicorn ASGI Server |
-| **Authentication** | OAuth2 with JWT | Passlib (Bcrypt), Python-Jose |
-| **Real-time Protocol**| Native FastAPI WebSockets | Custom ConnectionManager Broadcast Pool |
-| **Database ORM** | Async SQLAlchemy 2.0 | Asyncpg Driver, Alembic Migrations |
-| **Database Engine** | PostgreSQL 16 | Redis 7 (Caching & Rate Limiting) |
-| **ML Models (12)** | Scikit-Learn, XGBoost | LightGBM, CatBoost, PyTorch |
-| **Explainable AI** | SHAP | LIME |
-| **Report Generation** | ReportLab (PDF) | OpenPyXL (Excel), Python CSV |
-| **Containerization** | Docker | Docker Compose, GitHub Actions CI/CD |
+- **Framework**: React 18 + TypeScript, Vite 5 bundler
+- **Styling**: Tailwind CSS
+- **State**: React Hooks (`useState`, `useEffect`, `useCallback`)
+- **API Client**: Axios with `X-Request-ID` correlation header injection and 401 interceptor
+- **Pages**: Dashboard, Predictions, Analytics, Model Registry, Incidents, Reports, Audit Logs
+- **Real-time**: WebSocket subscription to `/ws/threat-stream`
+- **Location**: `frontend/src/`
 
 ---
 
-## 3. Core Design Patterns & SOLID Principles
+## 3. Backend Layer (FastAPI)
 
-### A. Single Responsibility Principle (SRP)
-- **Database ORM Models** define data attributes only.
-- **Pydantic Schemas** handle serialization and validation rules.
-- **Service Modules** handle business logic execution.
-- **API Routers** map HTTP verbs and status codes to service responses.
+- **Framework**: FastAPI + Uvicorn ASGI
+- **Database ORM**: SQLAlchemy 2.0 Async with `aiosqlite` / `asyncpg`
+- **Authentication**: JWT Bearer tokens (HS256), 8-hour expiry
+- **Authorization**: Role-based (`admin`, `analyst`, `viewer`)
+- **Middleware**: `RequestTimingAndAuditMiddleware` — attaches `X-Request-ID`, measures latency, writes audit log
+- **Location**: `backend/app/`
 
-### B. Open/Closed Principle (OCP)
-- **Base ML Model Strategy (`base_model.py`)**: Abstract base class defining `fit()`, `predict()`, and `predict_proba()`. New models can be added without modifying the ingestion framework.
-
-### C. Dependency Inversion Principle (DIP)
-- FastAPI endpoints depend on abstract repository interfaces passed via `Depends()` dependency injection rather than concrete database connections.
-
-### D. Repository & Unit of Work Pattern
-- Data retrieval logic is encapsulated inside repository services (`UserRepository`, `IncidentRepository`), insulating business logic from storage choices.
+### API Routers
+| Prefix | Module | Purpose |
+|:---|:---|:---|
+| `/health`, `/ready` | `api/v1/health.py` | Service health & readiness |
+| `/api/v1/auth` | `api/v1/auth.py` | Login / token management |
+| `/api/v1/users` | `api/v1/users.py` | User management (admin only) |
+| `/api/v1/predict` | `api/v1/predict.py` | ML inference + XAI |
+| `/api/v1/analytics` | `api/v1/analytics.py` | Summary / ROC / drift |
+| `/api/v1/train` | `api/v1/train.py` | Training job trigger / promote / rollback |
+| `/api/v1/incidents` | `api/v1/incidents.py` | Incident lifecycle management |
+| `/api/v1/logs` | `api/v1/logs.py` | Audit log access |
+| `/ws` | `api/v1/websockets.py` | Real-time threat stream |
 
 ---
 
-## 4. Cyber Threat Classification Taxonomy (CICIDS2017 Benchmark)
+## 4. ML Engine Layer
 
-SentinelAI categorizes network flows into 15 distinct classes:
-1. **BENIGN**: Normal operational network flows.
-2. **DDoS**: Distributed Denial of Service (UDP, TCP, HTTP flood).
-3. **DoS**: Denial of Service (Slowloris, Slowhttptest, Hulk, GoldenEye).
-4. **Port Scan**: Reconnaissance scans (Nmap, SYN scan, FIN scan).
-5. **Botnet**: Command & Control (C2) bot network traffic.
-6. **SQL Injection**: Database vulnerability exploitation payloads.
-7. **XSS**: Cross-Site Scripting attack vectors in HTTP streams.
-8. **Brute Force**: Automated credential stuffing (FTP-Patator, SSH-Patator).
-9. **MITM**: Man-In-The-Middle packet interception.
-10. **ARP Spoofing**: Address Resolution Protocol cache poisoning.
-11. **DNS Spoofing**: Cache poisoning & DNS redirection attacks.
-12. **Ransomware**: File encryption payload transfer and C2 beaconing.
-13. **Malware**: Malicious code transfer and execution indicators.
-14. **Data Exfiltration**: Covert channel data extraction over unexpected ports.
-15. **Zero-Day Anomaly**: Unsupervised Autoencoder flagged anomalous flows.
+- **Location**: `ml/`
+- **Dataset**: Synthetic CICIDS2017-schema data (`ml/dataset/generator.py`)
+- **Preprocessing**: `CICIDS2017Preprocessor` — imputation, scaling, SelectKBest feature selection
+- **Models**: Random Forest, XGBoost, LightGBM, CatBoost, Decision Tree, Logistic Regression, SVM, KNN, Naive Bayes, 1D-CNN (stub), LSTM (stub), Autoencoder (stub)
+- **Artifacts**: Serialized via `joblib` in `ml/artifacts/`
+- **Explainability**: SHAP TreeExplainer for tree models (`ml/explainability/real_explainer.py`)
+- **Drift Detection**: PSI + KS-test sliding window monitor (`ml/monitoring/drift_detector.py`)
+
+---
+
+## 5. Database Layer
+
+- **Schema tables**: `User`, `Incident`, `ModelRegistry`, `AuditLog`, `TrainingJob`
+- **Development**: SQLite (`sentinelai.db`)
+- **Production**: PostgreSQL 16 via asyncpg
+- **Migrations**: Managed via `backend/app/database.py` (`create_all` on startup)
+
+---
+
+## 6. Container Architecture (Docker)
+
+```
+sentinel_frontend (nginx:1.27-alpine)
+       │ proxy_pass /api/ → backend:8000
+sentinel_backend (python:3.11-slim, user: sentinelai:1001)
+       │ depends_on: postgres (healthy), redis (healthy)
+sentinel_postgres (postgres:16-alpine)
+sentinel_redis    (redis:7-alpine)
+```
+
+All services on isolated `sentinel_net` bridge network. PostgreSQL and Redis not exposed publicly.
+
+---
+
+## 7. Security Architecture
+
+- JWT HS256 tokens with configurable expiry
+- Bcrypt password hashing (via `passlib`)
+- RBAC enforcement at router level (`Depends(require_role(...))`)
+- CORS restricted to configured origins
+- Production fail-closed: `validate_production_settings()` raises `RuntimeError` on startup if secrets missing
+- Audit logging on all mutating operations via middleware
+- Operating modes: `DEMO`, `LAB`, `PRODUCTION`

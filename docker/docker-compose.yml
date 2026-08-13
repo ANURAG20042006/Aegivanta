@@ -5,13 +5,14 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: sentinel_postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-sentinel_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}
       POSTGRES_DB: ${POSTGRES_DB:-sentinelai_db}
-    ports:
-      - "5432:5432"
+    # Do NOT expose PostgreSQL port publicly in production — internal only
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,9 +27,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sentinel_redis
-    restart: always
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
+    # Do NOT expose Redis port publicly — internal only
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -45,7 +47,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.backend
     container_name: sentinel_backend
-    restart: always
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,18 +55,32 @@ services:
         condition: service_healthy
     environment:
       - APP_NAME=SentinelAI
-      - APP_ENV=development
+      - APP_ENV=${APP_ENV:-development}
+      - OPERATING_MODE=${OPERATING_MODE:-DEMO}
       - DEBUG=False
       - API_V1_STR=/api/v1
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable must be set}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-sentinel_admin}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}@postgres:5432/${POSTGRES_DB:-sentinelai_db}
       - REDIS_URL=redis://redis:6379/0
       - LOG_FILE_PATH=logs/sentinelai.log
+      - SENTINEL_ADMIN_PASSWORD=${SENTINEL_ADMIN_PASSWORD:?SENTINEL_ADMIN_PASSWORD must be set}
+      - SENTINEL_ANALYST_PASSWORD=${SENTINEL_ANALYST_PASSWORD:?SENTINEL_ANALYST_PASSWORD must be set}
+      - SENTINEL_VIEWER_PASSWORD=${SENTINEL_VIEWER_PASSWORD:?SENTINEL_VIEWER_PASSWORD must be set}
+    # Only expose backend port to frontend container via internal network
+    expose:
+      - "8000"
     ports:
       - "8000:8000"
     volumes:
       - backend_logs:/app/logs
       - backend_reports:/app/reports
+      - ml_artifacts:/app/ml/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
     networks:
       - sentinel_net
 
@@ -74,12 +90,12 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.frontend
     container_name: sentinel_frontend
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
-      - "5173:80"
     networks:
       - sentinel_net
 
@@ -88,6 +104,7 @@ volumes:
   redis_data:
   backend_logs:
   backend_reports:
+  ml_artifacts:
 
 networks:
   sentinel_net:

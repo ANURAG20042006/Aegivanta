@@ -1,61 +1,83 @@
-# 🔬 SentinelAI Phase 11 — Automated Test Suite & Audit Documentation
+# SentinelAI — Testing Guide
 
-**Audit Date**: August 12, 2026  
-**Test Runner**: `pytest`  
-**Total Automated Tests**: 25 Tests  
-**Test Pass Rate**: 100% (Clean Pass)  
+**Last Updated**: 2026-08-13
 
 ---
 
-## 1. Test Suite Architecture & Directory Structure
+## 1. Test Suite Summary
 
+| Category | Test Files | Tests |
+|:---|:---|:---|
+| ML Pipeline | `tests/ml/` | ~40 |
+| Security & Auth | `tests/test_security*.py` | ~25 |
+| API Endpoints | `tests/test_api*.py` | ~30 |
+| XAI & Drift | `tests/test_drift_and_xai.py` | 6 |
+| Integration | `tests/test_integration*.py` | ~20 |
+| **Total** | | **125 passed, 1 skipped** |
+
+---
+
+## 2. Running the Test Suite
+
+### Full Suite
+```bash
+py -m pytest -q
+# Expected: 125 passed, 1 skipped, 12 warnings
 ```
-tests/
-├── ml/             # Machine Learning, Leakage-Free CV, Feature Contracts, XAI, Drift Engine
-├── unit/           # Model Lifecycle, Promotion Gate, Async Retraining Jobs, Operating Modes
-├── integration/    # Incident Response Lifecycle, State Machine, Remediation
-├── security/       # JWT Auth, Server-Side RBAC, Privilege Escalation Prevention
-├── api/            # API Validation, Error Formatting, Pagination
-└── e2e/            # End-to-End Threat Detection to Incident Containment Pipeline
+
+### With Verbose Output
+```bash
+py -m pytest -v
+```
+
+### Specific Modules
+```bash
+py -m pytest tests/ml/ -v         # ML pipeline tests only
+py -m pytest tests/test_security* -v   # Security tests only
 ```
 
 ---
 
-## 2. Test Execution Results Matrix
+## 3. ML Pipeline Tests (`tests/ml/`)
 
-| Module Category | Target Components | Test File | Tests | Result |
-| :--- | :--- | :--- | :---: | :---: |
-| **ML Engine** | Preprocessor Split-First, Untouched Test-Set Rule, SMOTE inside CV folds, Feature Schema Contract, Real Joblib Inference, SHAP TreeExplainer, Window Drift (KS, PSI, Prediction Shift, Concept Drift) | `tests/ml/` | 11 | ✅ PASS |
-| **Model Lifecycle** | Model Registry Statuses (`CANDIDATE`, `ACTIVE`, `REJECTED`, `ARCHIVED`, `ROLLED_BACK`), Multi-Metric Promotion Gate, Atomic Rollback, Persisted Training Jobs | `tests/unit/` | 7 | ✅ PASS |
-| **Security & RBAC** | Server-Side RBAC (`ADMIN`, `SOC_ANALYST`, `RESEARCHER`, `VIEWER`), Privilege Escalation Denial, Path Traversal Sanitization | `tests/security/` | 4 | ✅ PASS |
-| **Incident SOAR** | Incident State Machine (`DETECTED` $\rightarrow$ `CLOSED`), Invalid Transition Rejection, Mode Remediation (`SIMULATION`, `REAL LAB`, `PRODUCTION`) | `tests/integration/` | 3 | ✅ PASS |
-| **API Endpoints** | Schema Contract Validation, Error Format Integrity, Pagination | `tests/api/` | 2 | ✅ PASS |
-| **End-to-End** | Full Pipeline (Validation $\rightarrow$ Inference $\rightarrow$ XAI $\rightarrow$ Promotion $\rightarrow$ Containment) | `tests/e2e/` | 1 | ✅ PASS |
-| **Total** | **All System Modules** | **`tests/`** | **28** | **100% PASS** |
+Key verified behaviors:
+
+| Test | File | What It Verifies |
+|:---|:---|:---|
+| `test_split_before_smote` | `test_phase2_*.py` | Train/test split before SMOTE |
+| `test_cv_isolation` | `test_phase2_*.py` | Validation fold not used in fitting |
+| `test_fpr_formula` | `test_phase2_*.py` | FPR = FP/(FP+TN), not 1-recall |
+| `test_missing_fpr_rejects` | `test_phase2_*.py` | Missing FPR → promotion rejected |
+| `test_missing_latency_rejects` | `test_phase2_*.py` | Missing latency → promotion rejected |
+| `test_final_test_not_in_promotion` | `test_phase2_*.py` | Final test metrics never reach promotion gate |
+| `test_rollback_hash_mismatch` | `test_phase2_*.py` | Hash mismatch → rollback rejected |
+| `test_shap_tree_explainer` | `test_drift_and_xai.py` | Real SHAP values returned |
+| `test_drift_psi_detection` | `test_drift_and_xai.py` | PSI > 0.25 triggers DRIFT_DETECTED |
 
 ---
 
-## 3. Frontend Typecheck & Build Verification
+## 4. Intentional Skips
+
+| Skip | Reason |
+|:---|:---|
+| 1 GPU benchmark test | Test host has no CUDA-capable GPU; guarded with `pytest.mark.skipif` |
+
+---
+
+## 5. Static Checks
 
 ```bash
-# Frontend Build Verification
-cd frontend
-npm run build
-```
-Output:
-```
-vite v5.4.11 building for production...
-✓ 142 modules transformed.
-dist/index.html                  0.48 kB
-dist/assets/index-B1z9k3mA.js   312.45 kB │ gzip: 89.12 kB
-✓ built in 1.42s
+# Python syntax compilation check
+py -m compileall -q backend ml scripts tests
+# Expected: 0 errors
+
+# Frontend production build
+cd frontend && npm run build
+# Expected: 0 TypeScript errors, 0 build failures
 ```
 
 ---
 
-## 4. Execution Command
+## 6. Known Warnings
 
-```bash
-python -m pytest -q
-```
-Result: **28 passed in 44.30s (100% Clean Pass)**
+12 `PydanticDeprecatedSince20` warnings from `backend/app/schemas/auth.py` and `schemas/user.py` — using `example=` kwargs on `Field()` which is deprecated in Pydantic V2. These are non-breaking and will be cleaned up in a future schema refactor.
