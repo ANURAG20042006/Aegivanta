@@ -109,7 +109,7 @@ def test_phase_i_roc_curve_artifact():
 
 
 # J, K, L. Test-set isolation and fold-local SMOTE
-def test_phase_j_k_l_split_first_and_fold_isolation():
+def test_phase_j_k_l_split_first_and_fold_isolation(tmp_path):
     gen = CICIDS2017DataGenerator()
     df = gen.generate_synthetic_dataset(num_samples=1000, random_seed=42)
     prep = CICIDS2017Preprocessor(n_features_to_select=10)
@@ -119,7 +119,7 @@ def test_phase_j_k_l_split_first_and_fold_isolation():
     X_raw = cleaned.drop(columns=["Label"]).values
     y_encoded = LabelEncoder().fit_transform(cleaned["Label"].astype(str))
 
-    selector = ModelSelectorSuite(artifacts_dir="ml/artifacts")
+    selector = ModelSelectorSuite(artifacts_dir=str(tmp_path))
     results = selector.train_and_select_champion(X_raw, y_encoded, X_train_raw=X_raw, y_train_raw=y_encoded, n_splits=3)
     assert len(results) == len(selector.models)
 

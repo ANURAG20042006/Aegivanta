@@ -74,9 +74,15 @@ def test_cv_folds_independently_fit_preprocessing():
         assert 0.0 <= fold["Macro F1"] <= 1.0
 
 
-def test_final_test_evaluated_only_after_model_selection():
+def test_final_test_evaluated_only_after_model_selection(tmp_path):
     """Requirement 4 Proof: Training pipeline runs model selection and evaluates untouched test set once."""
-    results = run_training_pipeline(num_synthetic_samples=500, n_splits=3, random_seed=42)
+    results = run_training_pipeline(
+        num_synthetic_samples=500,
+        n_splits=3,
+        random_seed=42,
+        artifacts_dir=str(tmp_path / "artifacts"),
+        experiment_id="EXP-TEST-001"
+    )
     assert len(results) > 0
     champion = results[0]
     assert "model_name" in champion, f"Expected 'model_name' key, got keys: {list(champion.keys())}"

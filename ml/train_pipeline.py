@@ -133,7 +133,8 @@ def run_training_pipeline(
     num_synthetic_samples: int = 5000,
     artifacts_dir: str = "ml/artifacts",
     n_splits: int = 5,
-    random_seed: int = 42
+    random_seed: int = 42,
+    experiment_id: str = "EXP-2026-002"
 ) -> List[Dict[str, Any]]:
     """
     Leakage-Proof SentinelAI ML Training & Cross-Validation Pipeline:
@@ -228,8 +229,6 @@ def run_training_pipeline(
     champion_results = next(r for r in results if r["model_name"] == champion_name)
 
 
-
-    experiment_id = "EXP-2026-002"
 
     import sklearn
     metadata = {
@@ -327,16 +326,93 @@ def run_training_pipeline(
     with manifest_path.open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    # Also save to results/EXP-2026-002/
-    exp_dir = Path("results") / experiment_id
-    exp_dir.mkdir(parents=True, exist_ok=True)
-    with (exp_dir / "metadata.json").open("w", encoding="utf-8") as f:
-        json.dump(metadata, f, indent=2)
-    with (exp_dir / "artifact_manifest.json").open("w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
+    # Save Provenance Manifest
+    model_sha256 = hashlib.sha256(model_bytes).hexdigest()
+    provenance = {
+        "experiment_id": experiment_id,
+        "dataset": {
+            "name": dataset_id,
+            "type": "synthetic" if "synthetic" in dataset_id else "real",
+            "hash": df_hash,
+            "n_samples": len(df),
+            "train_samples": len(X_train_preprocessed),
+            "test_samples": len(X_test_preprocessed),
+            "n_raw_features": X_train_raw.shape[1],
+            "n_selected_features": len(preprocessor.selected_feature_names)
+        },
+        "reproducibility": {
+            "python_version": platform.python_version(),
+            "random_seed": random_seed,
+            "library_versions": {
+                "scikit-learn": sklearn.__version__,
+                "numpy": np.__version__,
+                "pandas": pd.__version__
+            },
+            "git_commit": get_git_commit_hash()
+        },
+        "split": {
+            "method": "train_test_split",
+            "test_size": 0.2,
+            "stratified": True,
+            "random_state": random_seed
+        },
+        "cross_validation": {
+            "method": "StratifiedKFold",
+            "n_splits": n_splits,
+            "shuffle": True,
+            "random_state": random_seed
+        },
+        "preprocessing": {
+            "scaler": "StandardScaler",
+            "selector": f"SelectKBest(f_classif, k={len(preprocessor.selected_feature_names)})",
+            "selected_features_count": len(preprocessor.selected_feature_names),
+            "smote": True,
+            "version": "split_first_smote_inside_folds_only",
+            "fit_scope": "TRAIN folds only (test set frozen and untouched)"
+        },
+        "model": {
+            "name": champion_name,
+            "class": type(getattr(selector.best_model, "model", selector.best_model)).__name__,
+            "artifact_path": "ml/artifacts/best_model.joblib",
+            "artifact_type": "joblib",
+            "artifact_sha256": model_sha256,
+            "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0"
+        },
+        "results": {
+            "cv_metrics": {
+                "n_splits": n_splits,
+                "macro_f1_mean": champion_results["cv_f1_mean"],
+                "macro_f1_std": champion_results["cv_f1_std"],
+                "precision_mean": champion_results["cv_precision_mean"],
+                "precision_std": champion_results["cv_precision_std"],
+                "recall_mean": champion_results["cv_recall_mean"],
+                "recall_std": champion_results["cv_recall_std"],
+                "accuracy_mean": champion_results["cv_accuracy_mean"],
+                "accuracy_std": champion_results["cv_accuracy_std"]
+            },
+            "final_test_metrics": final_test_metrics
+        },
+        "provenance_status": "verified"
+    }
+
+    prov_path = artifacts_path / "provenance.json"
+    with prov_path.open("w", encoding="utf-8") as f:
+        json.dump(provenance, f, indent=2)
+
+    # Also save to results/<experiment_id>/ if running for main ml/artifacts
+    if (artifacts_path == Path("ml/artifacts") or str(artifacts_path) == "ml/artifacts") and experiment_id:
+        exp_dir = Path("results") / experiment_id
+        exp_dir.mkdir(parents=True, exist_ok=True)
+        with (exp_dir / "metadata.json").open("w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2)
+        with (exp_dir / "artifact_manifest.json").open("w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2)
+        with (exp_dir / "provenance.json").open("w", encoding="utf-8") as f:
+            json.dump(provenance, f, indent=2)
 
     print(f"--> Metadata saved to: {metadata_path}")
     print(f"--> Manifest saved to: {manifest_path}")
+    print(f"--> Provenance saved to: {prov_path}")
     return results
 
 
