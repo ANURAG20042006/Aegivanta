@@ -57,4 +57,9 @@ async def init_db() -> None:
     async with async_engine.begin() as conn:
         logger.info("Initializing database tables...")
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE model_registry ADD COLUMN artifact_type VARCHAR(30)"))
+        except Exception:
+            pass
         logger.info("Database tables successfully initialized.")

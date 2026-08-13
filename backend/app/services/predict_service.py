@@ -55,22 +55,19 @@ class PredictService:
         Loads model and preprocessor artifacts fail-closed.
         Raises HTTPException(503) if artifacts are missing or unreadable.
         """
+        from ml.schema.artifact_mapping import resolve_model_artifact_path, PYTORCH_MODEL_NAMES
+
         artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
         if not artifact_dir.is_absolute():
             artifact_dir = Path(__file__).resolve().parents[3] / artifact_dir
 
-        filename = cls._artifact_filenames.get(model_name, "best_model.joblib")
         if model_name not in cls._model_artifacts or cls._model_artifacts[model_name] is None:
-            model_path = artifact_dir / filename
-            if not model_path.exists():
-                # Fallback: try best_model.joblib for classical models only
-                if model_name not in cls._pytorch_model_names:
-                    model_path = artifact_dir / "best_model.joblib"
+            model_path, art_type, _, exists = resolve_model_artifact_path(model_name, artifact_dir)
 
-            if not model_path.exists():
+            if not exists:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail=f"Model artifact '{filename}' missing from '{artifact_dir}'. Run training pipeline."
+                    detail=f"Model artifact for '{model_name}' missing from '{artifact_dir}'. Run training pipeline."
                 )
 
             try:

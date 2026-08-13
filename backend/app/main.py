@@ -104,15 +104,20 @@ async def initialize_application() -> None:
         model_exists = (await db.execute(select(ModelRegistry.id).limit(1))).scalar_one_or_none()
         if not model_exists:
             # Seed from ml/artifacts/metadata.json if generated, otherwise create baseline registry entry
-            meta_path = Path("ml/artifacts/metadata.json")
             if meta_path.exists():
                 try:
+                    from ml.schema.artifact_mapping import resolve_model_artifact_path
                     with meta_path.open("r", encoding="utf-8") as f:
                         meta_data = json.load(f)
                     for item in meta_data.get("leaderboard", []):
+                        m_name = item["model_name"]
+                        art_path, art_type, actual_sha256, exists = resolve_model_artifact_path(m_name)
+                        if not exists:
+                            logger.warning("Model artifact for '%s' missing at '%s'; registry seeding skipped.", m_name, art_path)
+                            continue
                         db.add(ModelRegistry(
-                            model_name=item["model_name"],
-                            model_version=f"{item['model_name'].lower().replace(' ', '_')}-v1.0",
+                            model_name=m_name,
+                            model_version=f"{m_name.lower().replace(' ', '_')}-v1.0",
                             model_type=item["model_type"],
                             accuracy=item.get("cv_accuracy_mean"),
                             f1_score=item.get("cv_f1_mean"),
@@ -120,9 +125,11 @@ async def initialize_application() -> None:
                             recall_score=item.get("cv_recall_mean"),
                             roc_auc=item.get("cv_roc_auc"),
                             is_active=False,
-                            artifact_path=f"ml/artifacts/{item['model_name'].lower().replace(' ', '_')}.joblib"
+                            artifact_path=str(art_path),
+                            artifact_type=art_type,
+                            artifact_sha256=actual_sha256
                         ))
-                    logger.info("Seeded ModelRegistry from actual training metadata.json")
+                    logger.info("Seeded ModelRegistry from actual training metadata.json and verified artifacts")
                 except Exception as e:
                     logger.warning("Unable to seed ModelRegistry from metadata.json: %s", e)
 

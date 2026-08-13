@@ -302,16 +302,8 @@ async def async_train_worker(job_id: str):
             candidate_per_class = champion.get("per_class_metrics")
             active_per_class = getattr(active_model, "per_class_metrics", None) if active_model else None
 
-            cand_art_file = Path(f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib")
-            if not cand_art_file.exists():
-                cand_art_file = Path("ml/artifacts/best_model.joblib")
-
-            cand_sha256 = None
-            if cand_art_file.exists():
-                try:
-                    cand_sha256 = hashlib.sha256(cand_art_file.read_bytes()).hexdigest()
-                except Exception:
-                    cand_sha256 = None
+            from ml.schema.artifact_mapping import resolve_model_artifact_path
+            cand_art_file, cand_art_type, cand_sha256, cand_exists = resolve_model_artifact_path(champion["model_name"])
 
             # Register Candidate Model in ModelRegistry with status "CANDIDATE" BEFORE promotion gate evaluation
             candidate_registry = ModelRegistry(
@@ -328,6 +320,7 @@ async def async_train_worker(job_id: str):
                 artifact_sha256=cand_sha256,
                 is_active=False,
                 artifact_path=str(cand_art_file),
+                artifact_type=cand_art_type,
                 previous_version=active_model.model_version if active_model else None,
                 per_class_metrics=candidate_per_class
             )

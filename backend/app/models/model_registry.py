@@ -33,6 +33,7 @@ class ModelRegistry(Base):
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     artifact_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    artifact_type: Mapped[Optional[str]] = mapped_column(String(30), nullable=True, default=None)  # "joblib", "pytorch"
     schema_version: Mapped[str] = mapped_column(String(30), default="schema-v1.0", nullable=False)
     preprocessing_version: Mapped[str] = mapped_column(String(50), default="split_first_smote_inside_folds_only", nullable=False)
     

@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import hashlib
 import joblib
 import platform
@@ -297,6 +298,15 @@ def run_training_pipeline(
     inner_model = getattr(selector.best_model, "model", selector.best_model)
     model_n_features_in = int(getattr(inner_model, "n_features_in_", len(preprocessor.selected_feature_names)))
 
+    from ml.schema.artifact_mapping import MODEL_ARTIFACT_SPECS
+    artifacts_map = {
+        m_name: {
+            "path": f"ml/artifacts/{spec['filename']}",
+            "type": spec["type"]
+        }
+        for m_name, spec in MODEL_ARTIFACT_SPECS.items()
+    }
+
     manifest = {
         "experiment_id": experiment_id,
         "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0",
@@ -310,7 +320,8 @@ def run_training_pipeline(
         "model_hash": hashlib.sha256(model_bytes).hexdigest(),
         "training_timestamp": datetime.now(timezone.utc).isoformat(),
         "dataset_hash": df_hash,
-        "git_commit": get_git_commit_hash()
+        "git_commit": get_git_commit_hash(),
+        "artifacts": artifacts_map
     }
     manifest_path = artifacts_path / "artifact_manifest.json"
     with manifest_path.open("w", encoding="utf-8") as f:
