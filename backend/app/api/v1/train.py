@@ -31,7 +31,7 @@ def evaluate_promotion_gate(
     candidate_recall: Optional[float],
     candidate_fpr: Optional[float],
     candidate_latency_ms: Optional[float] = None,
-    active_f1: float = 0.85,
+    active_f1: Optional[float] = None,
     regression_tolerance: float = DEFAULT_REGRESSION_TOLERANCE,
     artifact_metadata: Optional[Dict[str, Any]] = None,
     candidate_per_class_metrics: Optional[Dict[str, Dict[str, float]]] = None,
@@ -39,21 +39,29 @@ def evaluate_promotion_gate(
     protected_metrics: Optional[List[str]] = None
 ) -> Tuple[bool, str]:
     """
-    Multi-Metric Promotion Gate with Per-Class Regression Protection:
+    Multi-Metric Promotion Gate with Per-Class Regression Protection.
+
+    FIRST-MODEL PROMOTION POLICY (active_f1 is None):
+      When no active model exists, the candidate is evaluated against absolute
+      safety thresholds only.  No active F1 is fabricated or assumed.
+      Checks: F1 available, Recall >= MIN_REQUIRED_RECALL, FPR <= MAX_ALLOWED_FPR,
+              Latency <= MAX_INFERENCE_LATENCY_MS.
+
+    SUBSEQUENT PROMOTION POLICY (active_f1 is a real measured value):
       1. Artifact Integrity & Schema Compatibility
       2. Required Metric Presence (F1, Recall, FPR, Latency must be non-None)
       3. Candidate Macro F1 >= Active Macro F1 - Regression Tolerance
       4. Candidate Recall >= MIN_REQUIRED_RECALL (0.85)
-      5. Candidate False Positive Rate <= MAX_ALLOWED_FPR (0.05)
+      5. Candidate FPR <= MAX_ALLOWED_FPR (0.05)
       6. Inference Latency <= MAX_INFERENCE_LATENCY_MS (5.0ms)
-      7. Per-Class Regression Protection & Class Set Matching (protected metrics default to ['recall'])
+      7. Per-Class Regression Protection & Class Set Matching
     """
     if artifact_metadata:
         ok, compat_errors = validate_artifact_compatibility(artifact_metadata)
         if not ok:
             return False, f"Artifact Schema Compatibility Failed: {compat_errors}"
 
-    # Required metric availability checks (P0 Fix 1 & P0 Metric Integrity)
+    # Required metric availability — applies in both first-model and subsequent promotion
     if candidate_f1 is None:
         return False, "Promotion rejected: Macro F1 metric unavailable. Cannot promote without a real measured F1 score."
     if candidate_recall is None:
@@ -63,10 +71,7 @@ def evaluate_promotion_gate(
     if candidate_latency_ms is None:
         return False, "Promotion rejected: inference latency unavailable."
 
-    # Threshold checks
-    min_required_f1 = active_f1 - regression_tolerance
-    if candidate_f1 < min_required_f1 - 1e-6:
-        return False, f"Candidate F1 ({candidate_f1:.4f}) is below active threshold with tolerance ({min_required_f1:.4f})."
+    # Absolute safety thresholds — always enforced
     if candidate_recall < MIN_REQUIRED_RECALL:
         return False, f"Candidate Recall ({candidate_recall:.4f}) fails minimum threshold ({MIN_REQUIRED_RECALL:.4f})."
     if candidate_fpr > MAX_ALLOWED_FPR:
@@ -74,7 +79,17 @@ def evaluate_promotion_gate(
     if candidate_latency_ms > MAX_INFERENCE_LATENCY_MS:
         return False, f"Promotion rejected: Candidate Latency ({candidate_latency_ms:.2f}ms) exceeds max limit ({MAX_INFERENCE_LATENCY_MS:.2f}ms)."
 
-    # Per-Class Metrics & Regression Protection Check (P0 Fix 2)
+    if active_f1 is None:
+        # First-model promotion: no active baseline — absolute thresholds already checked above.
+        # Relative regression check is skipped because there is no baseline to regress from.
+        return True, "PASSED: First-model promotion — absolute safety thresholds satisfied (no active baseline to compare against)."
+
+    # Relative F1 regression check — only when a real active_f1 measurement is available
+    min_required_f1 = active_f1 - regression_tolerance
+    if candidate_f1 < min_required_f1 - 1e-6:
+        return False, f"Candidate F1 ({candidate_f1:.4f}) is below active threshold with tolerance ({min_required_f1:.4f})."
+
+    # Per-Class Metrics & Regression Protection Check
     if active_per_class_metrics is not None:
         if candidate_per_class_metrics is None:
             return False, "Promotion rejected: per-class metrics unavailable."
@@ -262,7 +277,10 @@ async def async_train_worker(job_id: str):
             active_query = select(ModelRegistry).where(ModelRegistry.is_active == True)
             active_res = await db.execute(active_query)
             active_model = active_res.scalar_one_or_none()
-            active_f1 = active_model.f1_score if active_model else 0.85
+            # active_f1 is the real measured F1 of the current production model.
+            # When no active model exists, active_f1=None — evaluate_promotion_gate
+            # applies first-model absolute thresholds only. Never fabricate a metric.
+            active_f1: Optional[float] = active_model.f1_score if active_model else None
 
             meta_path = Path("ml/artifacts/metadata.json")
             candidate_roc_auc = None

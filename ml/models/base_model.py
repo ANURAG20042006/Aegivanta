@@ -29,10 +29,10 @@ class BaseSentinelModel(ABC):
         pass
 
     def save(self, filepath: str) -> None:
-        """Serializes trained model artifact to disk."""
+        """Serializes trained model artifact to disk using joblib (classical/sklearn models)."""
         joblib.dump(self.model, filepath)
 
     def load(self, filepath: str) -> None:
-        """Loads serialized model artifact from disk."""
+        """Loads serialized model artifact from disk using joblib (classical/sklearn models)."""
         self.model = joblib.load(filepath)
         self.is_trained = True

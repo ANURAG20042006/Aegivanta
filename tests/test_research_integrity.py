@@ -222,7 +222,7 @@ def test_phase2_promotion_gate_uses_real_leaderboard_key():
         "model_name": "Random Forest",
         "model_type": "Classical",
         "cv_f1_mean": 0.72,
-        "cv_recall_mean": 0.68,
+        "cv_recall_mean": 0.90,
         "cv_fpr_mean": 0.04,    # real One-vs-Rest FPR
         "cv_latency_ms": 0.35,
         "cv_accuracy_mean": 0.71,

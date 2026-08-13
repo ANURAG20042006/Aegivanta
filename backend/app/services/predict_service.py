@@ -30,20 +30,24 @@ class PredictService:
     _explainers: Dict[str, RealModelExplainer] = {}
     _drift_detector: AccumulatedWindowDriftDetector = AccumulatedWindowDriftDetector(window_size=50)
 
+    # Classical sklearn/boosting models -> joblib
+    # PyTorch deep learning models     -> .pt  (torch.save artifact)
     _artifact_filenames = {
-        "Random Forest": "random_forest.joblib",
-        "XGBoost": "xgboost.joblib",
-        "LightGBM": "lightgbm.joblib",
-        "CatBoost": "catboost.joblib",
-        "Decision Tree": "decision_tree.joblib",
+        "Random Forest":      "random_forest.joblib",
+        "XGBoost":            "xgboost.joblib",
+        "LightGBM":           "lightgbm.joblib",
+        "CatBoost":           "catboost.joblib",
+        "Decision Tree":      "decision_tree.joblib",
         "Logistic Regression": "logistic_regression.joblib",
-        "SVM": "svm.joblib",
-        "KNN": "knn.joblib",
-        "Naive Bayes": "naive_bayes.joblib",
-        "1D-CNN": "1d-cnn.joblib",
-        "LSTM": "lstm.joblib",
-        "Autoencoder": "autoencoder.joblib",
+        "SVM":                "svm.joblib",
+        "KNN":                "knn.joblib",
+        "Naive Bayes":        "naive_bayes.joblib",
+        "1D-CNN":             "cnn_1d.pt",
+        "LSTM":               "lstm.pt",
+        "Autoencoder":        "autoencoder.pt",
     }
+    # Models whose artifacts are stored as PyTorch .pt files
+    _pytorch_model_names = {"1D-CNN", "LSTM", "Autoencoder"}
 
     @classmethod
     def _load_artifacts(cls, model_name: str) -> Tuple[Any, Any]:
@@ -59,7 +63,9 @@ class PredictService:
         if model_name not in cls._model_artifacts or cls._model_artifacts[model_name] is None:
             model_path = artifact_dir / filename
             if not model_path.exists():
-                model_path = artifact_dir / "best_model.joblib"
+                # Fallback: try best_model.joblib for classical models only
+                if model_name not in cls._pytorch_model_names:
+                    model_path = artifact_dir / "best_model.joblib"
 
             if not model_path.exists():
                 raise HTTPException(
@@ -68,7 +74,17 @@ class PredictService:
                 )
 
             try:
-                cls._model_artifacts[model_name] = joblib.load(model_path)
+                if model_name in cls._pytorch_model_names:
+                    # PyTorch artifact: reconstruct network from stored architecture metadata
+                    from ml.models.deep_learning import _load_pytorch_artifact, CNN1DModel, LSTMModel, AutoencoderModel
+                    _model_map = {"1D-CNN": CNN1DModel, "LSTM": LSTMModel, "Autoencoder": AutoencoderModel}
+                    wrapper = _model_map[model_name]()
+                    wrapper.load(str(model_path))
+                    cls._model_artifacts[model_name] = wrapper
+                else:
+                    cls._model_artifacts[model_name] = joblib.load(model_path)
+            except HTTPException:
+                raise
             except Exception as exc:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
