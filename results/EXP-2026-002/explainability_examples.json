@@ -7,8 +7,8 @@
   "model_version": "random_forest-research-v1.0",
   "prediction": "16",
   "confidence": 0.34,
-  "timestamp": "2026-08-13T05:58:34.559959+00:00",
-  "xai_latency_ms": 66.86,
+  "timestamp": "2026-08-13T09:28:39.446133+00:00",
+  "xai_latency_ms": 156.88,
   "features": [
     {
       "feature": "Flow Duration",

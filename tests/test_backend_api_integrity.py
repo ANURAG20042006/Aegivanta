@@ -1,3 +1,4 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from backend.app.main import app
@@ -7,8 +8,11 @@ from backend.app.config import settings
 client = TestClient(app)
 
 
-def get_authenticated_headers(username: str = "admin", password: str = "Admin_Secure2026!") -> dict:
+def get_authenticated_headers(username: str = "admin", password: str = None) -> dict:
     """Helper to authenticate against test app and return Bearer token headers."""
+    if password is None:
+        env_map = {"admin": "SENTINEL_ADMIN_PASSWORD", "analyst": "SENTINEL_ANALYST_PASSWORD", "viewer": "SENTINEL_VIEWER_PASSWORD"}
+        password = os.getenv(env_map.get(username, "SENTINEL_ADMIN_PASSWORD"), "TestAdminPassword2026!")
     response = client.post("/api/v1/auth/login", data={"username": username, "password": password})
     if response.status_code == 200:
         token = response.json().get("access_token")
@@ -18,7 +22,7 @@ def get_authenticated_headers(username: str = "admin", password: str = "Admin_Se
 
 def test_1_feature_schema_validation_failure_returns_400():
     """Test feature vector with invalid datatype returns HTTP 400 Bad Request."""
-    headers = get_authenticated_headers("admin", "Admin_Secure2026!")
+    headers = get_authenticated_headers("admin")
     invalid_payload = {
         "features": {
             "flow_duration": -100.0,  # Negative duration violates non-negative constraint
@@ -32,7 +36,7 @@ def test_1_feature_schema_validation_failure_returns_400():
 
 def test_2_valid_single_prediction_flow_creates_incident():
     """Test valid packet vector returns prediction result with legitimate probability & SHAP explanation."""
-    headers = get_authenticated_headers("analyst", "Analyst_Secure2026!")
+    headers = get_authenticated_headers("analyst")
     valid_payload = {
         "features": {
             "destination_port": 80,
@@ -56,7 +60,7 @@ def test_2_valid_single_prediction_flow_creates_incident():
 
 def test_3_predict_remediate_dynamic_operating_mode():
     """Test /predict/remediate resolves OPERATING_MODE dynamically."""
-    headers = get_authenticated_headers("analyst", "Analyst_Secure2026!")
+    headers = get_authenticated_headers("analyst")
     payload = {
         "target_ip": "192.168.1.50",
         "action": "BLOCK_IP"
@@ -75,7 +79,7 @@ def test_4_training_trigger_creates_real_queued_job(monkeypatch):
 
     monkeypatch.setattr("backend.app.api.v1.train.async_train_worker", mock_async_worker)
 
-    headers = get_authenticated_headers("admin", "Admin_Secure2026!")
+    headers = get_authenticated_headers("admin")
     response = client.post("/api/v1/train/trigger", headers=headers)
     assert response.status_code in [200, 202]
     data = response.json()
@@ -85,7 +89,7 @@ def test_4_training_trigger_creates_real_queued_job(monkeypatch):
 
 def test_5_analytics_summary_returns_db_backed_metrics():
     """Test GET /analytics/summary returns metrics backed by active model and DB records."""
-    headers = get_authenticated_headers("viewer", "Viewer_Secure2026!")
+    headers = get_authenticated_headers("viewer")
     response = client.get("/api/v1/analytics/summary", headers=headers)
     assert response.status_code == 200
     data = response.json()

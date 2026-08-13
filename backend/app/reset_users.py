@@ -19,9 +19,15 @@ async def reset_and_seed_users():
         await db.execute(delete(User))
         await db.commit()
 
-        admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", "Admin_Secure2026!")
-        analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", "Analyst_Secure2026!")
-        viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", "Viewer_Secure2026!")
+        admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD")
+        analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD")
+        viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD")
+
+        if not admin_pass or not analyst_pass or not viewer_pass:
+            raise RuntimeError(
+                "Security Error: Mandatory environment variables missing!\n"
+                "Please set SENTINEL_ADMIN_PASSWORD, SENTINEL_ANALYST_PASSWORD, and SENTINEL_VIEWER_PASSWORD."
+            )
 
         users_data = [
             ("admin", "admin@sentinelai.io", admin_pass, "System Administrator", "admin"),

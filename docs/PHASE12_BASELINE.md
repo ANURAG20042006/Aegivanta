@@ -1,4 +1,7 @@
-# SentinelAI Phase 12 Baseline Repository Audit Report
+# SentinelAI Phase 12 — Pre-Remediation Baseline Findings Audit
+
+> [!NOTE]
+> **HISTORICAL ARCHIVE**: This document is an initial baseline audit recording security vulnerabilities and code deficiencies found in earlier iterations of the codebase. All issues described below (including Base64 decodes and fallback password strings) have been fully remediated in current production source code. Report
 
 **Audit Date**: 2026-08-13  
 **Audit Scope**: Pre-remediation repository state prior to Phase 12 Master Remediation  

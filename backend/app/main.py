@@ -34,33 +34,34 @@ from backend.app.api.v1.health import router as health_router
 import secrets
 import json
 
-def _get_required_user_password(env_var: str, default_dev_label: str) -> str:
+def _get_required_user_password(env_var: str) -> str:
     pwd = os.environ.get(env_var)
-    if pwd:
-        return pwd
-    if settings.APP_ENV.lower() == "production" or settings.OPERATING_MODE.upper() == "PRODUCTION":
-        raise RuntimeError(f"Production environment requires environment variable {env_var} to be set.")
-    return f"{default_dev_label}_Secure2026!"
+    if not pwd:
+        raise RuntimeError(
+            f"Security Error: Environment variable '{env_var}' is required to seed default accounts.\n"
+            f"Set {env_var} in your .env or environment variables."
+        )
+    return pwd
 
 DEFAULT_USERS = [
     (
         "admin",
         "admin@sentinelai.io",
-        _get_required_user_password("SENTINEL_ADMIN_PASSWORD", "Admin"),
+        _get_required_user_password("SENTINEL_ADMIN_PASSWORD"),
         "System Administrator",
         "admin"
     ),
     (
         "analyst",
         "analyst@sentinelai.io",
-        _get_required_user_password("SENTINEL_ANALYST_PASSWORD", "Analyst"),
+        _get_required_user_password("SENTINEL_ANALYST_PASSWORD"),
         "Senior Security Analyst",
         "analyst"
     ),
     (
         "viewer",
         "viewer@sentinelai.io",
-        _get_required_user_password("SENTINEL_VIEWER_PASSWORD", "Viewer"),
+        _get_required_user_password("SENTINEL_VIEWER_PASSWORD"),
         "Security Operations Viewer",
         "viewer"
     ),

@@ -170,17 +170,17 @@ APP_ENV=production
 
 ---
 
-## 9. Default User Accounts
+## 9. Seeded User Accounts
 
-Seeded on first startup (development mode only):
+User passwords MUST be provided via environment variables on initial startup:
 
-| Username | Role | Password (Development) |
+| Username | Role | Required Environment Variable |
 |:---|:---|:---|
-| `admin` | admin | Set via `SENTINEL_ADMIN_PASSWORD` or `Admin_Secure2026!` |
-| `analyst` | analyst | Set via `SENTINEL_ANALYST_PASSWORD` or `Analyst_Secure2026!` |
-| `viewer` | viewer | Set via `SENTINEL_VIEWER_PASSWORD` or `Viewer_Secure2026!` |
+| `admin` | admin | `SENTINEL_ADMIN_PASSWORD` |
+| `analyst` | analyst | `SENTINEL_ANALYST_PASSWORD` |
+| `viewer` | viewer | `SENTINEL_VIEWER_PASSWORD` |
 
-> **Security**: In production, always set `SENTINEL_ADMIN_PASSWORD`, `SENTINEL_ANALYST_PASSWORD`, and `SENTINEL_VIEWER_PASSWORD` via environment variables.
+> **Security Enforcement**: SentinelAI does not embed hardcoded fallback user passwords in application source code. Application startup will fail closed with a `RuntimeError` if these environment variables are missing.
 
 ---
 

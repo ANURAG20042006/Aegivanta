@@ -297,14 +297,14 @@ check("frontend/dist/index.html exists (build artifact)", dist_path.exists(),
 # ===================================================================
 run_section("10. SECURITY CHECKS")
 
-# Check for hardcoded production passwords in main.py
+# Check for hardcoded user passwords in main.py
 main_py = PROJECT_ROOT / "backend" / "app" / "main.py"
 if main_py.exists():
     main_src = main_py.read_text(encoding="utf-8")
-    # The fallback passwords are DEV-only guarded behind env check
-    has_production_guard = "OPERATING_MODE.upper() == \"PRODUCTION\"" in main_src or \
-                           "APP_ENV.lower() == \"production\"" in main_src
-    check("main.py guards dev password fallbacks in production", has_production_guard)
+    has_required_env_check = "_get_required_user_password" in main_src and "SENTINEL_ADMIN_PASSWORD" in main_src
+    has_no_inline_fallback_string = "Admin_Secure2026!" not in main_src
+    check("main.py requires mandatory user password env vars with zero hardcoded fallback strings",
+          has_required_env_check and has_no_inline_fallback_string)
 
 config_py = PROJECT_ROOT / "backend" / "app" / "config.py"
 if config_py.exists():

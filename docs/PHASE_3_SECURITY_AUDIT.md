@@ -1,4 +1,7 @@
-# PHASE 3 — SECURITY BASELINE AUDIT
+# PHASE 3 — SECURITY AUDIT REPORT
+
+> [!NOTE]
+> **HISTORICAL ARCHIVE**: This document is a Phase 3 security audit recording early findings. All fallback password behaviors described below have been eliminated in current application source code.
 
 **Target Repository**: SentinelAI (`backend/app/`, `docker/`, `tests/`, `.env*`)  
 **Audit Timestamp**: 2026-08-13  
