@@ -24,7 +24,7 @@ async def test_app_lifespan_e2e_flow():
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             # 1. Test Login
-            admin_pwd = os.getenv("SENTINEL_ADMIN_PASSWORD", "Admin_Secure2026!")
+            admin_pwd = os.environ["SENTINEL_ADMIN_PASSWORD"]
             login_res = await client.post(
                 "/api/v1/auth/login",
                 data={"username": "admin", "password": admin_pwd}

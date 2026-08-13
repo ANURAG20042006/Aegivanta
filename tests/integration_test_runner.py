@@ -27,7 +27,7 @@ async def run_end_to_end_integration_test():
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
             # Step 2: Authentication
             print("--> 2. Testing Authentication (/api/v1/auth/login)...")
-            admin_pwd = os.getenv("SENTINEL_ADMIN_PASSWORD", "Admin_Secure2026!")
+            admin_pwd = os.environ.get("SENTINEL_ADMIN_PASSWORD", "TestAdminPassword2026!")
             login_res = await client.post(
                 "/api/v1/auth/login",
                 data={"username": "admin", "password": admin_pwd}
