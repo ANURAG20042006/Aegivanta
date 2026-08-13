@@ -1,0 +1,74 @@
+{
+  "experiment_id": "EXP-2026-002",
+  "dataset": {
+    "name": "synthetic_cicids2017_benchmark",
+    "type": "synthetic",
+    "hash": "62aa92a7d54fe464",
+    "n_samples": 3000,
+    "train_samples": 2574,
+    "test_samples": 100,
+    "n_raw_features": 78,
+    "n_selected_features": 30
+  },
+  "reproducibility": {
+    "python_version": "3.11.5",
+    "random_seed": 42,
+    "library_versions": {
+      "scikit-learn": "1.6.1",
+      "numpy": "2.2.2",
+      "pandas": "2.2.3"
+    },
+    "git_commit": "411ca0d9cb11ce2a991807d4b4a16b947bb3a0b5"
+  },
+  "split": {
+    "method": "train_test_split",
+    "test_size": 0.2,
+    "stratified": true,
+    "random_state": 42
+  },
+  "cross_validation": {
+    "method": "StratifiedKFold",
+    "n_splits": 3,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "preprocessing": {
+    "scaler": "StandardScaler",
+    "selector": "SelectKBest(f_classif, k=30)",
+    "selected_features_count": 30,
+    "smote": true,
+    "version": "split_first_smote_inside_folds_only",
+    "fit_scope": "TRAIN folds only (test set frozen and untouched)"
+  },
+  "model": {
+    "name": "CatBoost",
+    "class": "CatBoostClassifier",
+    "artifact_path": "ml/artifacts/best_model.joblib",
+    "artifact_type": "joblib",
+    "artifact_sha256": "820680309018fec707d1c20a869865ef43b7ea0c9a12c7c1544bdcf1d96538c0",
+    "model_version": "catboost-v1.0"
+  },
+  "results": {
+    "cv_metrics": {
+      "n_splits": 3,
+      "macro_f1_mean": 0.9301,
+      "macro_f1_std": 0.0245,
+      "precision_mean": 0.9405,
+      "precision_std": 0.019,
+      "recall_mean": 0.9323,
+      "recall_std": 0.0292,
+      "accuracy_mean": 0.9625,
+      "accuracy_std": 0.0148
+    },
+    "final_test_metrics": {
+      "accuracy": 0.96,
+      "macro_f1": 0.9329,
+      "precision": 0.9333,
+      "recall": 0.9389,
+      "fpr": 0.0023,
+      "roc_auc": 0.9996,
+      "inference_latency_ms": 0.0091
+    }
+  },
+  "provenance_status": "verified"
+}

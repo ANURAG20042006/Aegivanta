@@ -69,38 +69,39 @@ to avoid API breakage or numerical divergence.
 
 | Artifact | Type | Feature dimension | SHA-256 (prefix) |
 |:---|:---|:---:|:---|
-| `ml/artifacts/best_model.joblib` | GaussianNB | 30 features | `5a01833d72ed2ec5` |
+| `ml/artifacts/best_model.joblib` | CatBoostClassifier | 30 features | `820680309018fec7` |
 | `ml/artifacts/preprocessor.joblib` | CICIDS2017Preprocessor | 30 features | `e5c07b23b9a82ca2` |
 | `ml/artifacts/metadata.json` | Experiment metadata | `EXP-2026-002` | — |
+| `results/EXP-2026-002/provenance.json` | Provenance manifest | `EXP-2026-002` | — |
 
 **Artifact generation context**:
 - Python: `3.11.5`
 - scikit-learn: `1.6.1`
 - numpy: `2.2.2`
 - pandas: `2.2.3`
-- Training timestamp: `2026-08-13T13:01:52 UTC`
 - Random seed: `42`
 - Dataset hash: `62aa92a7d54fe464`
-- Git commit: `9d34be31d17b59036d7d1fedee50ff3f690c7a52`
+- Feature schema: `schema-v1.0` (30 features)
+- Preprocessing: `split_first_smote_inside_folds_only`
 
 ---
 
-## 4. Experiment Identification
+## 4. Experiment Identification & Provenance
 
-| Parameter | Value |
-|:---|:---|
-| **Experiment ID** | `EXP-2026-002` |
-| **Random seed** | `42` |
-| **Dataset** | `synthetic_cicids2017_benchmark` |
-| **Dataset hash** | `62aa92a7d54fe464` |
-| **Selected model** | `GaussianNB` (Naive Bayes) |
-| **Feature schema** | `schema-v1.0` (30 features) |
-| **Feature schema version** | `schema-v1.0` |
-| **CV F1 (macro, mean)** | `0.9289` (std: `0.0349`) |
-| **Test F1 (macro)** | `0.9623` |
-| **Test Accuracy** | `0.98` |
-| **Test FPR** | `0.0012` |
-| **Test ROC-AUC** | `0.9996` |
+| Parameter | Current Live Experiment (`EXP-2026-002`) | Historical Reference Baseline (`EXP-2026-001`) |
+|:---|:---|:---|
+| **Context** | Current reproducible local benchmark | Historical CICIDS2017 literature baseline |
+| **Dataset Source** | `synthetic_cicids2017_benchmark` | Full CICIDS2017 CSV captures (historical) |
+| **Dataset Hash** | `62aa92a7d54fe464` | `historical-cicids2017-ref` |
+| **Random Seed** | `42` | `42` |
+| **Selected Model** | `CatBoost` (`catboost-v1.0`) | `XGBoost` / `Random Forest` |
+| **CV Splits** | 3-Fold Stratified (Train-Only) | 5-Fold Stratified |
+| **CV F1 (macro, mean)** | `0.9301` (std: `0.0245`) | `0.9269` |
+| **Final Test F1 (macro)** | `0.9329` | `0.985` (historical reference) |
+| **Final Test Accuracy** | `0.9600` | `0.991` (historical reference) |
+| **Final Test FPR** | `0.0023` | `0.003` (historical reference) |
+| **Final Test ROC-AUC** | `0.9996` | `0.997` (historical reference) |
+| **Provenance File** | `results/EXP-2026-002/provenance.json` | `research/reference/historical_benchmarks.json` |
 
 ---
 

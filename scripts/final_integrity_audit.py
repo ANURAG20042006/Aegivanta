@@ -280,6 +280,10 @@ for csv_name in required_csvs:
         except Exception as e:
             check(f"results/{csv_name} readable", False, detail=str(e))
 
+# Provenance manifest
+prov_path = RESULTS_DIR / "EXP-2026-002" / "provenance.json"
+check("results/EXP-2026-002/provenance.json exists", prov_path.exists())
+
 # Plots
 for plot_name in ["f1_vs_fpr.png", "latency_comparison.png", "ablation_study.png"]:
     path = RESULTS_DIR / "plots" / plot_name

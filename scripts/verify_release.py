@@ -131,14 +131,14 @@ def main():
         cv_f1 = metadata.get("cv_metrics", {}).get("macro_f1_mean")
         test_f1 = metadata.get("final_test_metrics", {}).get("macro_f1")
 
-        print(f"  Experiment ID: {exp_id}")
-        print(f"  CV Macro F1 Mean: {cv_f1}")
-        print(f"  Final Test Macro F1: {test_f1}")
+        prov_p = Path("results/EXP-2026-002/provenance.json")
+        prov_match = prov_p.exists()
+        print(f"  Provenance Manifest Exists: {prov_match}")
 
-        if exp_id == "EXP-2026-002" and cv_f1 is not None and test_f1 is not None:
-            print("[PASS] Authoritative experiment metrics verified.")
+        if exp_id == "EXP-2026-002" and cv_f1 is not None and test_f1 is not None and prov_match:
+            print("[PASS] Authoritative experiment metrics and provenance manifest verified.")
         else:
-            print("[FAIL] Unexpected experiment metadata structure.")
+            print("[FAIL] Unexpected experiment metadata structure or missing provenance manifest.")
             failed_stages.append("Stage 4: Metadata Metric Consistency")
     except Exception as e:
         print(f"[FAIL] Metadata verification error: {e}")
