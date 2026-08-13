@@ -12,9 +12,9 @@ class Settings(BaseSettings):
 
     # General Application Settings
     APP_NAME: str = "SentinelAI"
-    APP_ENV: str = "development"
+    APP_ENV: str = Field(default="development", description="Application Environment: development, staging, production")
     OPERATING_MODE: str = Field(default="DEMO", description="Operating Mode: DEMO, LAB, or PRODUCTION")
-    DEBUG: bool = True
+    DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
     PROJECT_VERSION: str = "1.0.0"
@@ -71,9 +71,32 @@ settings = Settings()
 
 def validate_production_settings() -> None:
     """Stops accidental production deployments with insecure development configurations."""
-    if settings.APP_ENV.lower() != "production":
+    valid_modes = ["DEMO", "LAB", "PRODUCTION"]
+    mode_upper = settings.OPERATING_MODE.upper()
+    if mode_upper not in valid_modes:
+        raise RuntimeError(f"Invalid OPERATING_MODE '{settings.OPERATING_MODE}'. Valid choices: {valid_modes}")
+
+    is_production = (settings.APP_ENV.lower() == "production" or mode_upper == "PRODUCTION")
+    if not is_production:
         return
+
     if not os.environ.get("SECRET_KEY") or len(settings.SECRET_KEY) < 32:
         raise RuntimeError("Production requires a unique SECRET_KEY of at least 32 characters in environment variables.")
-    if any(origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in settings.CORS_ORIGINS):
-        raise RuntimeError("Production CORS_ORIGINS must not use localhost entries.")
+
+    if not os.environ.get("POSTGRES_PASSWORD"):
+        raise RuntimeError("Production requires POSTGRES_PASSWORD environment variable to be set.")
+
+    if not os.environ.get("SENTINEL_ADMIN_PASSWORD"):
+        raise RuntimeError("Production requires SENTINEL_ADMIN_PASSWORD environment variable to be set.")
+
+    if not os.environ.get("SENTINEL_ANALYST_PASSWORD"):
+        raise RuntimeError("Production requires SENTINEL_ANALYST_PASSWORD environment variable to be set.")
+
+    if not os.environ.get("SENTINEL_VIEWER_PASSWORD"):
+        raise RuntimeError("Production requires SENTINEL_VIEWER_PASSWORD environment variable to be set.")
+
+    if settings.DEBUG:
+        raise RuntimeError("Production requires DEBUG=False.")
+
+    if any(origin == "*" or origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in settings.CORS_ORIGINS):
+        raise RuntimeError("Production CORS_ORIGINS must not use wildcard '*' or localhost entries.")

@@ -1,11 +1,16 @@
 import time
+import uuid
+import re
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from backend.app.core.logging import logger
 
 
 class RequestTimingAndAuditMiddleware(BaseHTTPMiddleware):
-    """Middleware for recording request execution latency and logging access details."""
+    """
+    Middleware for recording request execution latency, enforcing correlation request IDs (X-Request-ID),
+    and logging audit telemetry.
+    """
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         start_time = time.time()
@@ -13,21 +18,31 @@ class RequestTimingAndAuditMiddleware(BaseHTTPMiddleware):
         method = request.method
         url_path = request.url.path
 
+        # Correlation Request ID Handling (Requirement 3.16)
+        raw_request_id = request.headers.get("X-Request-ID", "").strip()
+        if raw_request_id and len(raw_request_id) <= 64 and re.match(r"^[a-zA-Z0-9_\-]+$", raw_request_id):
+            request_id = raw_request_id
+        else:
+            request_id = str(uuid.uuid4())
+
+        request.state.request_id = request_id
+
         try:
             response = await call_next(request)
-            process_time = (time.time() - start_time) * 1000  # milliseconds
+            process_time = (time.time() - start_time) * 1000.0  # milliseconds
             response.headers["X-Process-Time-Ms"] = f"{process_time:.2f}"
+            response.headers["X-Request-ID"] = request_id
 
-            # Log request telemetry
+            # Log request telemetry with correlation request_id
             logger.info(
                 f"[{method}] {url_path} - Status: {response.status_code} - "
-                f"Client: {client_ip} - Duration: {process_time:.2f}ms"
+                f"Client: {client_ip} - Duration: {process_time:.2f}ms - RequestID: {request_id}"
             )
             return response
         except Exception as exc:
-            process_time = (time.time() - start_time) * 1000
+            process_time = (time.time() - start_time) * 1000.0
             logger.error(
                 f"[{method}] {url_path} FAILED - Client: {client_ip} - "
-                f"Duration: {process_time:.2f}ms - Exception: {str(exc)}"
+                f"Duration: {process_time:.2f}ms - RequestID: {request_id} - Exception: {str(exc)}"
             )
             raise exc

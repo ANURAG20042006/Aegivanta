@@ -36,10 +36,14 @@ async def get_current_user(
 def require_role(allowed_roles: list[str]) -> Callable:
     """
     Factory dependency for enforcing Role-Based Access Control (RBAC).
-    Supported canonical roles: ADMIN, SOC_ANALYST, RESEARCHER, VIEWER.
+    Supported canonical roles: ADMIN, SOC_ANALYST (ANALYST), RESEARCHER, VIEWER.
     Validates authorization strictly on the server-side.
     """
-    normalized_allowed = [r.lower() for r in allowed_roles]
+    normalized_allowed = set(r.lower() for r in allowed_roles)
+    if "soc_analyst" in normalized_allowed:
+        normalized_allowed.add("analyst")
+    if "analyst" in normalized_allowed:
+        normalized_allowed.add("soc_analyst")
 
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:
         user_role = current_user.role.lower()

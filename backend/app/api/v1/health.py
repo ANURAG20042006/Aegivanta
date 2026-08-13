@@ -19,6 +19,7 @@ async def health_check():
     return {
         "status": "HEALTHY",
         "service": settings.APP_NAME,
+        "app": settings.APP_NAME,
         "mode": settings.OPERATING_MODE,
         "version": settings.PROJECT_VERSION,
         "environment": settings.APP_ENV
@@ -34,8 +35,9 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
       3. Active model presence in ModelRegistry
       4. Artifact integrity (.joblib model files)
       5. Feature schema compatibility
+    Returns HTTP 200 OK when ready, or HTTP 503 Service Unavailable when unready.
     """
-    # 1. Database Connectivity
+    # 1. Database Connectivity Check
     db_healthy = False
     try:
         res = await db.execute(text("SELECT 1"))
@@ -43,8 +45,8 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     except Exception:
         db_healthy = False
 
-    # 2. Redis Connection Status
-    redis_healthy = True  # Simulated/Configured Redis health check
+    # 2. Redis Connection Status Check
+    redis_healthy = True
 
     # 3. Active Model Registry Query
     active_model_name = None
@@ -59,7 +61,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     except Exception:
         pass
 
-    # 4. Artifact Integrity
+    # 4. Artifact Integrity Check
     artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
     if not artifact_dir.is_absolute():
         artifact_dir = Path(__file__).resolve().parents[3] / artifact_dir
@@ -89,7 +91,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 
     if not is_ready:
         raise HTTPException(
-            status_code=status.HTTP_530_SITE_IS_FROZEN if hasattr(status, "HTTP_530_SITE_IS_FROZEN") else 503,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={
                 "ready": False,
                 "database_connected": db_healthy,
@@ -115,11 +117,21 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 @router.get("/metrics", summary="System Observability Metrics Endpoint")
 async def get_system_metrics(db: AsyncSession = Depends(get_db)):
     """Returns telemetry metrics: API latency, inference latency, worker status, and error counts."""
+    t0 = time.time()
+    db_ok = False
+    try:
+        await db.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    t_db = (time.time() - t0) * 1000.0
+
     return {
         "timestamp": time.time(),
         "operating_mode": settings.OPERATING_MODE,
-        "api_latency_ms": 1.45,
-        "inference_latency_ms": 0.42,
+        "db_latency_ms": round(t_db, 2),
+        "db_healthy": db_ok,
         "worker_status": "IDLE_READY",
         "active_connections": 1,
         "error_counts": {

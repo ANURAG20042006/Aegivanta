@@ -38,7 +38,7 @@ def _get_required_user_password(env_var: str, default_dev_label: str) -> str:
     pwd = os.environ.get(env_var)
     if pwd:
         return pwd
-    if settings.APP_ENV == "production":
+    if settings.APP_ENV.lower() == "production" or settings.OPERATING_MODE.upper() == "PRODUCTION":
         raise RuntimeError(f"Production environment requires environment variable {env_var} to be set.")
     return f"{default_dev_label}_Secure2026!"
 
@@ -173,18 +173,8 @@ async def custom_sentinel_exception_handler(request: Request, exc: SentinelAIExc
     )
 
 
-# Health Check
-@app.get("/health", tags=["Health"])
-async def health_check():
-    return {
-        "status": "HEALTHY",
-        "app": settings.APP_NAME,
-        "environment": settings.APP_ENV,
-        "version": "1.0.0"
-    }
-
-
 # Include Routers
+app.include_router(health_router)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(users_router, prefix=settings.API_V1_STR)
 app.include_router(predict_router, prefix=settings.API_V1_STR)
