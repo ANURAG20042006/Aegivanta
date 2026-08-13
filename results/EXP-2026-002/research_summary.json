@@ -1,20 +1,20 @@
 {
   "experiment_id": "EXP-2026-002",
   "champion_selected_by": "CV macro-F1 on TRAIN set only \u2014 test set not used for selection",
-  "best_model": "Naive Bayes",
-  "best_cv_f1": 0.0268,
+  "best_model": "Random Forest",
+  "best_cv_f1": 0.0553,
   "ablation_variants_independent": true,
   "fabricated_metrics": false,
-  "timestamp": "2026-08-12T20:03:56.539749+00:00",
+  "timestamp": "2026-08-13T05:57:13.558982+00:00",
   "output_files": [
     "dataset_statistics.json",
     "experiment_config.json",
     "baseline_comparison.csv",
     "cross_validation.csv",
     "ablation.csv",
-    "confusion_matrix.json",
+    "robustness.csv",
+    "latency.csv",
     "per_class_metrics.csv",
-    "robustness_testing.csv",
     "explainability_examples.json"
   ]
 }

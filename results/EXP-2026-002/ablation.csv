@@ -1,0 +1,4 @@
+experiment_id,variant,model,dataset,seed,accuracy,precision,recall,f1_score,fpr,timestamp,feature_schema_version
+EXP-2026-002,Full Pipeline (Selection + SMOTE),Random Forest,CICIDS2017_Synthetic_Benchmark,42,0.5175,0.0397,0.0402,0.0399,0.056,2026-08-13T05:57:13.558982+00:00,schema-v1.0
+EXP-2026-002,Without Feature Selection,Random Forest,CICIDS2017_Synthetic_Benchmark,42,0.6675,0.0397,0.0519,0.0449,0.0558,2026-08-13T05:57:13.558982+00:00,schema-v1.0
+EXP-2026-002,Without SMOTE Balancing,Random Forest,CICIDS2017_Synthetic_Benchmark,42,0.715,0.0397,0.0556,0.0463,0.0556,2026-08-13T05:57:13.558982+00:00,schema-v1.0

@@ -1,37 +1,84 @@
 {
   "explanation_available": true,
+  "available": true,
   "explanation_method": "SHAP TreeExplainer",
+  "reason": null,
+  "explainer_type": "SHAP TreeExplainer",
   "model_version": "random_forest-research-v1.0",
-  "prediction": "1",
-  "confidence": 0.2,
+  "prediction": "16",
+  "confidence": 0.34,
+  "timestamp": "2026-08-13T05:58:34.559959+00:00",
+  "xai_latency_ms": 66.86,
   "features": [
     {
-      "feature": "Total Length of Fwd Packets",
-      "contribution": -0.0197,
-      "direction": "negative",
+      "feature": "Flow Duration",
+      "input_value": 0.8528,
+      "contribution": 0.0408,
+      "direction": "positive",
       "rank": 1
     },
     {
-      "feature": "Packet Length Std",
-      "contribution": 0.0145,
+      "feature": "RST Flag Count",
+      "input_value": 0.8063,
+      "contribution": 0.0245,
       "direction": "positive",
       "rank": 2
     },
     {
-      "feature": "URG Flag Count",
-      "contribution": -0.0113,
-      "direction": "negative",
+      "feature": "Packet Length Mean",
+      "input_value": 0.8008,
+      "contribution": 0.0213,
+      "direction": "positive",
       "rank": 3
     },
     {
-      "feature": "Flow Duration",
-      "contribution": -0.011,
-      "direction": "negative",
+      "feature": "Average Packet Size",
+      "input_value": -1.2762,
+      "contribution": 0.0125,
+      "direction": "positive",
       "rank": 4
     },
     {
+      "feature": "ACK Flag Count",
+      "input_value": 0.4156,
+      "contribution": -0.0115,
+      "direction": "negative",
+      "rank": 5
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "Flow Duration",
+      "input_value": 0.8528,
+      "contribution": 0.0408,
+      "direction": "positive",
+      "rank": 1
+    },
+    {
       "feature": "RST Flag Count",
-      "contribution": -0.0101,
+      "input_value": 0.8063,
+      "contribution": 0.0245,
+      "direction": "positive",
+      "rank": 2
+    },
+    {
+      "feature": "Packet Length Mean",
+      "input_value": 0.8008,
+      "contribution": 0.0213,
+      "direction": "positive",
+      "rank": 3
+    },
+    {
+      "feature": "Average Packet Size",
+      "input_value": -1.2762,
+      "contribution": 0.0125,
+      "direction": "positive",
+      "rank": 4
+    },
+    {
+      "feature": "ACK Flag Count",
+      "input_value": 0.4156,
+      "contribution": -0.0115,
       "direction": "negative",
       "rank": 5
     }

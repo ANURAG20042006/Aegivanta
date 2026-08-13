@@ -4,7 +4,7 @@
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "2acdcd9c8cb49635",
-  "training_timestamp": "2026-08-12T20:36:51.485755+00:00",
+  "training_timestamp": "2026-08-13T05:52:38.551567+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -86,7 +86,7 @@
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.3294481248972354,
+    "best_selection_score": 0.3270812271064619,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -101,7 +101,7 @@
     "recall": 0.0139,
     "fpr": 0.0565,
     "roc_auc": 0.4787,
-    "inference_latency_ms": 0.0,
+    "inference_latency_ms": 0.01,
     "confusion_matrix": [
       [
         0,
@@ -464,6 +464,116 @@
         0
       ]
     ],
+    "per_class_metrics": {
+      "ARP Spoofing": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.051
+      },
+      "BENIGN": {
+        "precision": 0.64,
+        "recall": 0.25,
+        "f1": 0.3596,
+        "fpr": 0.25
+      },
+      "Botnet": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0206
+      },
+      "DDoS": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.102
+      },
+      "DNS Spoofing": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0612
+      },
+      "Data Exfiltration": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0102
+      },
+      "DoS GoldenEye": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.1031
+      },
+      "DoS Hulk": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0102
+      },
+      "DoS Slowloris": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.051
+      },
+      "FTP-Patator": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0101
+      },
+      "MITM": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0404
+      },
+      "Malware": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0204
+      },
+      "Port Scan": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0412
+      },
+      "Ransomware": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0202
+      },
+      "SQL Injection": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0103
+      },
+      "SSH-Patator": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0816
+      },
+      "XSS": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.051
+      },
+      "Zero-Day Anomaly": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.0825
+      }
+    },
     "test_sample_count": 100
   },
   "leaderboard": [
@@ -478,7 +588,7 @@
       "cv_precision_std": 0.0003,
       "cv_accuracy_mean": 0.6,
       "cv_accuracy_std": 0.0252,
-      "selection_score": 0.2988
+      "selection_score": 0.2991
     },
     {
       "model_name": "XGBoost",
@@ -530,7 +640,7 @@
       "cv_precision_std": 0.0202,
       "cv_accuracy_mean": 0.265,
       "cv_accuracy_std": 0.0527,
-      "selection_score": 0.3294
+      "selection_score": 0.3271
     },
     {
       "model_name": "Logistic Regression",
@@ -543,7 +653,7 @@
       "cv_precision_std": 0.0057,
       "cv_accuracy_mean": 0.23,
       "cv_accuracy_std": 0.0437,
-      "selection_score": 0.3085
+      "selection_score": 0.3074
     },
     {
       "model_name": "SVM",
@@ -556,7 +666,7 @@
       "cv_precision_std": 0.0003,
       "cv_accuracy_mean": 0.6225,
       "cv_accuracy_std": 0.0027,
-      "selection_score": 0.272
+      "selection_score": 0.2414
     },
     {
       "model_name": "KNN",
@@ -587,28 +697,28 @@
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0508,
-      "cv_f1_std": 0.0149,
-      "cv_recall_mean": 0.0521,
-      "cv_recall_std": 0.0157,
-      "cv_precision_mean": 0.05,
-      "cv_precision_std": 0.0145,
-      "cv_accuracy_mean": 0.4451,
-      "cv_accuracy_std": 0.0326,
-      "selection_score": 0.2244
+      "cv_f1_mean": 0.0399,
+      "cv_f1_std": 0.0027,
+      "cv_recall_mean": 0.0435,
+      "cv_recall_std": 0.001,
+      "cv_precision_mean": 0.0374,
+      "cv_precision_std": 0.0052,
+      "cv_accuracy_mean": 0.4502,
+      "cv_accuracy_std": 0.0869,
+      "selection_score": 0.2173
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0438,
-      "cv_f1_std": 0.0049,
-      "cv_recall_mean": 0.0978,
-      "cv_recall_std": 0.0093,
-      "cv_precision_mean": 0.0296,
-      "cv_precision_std": 0.0035,
+      "cv_f1_mean": 0.0443,
+      "cv_f1_std": 0.0112,
+      "cv_recall_mean": 0.0882,
+      "cv_recall_std": 0.0288,
+      "cv_precision_mean": 0.0424,
+      "cv_precision_std": 0.0136,
       "cv_accuracy_mean": 0.0375,
-      "cv_accuracy_std": 0.0002,
-      "selection_score": 0.2406
+      "cv_accuracy_std": 0.0074,
+      "selection_score": 0.2332
     },
     {
       "model_name": "Autoencoder",
@@ -621,9 +731,9 @@
       "cv_precision_std": 0.0001,
       "cv_accuracy_mean": 0.64,
       "cv_accuracy_std": 0.0016,
-      "selection_score": 0.2954
+      "selection_score": 0.2861
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "1ae5a2ee92717ef1265888cb5536ecb9e229326e"
+  "git_commit": "9618c080d1c5ab8edb6bfe4af25bacaf1fd9a8da"
 }
