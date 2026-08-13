@@ -201,8 +201,13 @@ def verify_rollback_artifact_integrity(
 
     inner_model = getattr(model, "model", model)
     n_features_in = getattr(inner_model, "n_features_in_", None)
+    if (not n_features_in or n_features_in == 0) and hasattr(inner_model, "feature_names_") and inner_model.feature_names_:
+        n_features_in = len(inner_model.feature_names_)
+    elif (not n_features_in or n_features_in == 0) and hasattr(inner_model, "_input_dim") and inner_model._input_dim:
+        n_features_in = inner_model._input_dim
+
     selected_feats = len(getattr(preprocessor, "selected_feature_names", []))
-    if n_features_in is not None and selected_feats > 0 and n_features_in != selected_feats:
+    if n_features_in and n_features_in > 0 and selected_feats > 0 and n_features_in != selected_feats:
         return False, f"Rollback rejected: Preprocessor produces {selected_feats} features but target model expects {n_features_in} features."
 
     # 10. Checksum / SHA-256 Hash Verification (Fail-Closed)

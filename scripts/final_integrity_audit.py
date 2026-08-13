@@ -170,6 +170,10 @@ if best_model_path.exists() and preprocessor_path.exists():
 
         inner_model = getattr(loaded_model, "model", loaded_model)
         model_n_features = getattr(inner_model, "n_features_in_", None)
+        if (not model_n_features or model_n_features == 0) and hasattr(inner_model, "feature_names_") and inner_model.feature_names_:
+            model_n_features = len(inner_model.feature_names_)
+        elif (not model_n_features or model_n_features == 0) and hasattr(inner_model, "_input_dim") and inner_model._input_dim:
+            model_n_features = inner_model._input_dim
 
         if model_n_features is not None and hasattr(loaded_prep, "selected_feature_names"):
             prep_n_features = len(loaded_prep.selected_feature_names)

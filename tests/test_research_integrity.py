@@ -53,7 +53,13 @@ def test_phase_a_b_c_artifact_and_schema_integrity():
     inner = getattr(model, "model", model)
 
     selected_count = len(preprocessor.selected_feature_names)
-    model_n_in = getattr(inner, "n_features_in_", selected_count)
+    model_n_in = getattr(inner, "n_features_in_", None)
+    if (not model_n_in or model_n_in == 0) and hasattr(inner, "feature_names_") and inner.feature_names_:
+        model_n_in = len(inner.feature_names_)
+    elif (not model_n_in or model_n_in == 0) and hasattr(inner, "_input_dim") and inner._input_dim:
+        model_n_in = inner._input_dim
+    elif not model_n_in:
+        model_n_in = selected_count
 
     assert selected_count == model_n_in, f"Mismatch: preprocessor={selected_count}, model={model_n_in}"
     assert manifest["processed_feature_count"] == selected_count

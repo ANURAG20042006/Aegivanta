@@ -95,6 +95,10 @@ def main():
 
             inner_model = getattr(model_obj, "model", model_obj)
             n_features_in = getattr(inner_model, "n_features_in_", None)
+            if (not n_features_in or n_features_in == 0) and hasattr(inner_model, "feature_names_") and inner_model.feature_names_:
+                n_features_in = len(inner_model.feature_names_)
+            elif (not n_features_in or n_features_in == 0) and hasattr(inner_model, "_input_dim") and inner_model._input_dim:
+                n_features_in = inner_model._input_dim
             prep_features = len(getattr(prep_obj, "selected_feature_names", []))
 
             actual_model_hash = hashlib.sha256(best_model_p.read_bytes()).hexdigest()

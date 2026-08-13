@@ -13,6 +13,9 @@
 > across different operating systems or hardware. Results have been verified to match
 > on Python 3.11.5 / Windows 10 with the dependency versions listed below.
 
+> [!NOTE]
+> **Inference Latency Measurement Methodology**: Inference latency is measured as wall-clock model prediction time (`time.perf_counter()`) divided by the number of validation samples (`ms/sample`). Training (`model.fit()`), preprocessing fitting, artifact I/O, and explainability execution (SHAP/LIME) are strictly excluded from inference latency measurements. Latency measurements are hardware-dependent.
+
 ---
 
 ## 1. Dependency Source of Truth

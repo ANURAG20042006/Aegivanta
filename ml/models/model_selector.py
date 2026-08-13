@@ -43,11 +43,12 @@ class ModelSelectorSuite:
     def __init__(
         self,
         artifacts_dir: str = "ml/artifacts",
-        weights: Optional[Dict[str, float]] = None
+        weights: Optional[Dict[str, float]] = None,
+        models: Optional[List[BaseSentinelModel]] = None
     ):
         self.artifacts_dir = Path(artifacts_dir)
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)
-        self.models: List[BaseSentinelModel] = [
+        self.models: List[BaseSentinelModel] = models if models is not None else [
             RandomForestModel(),
             XGBoostModel(),
             LightGBMModel(),
@@ -144,19 +145,21 @@ class ModelSelectorSuite:
                         else:
                             X_tr_final, y_tr_final = X_tr_selected, y_tr_fold
 
-                        t0 = time.time()
                         model.fit(X_tr_final, y_tr_final)
-                        t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
 
                         X_val_scaled = fold_scaler.transform(X_val_fold)
                         X_val_selected = fold_selector.transform(X_val_scaled)
+
+                        t0 = time.perf_counter()
                         y_val_pred = model.predict(X_val_selected)
+                        t_lat = (time.perf_counter() - t0) * 1000.0 / max(len(X_val_selected), 1)
 
                     else:
-                        t0 = time.time()
                         model.fit(X_tr_fold, y_tr_fold)
-                        t_lat = (time.time() - t0) * 1000.0 / max(len(X_val_fold), 1)
+
+                        t0 = time.perf_counter()
                         y_val_pred = model.predict(X_val_fold)
+                        t_lat = (time.perf_counter() - t0) * 1000.0 / max(len(X_val_fold), 1)
 
                     f1 = float(f1_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
                     rec = float(recall_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
@@ -274,9 +277,9 @@ class ModelSelectorSuite:
             raise RuntimeError("Cannot evaluate final test set: No champion model selected.")
 
         print(f"--> Evaluating Frozen Champion Model ({self.best_model.model_name}) ONCE on Untouched TEST Set...")
-        t0 = time.time()
+        t0 = time.perf_counter()
         y_pred = self.best_model.predict(X_test)
-        latency_ms = round((time.time() - t0) * 1000.0 / max(len(X_test), 1), 4)
+        latency_ms = round((time.perf_counter() - t0) * 1000.0 / max(len(X_test), 1), 4)
 
         acc = float(accuracy_score(y_test, y_pred))
         prec = float(precision_score(y_test, y_pred, average="macro", zero_division=0))

@@ -38,7 +38,12 @@ def test_artifact_dimension_and_schema_synchronization():
 
     # 2. Verify model n_features_in_
     n_features_in = getattr(inner_model, "n_features_in_", None)
-    if n_features_in is not None:
+    if (not n_features_in or n_features_in == 0) and hasattr(inner_model, "feature_names_") and inner_model.feature_names_:
+        n_features_in = len(inner_model.feature_names_)
+    elif (not n_features_in or n_features_in == 0) and hasattr(inner_model, "_input_dim") and inner_model._input_dim:
+        n_features_in = inner_model._input_dim
+
+    if n_features_in and n_features_in > 0:
         assert len(selected_features) == n_features_in, (
             f"MODEL_PREPROCESSOR_SCHEMA_MISMATCH: Preprocessor produces {len(selected_features)} "
             f"features but model expects {n_features_in}."

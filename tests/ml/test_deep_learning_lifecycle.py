@@ -445,9 +445,15 @@ class TestFeatureDimensionCompatibility:
             pytest.skip("Canonical artifacts not present")
         model = joblib.load(model_path)
         prep = joblib.load(prep_path)
-        n_feat = getattr(getattr(model, "model", model), "n_features_in_", None)
+        inner = getattr(model, "model", model)
+        n_feat = getattr(inner, "n_features_in_", None)
+        if (not n_feat or n_feat == 0) and hasattr(inner, "feature_names_") and inner.feature_names_:
+            n_feat = len(inner.feature_names_)
+        elif (not n_feat or n_feat == 0) and hasattr(inner, "_input_dim") and inner._input_dim:
+            n_feat = inner._input_dim
+
         prep_feat = len(getattr(prep, "selected_feature_names", []))
-        if n_feat is not None and prep_feat > 0:
+        if n_feat and n_feat > 0 and prep_feat > 0:
             assert n_feat == prep_feat, (
                 f"Canonical artifact dimension mismatch: model={n_feat}, prep={prep_feat}"
             )

@@ -51,13 +51,13 @@ def compute_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 def _train_eval(model, X_tr, y_tr, X_te, y_te, label, exp_id, dataset_name, seed, timestamp_str, schema_ver):
     """Train model on X_tr/y_tr, evaluate on X_te/y_te. Returns result dict."""
-    t0 = time.time()
+    t0 = time.perf_counter()
     model.fit(X_tr, y_tr)
-    lat = round((time.time() - t0) * 1000.0 / max(len(X_te), 1), 4)
+    lat = round((time.perf_counter() - t0) * 1000.0 / max(len(X_te), 1), 4)
     
-    t_inf_0 = time.time()
+    t_inf_0 = time.perf_counter()
     y_pred = model.predict(X_te)
-    inf_lat = round((time.time() - t_inf_0) * 1000.0 / max(len(X_te), 1), 4)
+    inf_lat = round((time.perf_counter() - t_inf_0) * 1000.0 / max(len(X_te), 1), 4)
 
     return {
         "experiment_id": exp_id,
