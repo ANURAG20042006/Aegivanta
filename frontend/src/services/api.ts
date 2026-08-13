@@ -7,12 +7,16 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor to attach JWT Bearer Token
+// Request Interceptor to attach JWT Bearer Token & Request Correlation ID
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('sentinel_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Generate correlation X-Request-ID for client requests
+    if (!config.headers['X-Request-ID']) {
+      config.headers['X-Request-ID'] = `client-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     }
     return config;
   },

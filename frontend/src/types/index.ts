@@ -107,13 +107,20 @@ export interface ModelPerformanceItem {
 }
 
 export interface AnalyticsSummary {
+  network_status?: string;
   total_packets_inspected: number;
-  total_threats_isolated: number;
-  critical_threats_count: number;
+  total_threats_detected?: number;
+  total_threats_isolated?: number;
+  critical_incidents_count?: number;
+  critical_threats_count?: number;
+  prediction_accuracy?: number;
+  active_model?: string;
   attack_distribution: AttackDistributionItem[];
-  top_malicious_ips: Array<{ ip: string; count: number }>;
-  model_leaderboard: ModelPerformanceItem[];
-  recent_incidents: IncidentItem[];
+  top_source_ips?: Array<{ ip: string; count: number }>;
+  top_malicious_ips?: Array<{ ip: string; count: number }>;
+  model_performance?: ModelPerformanceItem[];
+  model_leaderboard?: ModelPerformanceItem[];
+  recent_incidents?: IncidentItem[];
 }
 
 export interface AttackDistributionItem {
