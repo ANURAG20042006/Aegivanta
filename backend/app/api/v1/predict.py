@@ -6,6 +6,7 @@ from backend.app.database import get_db
 from backend.app.models.user import User
 from backend.app.models.audit_log import AuditLog
 from backend.app.schemas.predict import PredictionRequest, PredictionResponse
+from backend.app.config import settings
 from backend.app.services.predict_service import predict_service
 from backend.app.core.dependencies import require_role
 
@@ -86,6 +87,9 @@ async def dispatch_remediation(
     current_user: User = Depends(require_role(["admin", "analyst"]))
 ):
     """Executes automated containment action (Perimeter Drop Rule / VLAN Quarantine) on target malicious IP."""
+    mode = settings.OPERATING_MODE.upper()
+    mode_label = "SIMULATION MODE" if mode == "DEMO" else ("REAL LAB MODE" if mode == "LAB" else "PRODUCTION MODE")
+
     audit = AuditLog(
         user_id=current_user.id,
         action=f"REMEDIATION_{payload.action.upper()}",
@@ -94,7 +98,7 @@ async def dispatch_remediation(
         details={
             "target_ip": payload.target_ip,
             "action": payload.action,
-            "mode": "SIMULATION MODE"
+            "mode": mode_label
         }
     )
     db.add(audit)
@@ -102,8 +106,8 @@ async def dispatch_remediation(
 
     return {
         "status": "SUCCESS",
-        "remediation_mode": "SIMULATION MODE",
+        "remediation_mode": mode_label,
         "target_ip": payload.target_ip,
         "action": payload.action,
-        "message": f"[SIMULATION MODE] Automated Playbook [{payload.action.upper()}] dispatched for target IP {payload.target_ip}."
+        "message": f"[{mode_label}] Automated Playbook [{payload.action.upper()}] dispatched for target IP {payload.target_ip}."
     }

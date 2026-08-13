@@ -159,17 +159,35 @@ app.add_middleware(
 app.add_middleware(RequestTimingAndAuditMiddleware)
 
 
-# Custom Exception Handler
+# Custom Exception Handlers
 @app.exception_handler(SentinelAIException)
 async def custom_sentinel_exception_handler(request: Request, exc: SentinelAIException):
+    req_id = getattr(request.state, "request_id", None)
+    content = {
+        "error": True,
+        "status_code": exc.status_code,
+        "detail": exc.detail
+    }
+    if req_id:
+        content["request_id"] = req_id
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "error": True,
-            "status_code": exc.status_code,
-            "detail": exc.detail
-        },
+        content=content,
         headers=exc.headers
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    req_id = getattr(request.state, "request_id", "unknown")
+    logger.error("Unhandled server exception [RequestID: %s]: %s", req_id, exc, exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": "internal_error",
+            "message": "An internal server error occurred.",
+            "request_id": req_id
+        }
     )
 
 

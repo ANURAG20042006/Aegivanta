@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from pydantic import BaseModel
 
 
@@ -17,7 +17,7 @@ class ModelPerformanceItem(BaseModel):
     f1_score: float
     precision_score: float
     recall_score: float
-    roc_auc: float
+    roc_auc: Optional[float] = None
     is_active: bool
 
 
