@@ -69,14 +69,14 @@ The ML pipeline ingests 78 statistical network packet flow features from the ben
 ### Benchmark Comparison (12 Classifiers):
 
 > [!IMPORTANT]
-> The metrics in this table are **prototype-era estimates** and are **not** from the current reproducible experiment suite.
-> The current empirically computed leaderboard is available in `results/EXP-2026-001/baseline_comparison.csv`.
-> Champion model and performance metrics update automatically after each training run.
+> The metrics in this table are **historical literature estimates** (EXP-2026-001) and are **not** from the current reproducible local experiment suite.
+> The current empirically computed leaderboard is available in `results/EXP-2026-002/baseline_comparison.csv` and `results/EXP-2026-002/provenance.json`.
+> Champion model and performance metrics update automatically after each training run (current live champion: **CatBoost**).
 
 | Rank | Model | Category | Inference Role |
 | :---: | :--- | :--- | :--- |
-| 👑 1 | **XGBoost** | Gradient Boosting | Champion Classifier |
-| 2 | **CatBoost** | Gradient Boosting | Active Secondary |
+| 👑 1 | **CatBoost** | Gradient Boosting | Live Champion Classifier (EXP-2026-002) |
+| 2 | **XGBoost** | Gradient Boosting | Historical Literature Baseline (EXP-2026-001) |
 | 3 | **LightGBM** | Gradient Boosting | Ultra Low-Latency Stream |
 | 4 | **Random Forest** | Classical Ensemble | High-Speed Baseline |
 | 5 | **LSTM** | Deep Learning | Sequential Flow Inspector |

@@ -1,5 +1,5 @@
 {
-  "_description": "Historical CICIDS2017 baseline benchmark results. These are reference values from prior research, NOT the current live model. Source: SentinelAI experimental design (EXP-2026-001). See results/EXP-2026-001/baseline_comparison.csv.",
+  "_description": "Historical CICIDS2017 baseline benchmark results. These are reference values from prior research, NOT the current live model. Source: SentinelAI experimental design (EXP-2026-001). See results/archive/EXP-2026-001/baseline_comparison.csv.",
   "baselines": [
     {
       "model_name": "XGBoost",

@@ -44,7 +44,7 @@ Previous studies in intrusion detection relied heavily on outmoded datasets such
 > [!NOTE]
 > **Experimental Data Scope**:
 > The metrics listed below represent historical baseline performance on the real **CICIDS2017** benchmark dataset.
-> For local runs utilizing the synthetic dataset generator (which target classes independently of features), the F1-scores will realistically be in the `0.04-0.09` range. Refer to `results/EXP-2026-001/` for live run details.
+> For local runs utilizing the synthetic benchmark generator, refer to `results/EXP-2026-002/provenance.json` and `results/EXP-2026-002/research_summary.json` for live reproducible run statistics.
 
 | Model | Architecture | Accuracy | F1 Score | Precision | Recall | Training Time (s) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |

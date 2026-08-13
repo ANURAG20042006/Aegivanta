@@ -33,7 +33,7 @@
 
 > [!NOTE]
 > The accuracy figures below are from the **prototype development phase** (not from the current reproducible experiment suite).
-> **For empirically generated, current results**, see `results/EXP-2026-001/baseline_comparison.csv` and `results/EXP-2026-001/research_summary.json`.
+> **For empirically generated, current results**, see `results/EXP-2026-002/baseline_comparison.csv`, `results/EXP-2026-002/research_summary.json`, and `results/EXP-2026-002/provenance.json`.
 > Examiners should direct performance questions to these live-generated artifacts.
 
 | Model Name | Model Type | Primary Use Case |
