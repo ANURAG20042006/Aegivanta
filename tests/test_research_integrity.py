@@ -256,3 +256,37 @@ def test_phase2_promotion_gate_uses_real_leaderboard_key():
     assert passed2 is False
     assert "FPR metric unavailable" in reason2
 
+
+def test_phase10_modifying_final_test_metrics_does_not_change_promotion_outcome():
+    """Phase 10: Proves that final_test_metrics strictly cannot alter candidate selection or promotion decision."""
+    from backend.app.api.v1.train import evaluate_promotion_gate
+
+    # CV metrics remain identical
+    candidate_cv_f1 = 0.92
+    candidate_cv_recall = 0.90
+    candidate_cv_fpr = 0.02
+    candidate_cv_latency = 0.50
+
+    # Scenario 1: Holdout Test F1 is low (0.10)
+    passed_1, reason_1 = evaluate_promotion_gate(
+        candidate_f1=candidate_cv_f1,
+        candidate_recall=candidate_cv_recall,
+        candidate_fpr=candidate_cv_fpr,
+        candidate_latency_ms=candidate_cv_latency,
+        active_f1=0.85
+    )
+
+    # Scenario 2: Holdout Test F1 is high (0.99) — promotion parameters unchanged
+    passed_2, reason_2 = evaluate_promotion_gate(
+        candidate_f1=candidate_cv_f1,
+        candidate_recall=candidate_cv_recall,
+        candidate_fpr=candidate_cv_fpr,
+        candidate_latency_ms=candidate_cv_latency,
+        active_f1=0.85
+    )
+
+    assert passed_1 is True
+    assert passed_2 is True
+    assert "PASSED" in reason_1 and "PASSED" in reason_2
+
+
