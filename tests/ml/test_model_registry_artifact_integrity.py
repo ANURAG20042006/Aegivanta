@@ -131,3 +131,13 @@ class TestModelRegistryArtifactIntegrity:
 
         ok, msg = verify_rollback_artifact_integrity(target_model)
         assert ok is True, f"Rollback integrity failed: {msg}"
+
+    def test_k_missing_specific_model_never_resolves_to_other_artifact(self, tmp_path):
+        """TEST K: A missing specific model artifact MUST NOT fallback to best_model.joblib."""
+        (tmp_path / "best_model.joblib").write_bytes(b"best model dummy")
+        path, art_type, sha256, exists = resolve_model_artifact_path("Decision Tree", tmp_path)
+        assert exists is False
+        assert sha256 is None
+        assert path.name == "decision_tree.joblib"
+        assert path.name != "best_model.joblib"
+

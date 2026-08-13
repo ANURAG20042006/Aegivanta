@@ -59,17 +59,7 @@ def resolve_model_artifact_path(
     target_path = artifacts_dir / spec["filename"]
     art_type = spec["type"]
 
-    # Fallback checks if expected file does not exist
-    if not target_path.exists():
-        if art_type == "joblib":
-            fallback_best = artifacts_dir / "best_model.joblib"
-            if fallback_best.exists():
-                target_path = fallback_best
-        elif art_type == "pytorch":
-            fallback_pt = artifacts_dir / f"{model_name.lower().replace(' ', '_')}.pth"
-            if fallback_pt.exists():
-                target_path = fallback_pt
-
+    # Strict resolution: exact canonical artifact ONLY. No silent cross-model fallback.
     exists = target_path.exists() and target_path.is_file()
     actual_sha256 = None
     if exists:
