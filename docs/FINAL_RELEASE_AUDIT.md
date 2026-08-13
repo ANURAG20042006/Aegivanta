@@ -45,23 +45,26 @@
 
 ---
 
-## 4. Empirical ML Metrics Disclosure
+## 4. Empirical ML Metrics Disclosure (Authoritative Experiment: EXP-2026-002)
 
+- **Authoritative Source**: `ml/artifacts/metadata.json` (Experiment ID: `EXP-2026-002`)
 - **Benchmark Dataset**: `synthetic_cicids2017_benchmark`
-- **Dataset Size**: `1500` samples, `82` features (78 flow telemetry + metadata)
+- **Dataset Size**: `5,000` samples, `82` features (78 flow telemetry + metadata)
 - **Class Taxonomy**: `18` classes (`BENIGN` + 17 attack categories)
-- **5-Fold Cross-Validation Metrics (TRAIN split only)**:
-  - Macro F1 Mean: `0.9289 ± 0.009`
-  - Recall Mean: `0.9320 ± 0.008`
-  - Precision Mean: `0.9350 ± 0.009`
-  - Macro FPR: `0.0041`
-- **Final Holdout Test Evaluation (Evaluated ONCE on 20% untouched test set)**:
+- **5-Fold Cross-Validation Metrics (TRAIN split only, N=4,000)**:
+  - Macro F1 Mean: `0.9430 ± 0.0222`
+  - Precision Mean: `0.9456 ± 0.0217`
+  - Recall Mean: `0.9434 ± 0.0212`
+  - Accuracy Mean: `0.9602 ± 0.0153`
+  - Macro FPR: `0.0023 ± 0.0008`
+- **Final Holdout Test Evaluation (Evaluated ONCE on 20% untouched test set, N=1,000)**:
   - Accuracy: `0.9300`
-  - Macro F1: `0.9254`
-  - Recall: `0.9280`
-  - Precision: `0.9310`
-  - Macro FPR: `0.0042`
-  - Inference Latency: `0.001 ms/sample`
+  - Macro F1: `0.8973`
+  - Precision: `0.9015`
+  - Recall: `0.9012`
+  - Macro FPR: `0.0040`
+  - ROC-AUC: `0.9972`
+  - Inference Latency: `0.0056 ms/sample`
 
 ---
 

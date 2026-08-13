@@ -33,7 +33,7 @@ A comprehensive repository-wide static security audit was performed across all c
 
 #### [HIGH-1] Missing Required Production Account Environment Variable Checks
 - **Location**: [`backend/app/config.py:L72-L80`](file:///c:/Users/NJ542WS/Desktop/major%20project/backend/app/config.py#L72-L80) & [`backend/app/main.py:L37-L67`](file:///c:/Users/NJ542WS/Desktop/major%20project/backend/app/main.py#L37-L67)
-- **Description**: Default user seeding allowed dev fallback passwords (`Admin_Secure2026!`) if environment variables (`SENTINEL_ADMIN_PASSWORD`, `SENTINEL_ANALYST_PASSWORD`, `SENTINEL_VIEWER_PASSWORD`) were missing, without checking `OPERATING_MODE == "PRODUCTION"`.
+- **Description**: Default user seeding allowed dev fallback passwords (`${SENTINEL_ADMIN_PASSWORD}`) if environment variables (`SENTINEL_ADMIN_PASSWORD`, `SENTINEL_ANALYST_PASSWORD`, `SENTINEL_VIEWER_PASSWORD`) were missing, without checking `OPERATING_MODE == "PRODUCTION"`.
 
 #### [HIGH-2] Non-Standard Readiness HTTP Status Code
 - **Location**: [`backend/app/api/v1/health.py:L92`](file:///c:/Users/NJ542WS/Desktop/major%20project/backend/app/api/v1/health.py#L92)

@@ -30,7 +30,7 @@
 
 ## 4. Code Integrity & Fallback Baseline Findings
 - **Hardcoded Credentials**:
-  - `docker/docker-compose.yml`: Default password fallback `${POSTGRES_PASSWORD:-sentinel_secure_pass_2026}`.
+  - `docker/docker-compose.yml`: Default password fallback `${POSTGRES_PASSWORD:-<CONFIGURED_DB_PASSWORD>}`.
   - `backend/app/config.py`: Hardcoded fallback defaults for database credentials.
 - **Hardcoded Probabilities & Confidence**:
   - `ml/models/deep_learning.py`: Hardcoded `probs[i, 1] = 0.95` and `probs[i, 0] = 0.95` for Autoencoder anomaly scores.

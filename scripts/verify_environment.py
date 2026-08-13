@@ -55,6 +55,12 @@ def check_package(import_name: str, pip_name: str, version_attr: str, required: 
     try:
         mod = importlib.import_module(import_name)
         version = getattr(mod, version_attr, "unknown")
+        if pip_name == "scikit-learn" and version != "unknown":
+            # Enforce scikit-learn >= 1.6, < 1.7 constraint check
+            parts = [int(p) for p in version.split(".")[:2] if p.isdigit()]
+            if len(parts) >= 2 and (parts[0] != 1 or parts[1] != 6):
+                print(f"  [WARN] {pip_name} ({import_name}) == {version} — WARNING: Expected scikit-learn >=1.6,<1.7 (e.g. 1.6.1)")
+                return True
         print(f"  [OK]  {pip_name} ({import_name}) == {version}")
         return True
     except ImportError as e:
