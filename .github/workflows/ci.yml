@@ -34,6 +34,10 @@ jobs:
         run: |
           python -m compileall -q backend ml scripts tests
 
+      - name: Run Artifact Integrity & Security Audit
+        run: |
+          python scripts/final_integrity_audit.py
+
       - name: Run PyTest Test Suite
         run: |
           python -m pytest -q

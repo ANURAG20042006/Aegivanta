@@ -377,8 +377,11 @@ class AutoencoderModel(BaseSentinelModel):
         else:
             self.model = IsolationForest(contamination=0.1, random_state=42)
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
-        self.num_classes = int(len(np.unique(y)))
+    def fit(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> None:
+        if y is not None:
+            self.num_classes = int(len(np.unique(y)))
+        else:
+            self.num_classes = 0
         if HAS_TORCH:
             self._input_dim = int(X.shape[1])
             self.net = AutoencoderNet(self._input_dim).to(self.device)
