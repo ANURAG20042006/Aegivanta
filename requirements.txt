@@ -48,5 +48,5 @@ seaborn==0.13.2
 
 # Testing & Utilities
 pytest==9.1.1
-pytest-asyncio==0.26.0
+pytest-asyncio==1.4.0
 httpx==0.28.1
