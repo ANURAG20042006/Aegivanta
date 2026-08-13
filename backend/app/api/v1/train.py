@@ -319,7 +319,7 @@ async def async_train_worker(job_id: str):
                 latency_ms=champion.get("cv_latency_ms"),
                 artifact_sha256=cand_sha256,
                 is_active=False,
-                artifact_path=str(cand_art_file),
+                artifact_path=str(cand_art_file).replace("\\", "/"),
                 artifact_type=cand_art_type,
                 previous_version=active_model.model_version if active_model else None,
                 per_class_metrics=candidate_per_class

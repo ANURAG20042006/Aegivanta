@@ -1,10 +1,10 @@
 {
   "experiment_id": "EXP-2026-002",
-  "model_version": "naive_bayes-v1.0",
+  "model_version": "catboost-v1.0",
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "62aa92a7d54fe464",
-  "training_timestamp": "2026-08-13T13:01:52.034084+00:00",
+  "training_timestamp": "2026-08-13T18:42:46.485143+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -50,43 +50,43 @@
   },
   "cv_metrics": {
     "n_splits": 3,
-    "macro_f1_mean": 0.9289,
-    "macro_f1_std": 0.0349,
-    "precision_mean": 0.9477,
-    "precision_std": 0.0297,
-    "recall_mean": 0.9269,
-    "recall_std": 0.0369,
-    "accuracy_mean": 0.9576,
-    "accuracy_std": 0.0214,
+    "macro_f1_mean": 0.9301,
+    "macro_f1_std": 0.0245,
+    "precision_mean": 0.9405,
+    "precision_std": 0.019,
+    "recall_mean": 0.9323,
+    "recall_std": 0.0292,
+    "accuracy_mean": 0.9625,
+    "accuracy_std": 0.0148,
     "fold_details": [
       {
         "Fold": 1,
-        "Accuracy": 0.9328,
-        "Macro F1": 0.889,
-        "Precision": 0.9134,
-        "Recall": 0.8843,
-        "FPR": 0.0041
+        "Accuracy": 0.9478,
+        "Macro F1": 0.906,
+        "Precision": 0.9188,
+        "Recall": 0.9028,
+        "FPR": 0.0032
       },
       {
         "Fold": 2,
-        "Accuracy": 0.9699,
-        "Macro F1": 0.9538,
-        "Precision": 0.9641,
-        "Recall": 0.9472,
-        "FPR": 0.002
+        "Accuracy": 0.9774,
+        "Macro F1": 0.9549,
+        "Precision": 0.9537,
+        "Recall": 0.9611,
+        "FPR": 0.0013
       },
       {
         "Fold": 3,
-        "Accuracy": 0.9699,
-        "Macro F1": 0.9439,
-        "Precision": 0.9656,
-        "Recall": 0.9491,
-        "FPR": 0.0017
+        "Accuracy": 0.9624,
+        "Macro F1": 0.9292,
+        "Precision": 0.9491,
+        "Recall": 0.9329,
+        "FPR": 0.0022
       }
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.948690058540551,
+    "best_selection_score": 0.9511522504720936,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -95,13 +95,13 @@
     }
   },
   "final_test_metrics": {
-    "accuracy": 0.98,
-    "macro_f1": 0.9623,
-    "precision": 0.9769,
-    "recall": 0.9611,
-    "fpr": 0.0012,
+    "accuracy": 0.96,
+    "macro_f1": 0.9329,
+    "precision": 0.9333,
+    "recall": 0.9389,
+    "fpr": 0.0023,
     "roc_auc": 0.9996,
-    "inference_latency_ms": 0.0763,
+    "inference_latency_ms": 0.0091,
     "confusion_matrix": [
       [
         4,
@@ -167,11 +167,11 @@
         0,
         0,
         0,
-        5,
+        4,
         0,
         0,
         0,
-        0,
+        1,
         0,
         0,
         0,
@@ -438,9 +438,9 @@
         0,
         0,
         0,
+        1,
         0,
-        0,
-        5,
+        4,
         0
       ],
       [
@@ -484,9 +484,9 @@
         "fpr": 0.0
       },
       "DDoS": {
-        "precision": 0.8333,
-        "recall": 1.0,
-        "f1": 0.9091,
+        "precision": 0.8,
+        "recall": 0.8,
+        "f1": 0.8,
         "fpr": 0.0105
       },
       "DNS Spoofing": {
@@ -508,10 +508,10 @@
         "fpr": 0.0
       },
       "DoS Hulk": {
-        "precision": 1.0,
+        "precision": 0.5,
         "recall": 0.5,
-        "f1": 0.6667,
-        "fpr": 0.0
+        "f1": 0.5,
+        "fpr": 0.0102
       },
       "DoS Slowloris": {
         "precision": 1.0,
@@ -550,10 +550,10 @@
         "fpr": 0.0
       },
       "SQL Injection": {
-        "precision": 1.0,
+        "precision": 0.75,
         "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0
+        "f1": 0.8571,
+        "fpr": 0.0103
       },
       "SSH-Patator": {
         "precision": 1.0,
@@ -563,8 +563,8 @@
       },
       "XSS": {
         "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "recall": 0.8,
+        "f1": 0.8889,
         "fpr": 0.0
       },
       "Zero-Day Anomaly": {
@@ -588,7 +588,10 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.955,
       "cv_accuracy_std": 0.0128,
-      "selection_score": 0.911
+      "selection_score": 0.9441,
+      "artifact_path": "ml\\artifacts\\random_forest.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "8cc472dfdfee0083fbdbaaaab396ac41ab835f374d77c871eaa6f3608dc7cc9f"
     },
     {
       "model_name": "XGBoost",
@@ -601,7 +604,10 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.9475,
       "cv_accuracy_std": 0.0127,
-      "selection_score": 0.8484
+      "selection_score": 0.9482,
+      "artifact_path": "ml\\artifacts\\xgboost.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "4d48f7396e02313673d3764630da6331a92c13bd60497f208c195c84f22c3c87"
     },
     {
       "model_name": "LightGBM",
@@ -614,7 +620,10 @@
       "cv_precision_std": 0.057,
       "cv_accuracy_mean": 0.9375,
       "cv_accuracy_std": 0.0378,
-      "selection_score": 0.8337
+      "selection_score": 0.9332,
+      "artifact_path": "ml\\artifacts\\lightgbm.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "33eb0c8158d7ae335101e3d222f8386974a827415ab47091aabe1c2687b05fd9"
     },
     {
       "model_name": "CatBoost",
@@ -627,7 +636,10 @@
       "cv_precision_std": 0.019,
       "cv_accuracy_mean": 0.9625,
       "cv_accuracy_std": 0.0148,
-      "selection_score": 0.8513
+      "selection_score": 0.9512,
+      "artifact_path": "ml\\artifacts\\catboost.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "a9a3edb3f0c31c4ec9c2ab1494e2a03fcc0f135c65aab5410c1a8642e06c795c"
     },
     {
       "model_name": "Decision Tree",
@@ -640,7 +652,10 @@
       "cv_precision_std": 0.0395,
       "cv_accuracy_mean": 0.95,
       "cv_accuracy_std": 0.0187,
-      "selection_score": 0.9351
+      "selection_score": 0.9422,
+      "artifact_path": "ml\\artifacts\\decision_tree.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "b355179832421de6a3c1d5cc52707026c061a679fafefbef24875ae28a097077"
     },
     {
       "model_name": "Logistic Regression",
@@ -653,7 +668,10 @@
       "cv_precision_std": 0.0182,
       "cv_accuracy_mean": 0.8951,
       "cv_accuracy_std": 0.0514,
-      "selection_score": 0.8977
+      "selection_score": 0.9157,
+      "artifact_path": "ml\\artifacts\\logistic_regression.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "e8e8bc9d949eb7984df1ee6b77dcc276fa4574f6b16c23ed653eb9dfbca978c6"
     },
     {
       "model_name": "SVM",
@@ -666,7 +684,10 @@
       "cv_precision_std": 0.0151,
       "cv_accuracy_mean": 0.7779,
       "cv_accuracy_std": 0.1415,
-      "selection_score": 0.8716
+      "selection_score": 0.8971,
+      "artifact_path": "ml\\artifacts\\svm.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "a1aa947b74572ca64aaf1a8ff27db1107b0dd2bf27c75b8ed9951f2c39dd97a7"
     },
     {
       "model_name": "KNN",
@@ -679,7 +700,10 @@
       "cv_precision_std": 0.0058,
       "cv_accuracy_mean": 0.9375,
       "cv_accuracy_std": 0.0112,
-      "selection_score": 0.9348
+      "selection_score": 0.9335,
+      "artifact_path": "ml\\artifacts\\knn.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "eef28ce30d1cadd3a7b75ff8262032d2f9a58a425d89bb7fe3ea2b2610d30e5d"
     },
     {
       "model_name": "Naive Bayes",
@@ -692,48 +716,57 @@
       "cv_precision_std": 0.0297,
       "cv_accuracy_mean": 0.9576,
       "cv_accuracy_std": 0.0214,
-      "selection_score": 0.9487
+      "selection_score": 0.9491,
+      "artifact_path": "ml\\artifacts\\naive_bayes.joblib",
+      "artifact_type": "joblib",
+      "artifact_sha256": "b42b192f5ea7072d26d006a0b743138a093de41fa5c9aaf9336f02aa9395a659"
     },
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.8247,
-      "cv_f1_std": 0.0341,
-      "cv_recall_mean": 0.8372,
-      "cv_recall_std": 0.0355,
-      "cv_precision_mean": 0.8263,
-      "cv_precision_std": 0.0375,
-      "cv_accuracy_mean": 0.8876,
-      "cv_accuracy_std": 0.0221,
-      "selection_score": 0.7795
+      "cv_f1_mean": 0.8899,
+      "cv_f1_std": 0.0325,
+      "cv_recall_mean": 0.8909,
+      "cv_recall_std": 0.0341,
+      "cv_precision_mean": 0.9009,
+      "cv_precision_std": 0.0229,
+      "cv_accuracy_mean": 0.93,
+      "cv_accuracy_std": 0.017,
+      "selection_score": 0.9224,
+      "artifact_path": "ml\\artifacts\\cnn_1d.pt",
+      "artifact_type": "pytorch"
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.6103,
-      "cv_f1_std": 0.0828,
-      "cv_recall_mean": 0.6635,
-      "cv_recall_std": 0.0682,
-      "cv_precision_mean": 0.6651,
-      "cv_precision_std": 0.1047,
-      "cv_accuracy_mean": 0.6447,
-      "cv_accuracy_std": 0.2068,
-      "selection_score": 0.6573
+      "cv_f1_mean": 0.8912,
+      "cv_f1_std": 0.0364,
+      "cv_recall_mean": 0.8905,
+      "cv_recall_std": 0.0413,
+      "cv_precision_mean": 0.9079,
+      "cv_precision_std": 0.0157,
+      "cv_accuracy_mean": 0.9326,
+      "cv_accuracy_std": 0.0195,
+      "selection_score": 0.9228,
+      "artifact_path": "ml\\artifacts\\lstm.pt",
+      "artifact_type": "pytorch"
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0293,
-      "cv_f1_std": 0.0001,
+      "cv_f1_mean": 0.005,
+      "cv_f1_std": 0.0005,
       "cv_recall_mean": 0.0556,
       "cv_recall_std": 0.0,
-      "cv_precision_mean": 0.0199,
-      "cv_precision_std": 0.0001,
-      "cv_accuracy_mean": 0.3575,
-      "cv_accuracy_std": 0.0038,
-      "selection_score": 0.2876
+      "cv_precision_mean": 0.0026,
+      "cv_precision_std": 0.0003,
+      "cv_accuracy_mean": 0.0425,
+      "cv_accuracy_std": 0.0042,
+      "selection_score": 0.3066,
+      "artifact_path": "ml\\artifacts\\autoencoder.pt",
+      "artifact_type": "pytorch"
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "9d34be31d17b59036d7d1fedee50ff3f690c7a52"
+  "git_commit": "aeffc9ac18c5898c796b4ac2b91da3199f5db521"
 }

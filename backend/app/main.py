@@ -125,7 +125,7 @@ async def initialize_application() -> None:
                             recall_score=item.get("cv_recall_mean"),
                             roc_auc=item.get("cv_roc_auc"),
                             is_active=False,
-                            artifact_path=str(art_path),
+                            artifact_path=str(art_path).replace("\\", "/"),
                             artifact_type=art_type,
                             artifact_sha256=actual_sha256
                         ))

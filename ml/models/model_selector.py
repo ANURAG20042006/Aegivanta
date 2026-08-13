@@ -230,9 +230,14 @@ class ModelSelectorSuite:
 
                 selection_score = self.compute_selection_score(avg_f1, avg_rec, avg_fpr, avg_lat)
 
+                from ml.schema.artifact_mapping import get_artifact_spec
+                spec = get_artifact_spec(model.model_name)
+
                 result = {
                     "model_name": model.model_name,
                     "model_type": model.model_type,
+                    "artifact_path": f"ml/artifacts/{spec['filename']}",
+                    "artifact_type": spec["type"],
                     "cv_f1_mean": round(avg_f1, 4),
                     "cv_f1_std": round(std_f1, 4),
                     "cv_recall_mean": round(avg_rec, 4),
