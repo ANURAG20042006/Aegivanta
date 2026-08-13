@@ -31,41 +31,45 @@ from backend.app.api.v1.incidents import router as incidents_router
 from backend.app.api.v1.health import router as health_router
 
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import secrets
 import json
 
-def _get_required_user_password(env_var: str) -> str:
-    pwd = os.environ.get(env_var)
-    if not pwd:
-        raise RuntimeError(
-            f"Security Error: Environment variable '{env_var}' is required to seed default accounts.\n"
-            f"Set {env_var} in your .env or environment variables."
-        )
-    return pwd
+def get_default_users():
+    def _get_required_user_password(env_var: str) -> str:
+        pwd = os.environ.get(env_var)
+        if not pwd:
+            raise RuntimeError(
+                f"Security Error: Environment variable '{env_var}' is required to seed default accounts.\n"
+                f"Set {env_var} in your .env or environment variables."
+            )
+        return pwd
 
-DEFAULT_USERS = [
-    (
-        "admin",
-        "admin@sentinelai.io",
-        _get_required_user_password("SENTINEL_ADMIN_PASSWORD"),
-        "System Administrator",
-        "admin"
-    ),
-    (
-        "analyst",
-        "analyst@sentinelai.io",
-        _get_required_user_password("SENTINEL_ANALYST_PASSWORD"),
-        "Senior Security Analyst",
-        "analyst"
-    ),
-    (
-        "viewer",
-        "viewer@sentinelai.io",
-        _get_required_user_password("SENTINEL_VIEWER_PASSWORD"),
-        "Security Operations Viewer",
-        "viewer"
-    ),
-]
+    return [
+        (
+            "admin",
+            "admin@sentinelai.io",
+            _get_required_user_password("SENTINEL_ADMIN_PASSWORD"),
+            "System Administrator",
+            "admin"
+        ),
+        (
+            "analyst",
+            "analyst@sentinelai.io",
+            _get_required_user_password("SENTINEL_ANALYST_PASSWORD"),
+            "Senior Security Analyst",
+            "analyst"
+        ),
+        (
+            "viewer",
+            "viewer@sentinelai.io",
+            _get_required_user_password("SENTINEL_VIEWER_PASSWORD"),
+            "Security Operations Viewer",
+            "viewer"
+        ),
+    ]
 
 async def initialize_application() -> None:
     """Creates the schema and seeds required records for a new installation."""
@@ -73,6 +77,7 @@ async def initialize_application() -> None:
 
     async with AsyncSessionFactory() as db:
         user_exists = (await db.execute(select(User.id).limit(1))).scalar_one_or_none()
+        default_users = get_default_users()
         if not user_exists:
             logger.info("Seeding default user accounts...")
             db.add_all([
@@ -84,12 +89,12 @@ async def initialize_application() -> None:
                     role=role,
                     is_active=True,
                 )
-                for username, email, raw_password, full_name, role in DEFAULT_USERS
+                for username, email, raw_password, full_name, role in default_users
             ])
             await db.commit()
         else:
             # Update password hashes for default accounts if needed
-            for username, _, raw_password, _, _ in DEFAULT_USERS:
+            for username, _, raw_password, _, _ in default_users:
                 usr = (await db.execute(select(User).where(User.username == username))).scalar_one_or_none()
                 if usr and not verify_password(raw_password, usr.password_hash):
                     usr.password_hash = hash_password(raw_password)
