@@ -113,6 +113,7 @@ class ModelSelectorSuite:
         for model in self.models:
             print(f"--> Evaluating Selection for Model: {model.model_name} ({model.model_type}) via {n_splits}-Fold CV on TRAIN set...")
             fold_f1s, fold_recalls, fold_fprs, fold_latencies, fold_precisions, fold_accuracies = [], [], [], [], [], []
+            fold_per_class_list = []
             fold_records = []
 
             try:
@@ -163,6 +164,9 @@ class ModelSelectorSuite:
                     acc = float(accuracy_score(y_val_fold, y_val_pred))
                     prec = float(precision_score(y_val_fold, y_val_pred, average="macro", zero_division=0))
 
+                    fold_per_class = compute_per_class_metrics(y_val_fold, y_val_pred)
+                    fold_per_class_list.append(fold_per_class)
+
                     fold_f1s.append(f1)
                     fold_recalls.append(rec)
                     fold_fprs.append(fpr)
@@ -190,6 +194,37 @@ class ModelSelectorSuite:
                 avg_fpr = float(np.mean(fold_fprs))
                 avg_lat = float(np.mean(fold_latencies))
 
+                cv_per_class = {}
+                all_classes = set()
+                for fpc in fold_per_class_list:
+                    all_classes.update(fpc.keys())
+
+                for cls_name in all_classes:
+                    p_vals = [fpc[cls_name]["precision"] for fpc in fold_per_class_list if cls_name in fpc]
+                    r_vals = [fpc[cls_name]["recall"] for fpc in fold_per_class_list if cls_name in fpc]
+                    f1_vals = [fpc[cls_name]["f1"] for fpc in fold_per_class_list if cls_name in fpc]
+                    fpr_vals = [fpc[cls_name]["fpr"] for fpc in fold_per_class_list if cls_name in fpc]
+
+                    p_mean = round(float(np.mean(p_vals)), 4) if p_vals else 0.0
+                    r_mean = round(float(np.mean(r_vals)), 4) if r_vals else 0.0
+                    f1_mean = round(float(np.mean(f1_vals)), 4) if f1_vals else 0.0
+                    fpr_mean = round(float(np.mean(fpr_vals)), 4) if fpr_vals else 0.0
+
+                    cv_per_class[str(cls_name)] = {
+                        "precision_mean": p_mean,
+                        "precision_std": round(float(np.std(p_vals, ddof=1)), 4) if len(p_vals) > 1 else 0.0,
+                        "recall_mean": r_mean,
+                        "recall_std": round(float(np.std(r_vals, ddof=1)), 4) if len(r_vals) > 1 else 0.0,
+                        "f1_mean": f1_mean,
+                        "f1_std": round(float(np.std(f1_vals, ddof=1)), 4) if len(f1_vals) > 1 else 0.0,
+                        "fpr_mean": fpr_mean,
+                        "fpr_std": round(float(np.std(fpr_vals, ddof=1)), 4) if len(fpr_vals) > 1 else 0.0,
+                        "precision": p_mean,
+                        "recall": r_mean,
+                        "f1": f1_mean,
+                        "fpr": fpr_mean
+                    }
+
                 selection_score = self.compute_selection_score(avg_f1, avg_rec, avg_fpr, avg_lat)
 
                 result = {
@@ -205,6 +240,8 @@ class ModelSelectorSuite:
                     "cv_accuracy_std": round(std_acc, 4),
                     "cv_fpr_mean": round(avg_fpr, 4),
                     "cv_latency_ms": round(avg_lat, 4),
+                    "cv_per_class_metrics": cv_per_class,
+                    "per_class_metrics": cv_per_class,
                     "selection_score": round(selection_score, 4),
                     "instance": model,
                     "fold_details": fold_records

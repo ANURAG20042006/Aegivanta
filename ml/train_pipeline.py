@@ -211,15 +211,18 @@ def run_training_pipeline(
     baseline_path = artifacts_path / "baseline_X_train.joblib"
     joblib.dump(X_train_preprocessed, baseline_path)
 
-    # Step 5: Evaluate frozen champion ONCE on test set
+    # Step 5: Evaluate frozen champion ONCE on test set AFTER selection & training finish.
+    # CRITICAL RESEARCH ISOLATION RULE: final_test_metrics is used strictly for post-promotion
+    # empirical reporting and metadata persistence. It MUST NOT be fed into candidate selection
+    # or the production promotion gate.
     X_test_preprocessed = preprocessor.transform_test(X_test_raw)
     class_names = [str(c) for c in label_encoder.classes_] if hasattr(label_encoder, "classes_") else None
     final_test_metrics = selector.evaluate_final_test_set(X_test_preprocessed, y_test_raw, class_names=class_names)
 
-    # Step 6: Metadata Generation with 4 Required Metric Sections
+    # Step 6: Metadata Generation with Required Metric Sections
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
     champion_results = next(r for r in results if r["model_name"] == champion_name)
-    champion_results["per_class_metrics"] = final_test_metrics.get("per_class_metrics", {})
+
 
 
     experiment_id = "EXP-2026-002"

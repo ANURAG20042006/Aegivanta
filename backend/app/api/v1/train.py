@@ -190,21 +190,31 @@ def verify_rollback_artifact_integrity(
     if n_features_in is not None and selected_feats > 0 and n_features_in != selected_feats:
         return False, f"Rollback rejected: Preprocessor produces {selected_feats} features but target model expects {n_features_in} features."
 
+    # 10. Checksum / SHA-256 Hash Verification (Fail-Closed)
+    expected_hash = getattr(target_model, "artifact_sha256", None)
+
     manifest_path = artifacts_dir / "artifact_manifest.json"
     if not manifest_path.exists():
         manifest_path = Path.cwd() / "ml/artifacts/artifact_manifest.json"
-    if manifest_path.exists():
+
+    if expected_hash is None and manifest_path.exists():
         try:
             with manifest_path.open("r", encoding="utf-8") as f:
                 manifest = json.load(f)
-            stored_model_hash = manifest.get("model_hash")
-            if stored_model_hash and art_path.name == (manifest.get("model_version", "") + ".joblib"):
-                actual_hash = hashlib.sha256(art_path.read_bytes()).hexdigest()
-                if actual_hash != stored_model_hash:
-                    return False, f"Rollback rejected: Model artifact hash mismatch ({actual_hash[:8]} vs registered {stored_model_hash[:8]})."
-        except Exception:
-            pass
+            expected_hash = manifest.get("model_hash")
+        except Exception as exc:
+            return False, f"Rollback rejected: Artifact manifest file is corrupted or unreadable: {exc}"
 
+    if expected_hash:
+        try:
+            actual_hash = hashlib.sha256(art_path.read_bytes()).hexdigest()
+        except Exception as exc:
+            return False, f"Rollback rejected: Failed to calculate artifact SHA-256 hash: {exc}"
+
+        if actual_hash != expected_hash:
+            return False, f"Rollback rejected: Model artifact SHA-256 hash mismatch ({actual_hash[:8]} vs registered {expected_hash[:8]})."
+
+    # 11 & 12. Inference usability check
     if not hasattr(model, "predict"):
         return False, "Rollback rejected: Target model object missing required predict() interface."
 
@@ -269,6 +279,17 @@ async def async_train_worker(job_id: str):
             candidate_per_class = champion.get("per_class_metrics")
             active_per_class = getattr(active_model, "per_class_metrics", None) if active_model else None
 
+            cand_art_file = Path(f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib")
+            if not cand_art_file.exists():
+                cand_art_file = Path("ml/artifacts/best_model.joblib")
+
+            cand_sha256 = None
+            if cand_art_file.exists():
+                try:
+                    cand_sha256 = hashlib.sha256(cand_art_file.read_bytes()).hexdigest()
+                except Exception:
+                    cand_sha256 = None
+
             # Register Candidate Model in ModelRegistry with status "CANDIDATE" BEFORE promotion gate evaluation
             candidate_registry = ModelRegistry(
                 model_name=champion["model_name"],
@@ -281,8 +302,9 @@ async def async_train_worker(job_id: str):
                 recall_score=champion.get("cv_recall_mean"),
                 roc_auc=candidate_roc_auc,
                 latency_ms=champion.get("cv_latency_ms"),
+                artifact_sha256=cand_sha256,
                 is_active=False,
-                artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
+                artifact_path=str(cand_art_file),
                 previous_version=active_model.model_version if active_model else None,
                 per_class_metrics=candidate_per_class
             )

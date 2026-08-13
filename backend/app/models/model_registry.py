@@ -28,7 +28,8 @@ class ModelRegistry(Base):
     precision_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     recall_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     roc_auc: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    latency_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.45)
+    latency_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=None)
+    artifact_sha256: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     artifact_path: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -45,4 +46,5 @@ class ModelRegistry(Base):
     promotion_reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     confusion_matrix: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     per_class_metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+
 

@@ -174,8 +174,8 @@ def test_13_binary_fpr_correctness():
     assert abs(fpr - 0.0583) < 1e-3, f"Binary FPR calculated incorrectly: got {fpr}, expected ~0.0583"
 
 
-def test_14_multiclass_fpr_correctness():
-    """TEST 14 — Multiclass FPR: Verify One-vs-Rest macro FPR = FP/(FP+TN) per class and prove FPR != 1 - recall."""
+def test_19_multiclass_fpr_formula():
+    """TEST 19 — Multiclass FPR remains FP / (FP + TN) per class, averaged across classes (One-vs-Rest macro)."""
     y_true = np.array([0, 0, 0,  1, 1, 1,  2, 2, 2])
     y_pred = np.array([0, 0, 1,  1, 1, 2,  2, 2, 0])
 
@@ -183,10 +183,18 @@ def test_14_multiclass_fpr_correctness():
     expected_fpr = 1.0 / 6.0   # = 0.16667
     assert abs(fpr - expected_fpr) < 1e-4, f"Multiclass FPR incorrect. Got {fpr:.5f}, expected {expected_fpr:.5f}"
 
+
+def test_20_fpr_is_not_one_minus_recall():
+    """TEST 20 — FPR is NOT 1 - recall (False Negative Rate is FN/(FN+TP), while False Positive Rate is FP/(FP+TN))."""
+    y_true = np.array([0, 0, 0,  1, 1, 1,  2, 2, 2])
+    y_pred = np.array([0, 0, 1,  1, 1, 2,  2, 2, 0])
+
+    fpr = calculate_true_fpr(y_true, y_pred)
     from sklearn.metrics import recall_score
     recall = recall_score(y_true, y_pred, average="macro", zero_division=0)
     fnr = 1.0 - recall
     assert abs(fpr - fnr) > 0.10, f"FPR ({fpr:.4f}) must differ from 1-recall ({fnr:.4f})"
+
 
 
 
