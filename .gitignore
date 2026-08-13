@@ -76,3 +76,6 @@ logs/
 docs/generated/
 reports/*.pdf
 reports/*.xlsx
+
+# CatBoost Training Artifacts (generated locally, not for version control)
+catboost_info/

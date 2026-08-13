@@ -4,17 +4,17 @@ from pydantic import BaseModel, EmailStr, Field
 
 class LoginRequest(BaseModel):
     """Payload for user authentication."""
-    username: str = Field(..., example="analyst_admin")
-    password: str = Field(..., example="SecurePassword123!")
+    username: str = Field(..., json_schema_extra={"example": "analyst_admin"})
+    password: str = Field(..., json_schema_extra={"example": "SecurePassword123!"})
 
 
 class RegisterRequest(BaseModel):
     """Payload for registering a new user."""
-    username: str = Field(..., min_length=3, max_length=50, example="cyber_analyst")
-    email: EmailStr = Field(..., example="analyst@sentinelai.io")
-    password: str = Field(..., min_length=6, example="SecurePass123!")
-    full_name: str = Field(..., example="Jane Doe")
-    role: Literal["analyst", "viewer"] = Field(default="analyst", example="analyst")
+    username: str = Field(..., min_length=3, max_length=50, json_schema_extra={"example": "cyber_analyst"})
+    email: EmailStr = Field(..., json_schema_extra={"example": "analyst@sentinelai.io"})
+    password: str = Field(..., min_length=6, json_schema_extra={"example": "SecurePass123!"})
+    full_name: str = Field(..., json_schema_extra={"example": "Jane Doe"})
+    role: Literal["analyst", "viewer"] = Field(default="analyst", json_schema_extra={"example": "analyst"})
 
 
 class Token(BaseModel):

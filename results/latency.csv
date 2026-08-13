@@ -1,7 +1,7 @@
 model,batch_inference_latency_ms,single_sample_latency_ms,f1_score,fpr
-Random Forest,0.0653,0.0653,0.0487,0.0565
-XGBoost,0.013,0.013,0.0626,0.0569
-CatBoost,0.008,0.008,0.051,0.0559
-LightGBM,0.0418,0.0418,0.0502,0.0579
-Decision Tree,0.0,0.0,0.0336,0.055
-Logistic Regression,0.0,0.0,0.0397,0.0548
+Random Forest,0.2019,0.2019,0.0487,0.0565
+XGBoost,0.0395,0.0395,0.0626,0.0569
+CatBoost,0.0408,0.0408,0.051,0.0559
+LightGBM,0.1004,0.1004,0.0502,0.0579
+Decision Tree,0.0202,0.0202,0.0336,0.055
+Logistic Regression,0.0016,0.0016,0.0397,0.0548

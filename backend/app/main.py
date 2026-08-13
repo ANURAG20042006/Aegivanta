@@ -122,7 +122,6 @@ async def initialize_application() -> None:
 
         if not user_exists or not model_exists:
             await db.commit()
-            await db.commit()
 
 
 @asynccontextmanager
