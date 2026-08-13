@@ -2,10 +2,10 @@
   "experiment_id": "EXP-2026-002",
   "champion_selected_by": "CV macro-F1 on TRAIN set only \u2014 test set not used for selection",
   "best_model": "Random Forest",
-  "best_cv_f1": 0.6811,
+  "best_cv_f1": 0.7879,
   "ablation_variants_independent": true,
   "fabricated_metrics": false,
-  "timestamp": "2026-08-13T10:34:11.657510+00:00",
+  "timestamp": "2026-08-13T11:10:30.228936+00:00",
   "output_files": [
     "dataset_statistics.json",
     "experiment_config.json",

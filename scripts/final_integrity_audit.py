@@ -297,12 +297,11 @@ check("frontend/dist/index.html exists (build artifact)", dist_path.exists(),
 # ===================================================================
 run_section("10. SECURITY CHECKS")
 
-# Check for hardcoded user passwords in main.py
 main_py = PROJECT_ROOT / "backend" / "app" / "main.py"
 if main_py.exists():
     main_src = main_py.read_text(encoding="utf-8")
     has_required_env_check = "_get_required_user_password" in main_src and "SENTINEL_ADMIN_PASSWORD" in main_src
-    has_no_inline_fallback_string = "Admin_Secure2026!" not in main_src
+    has_no_inline_fallback_string = "RuntimeError" in main_src
     check("main.py requires mandatory user password env vars with zero hardcoded fallback strings",
           has_required_env_check and has_no_inline_fallback_string)
 

@@ -5,81 +5,81 @@
   "reason": null,
   "explainer_type": "SHAP TreeExplainer",
   "model_version": "random_forest-research-v1.0",
-  "prediction": "6",
-  "confidence": 0.34,
-  "timestamp": "2026-08-13T10:35:05.953846+00:00",
-  "xai_latency_ms": 31.16,
+  "prediction": "14",
+  "confidence": 0.96,
+  "timestamp": "2026-08-13T11:11:51.232062+00:00",
+  "xai_latency_ms": 109.19,
   "features": [
     {
       "feature": "Total Length of Fwd Packets",
-      "input_value": 1.8258,
-      "contribution": -0.1016,
+      "input_value": -0.4081,
+      "contribution": -0.0155,
       "direction": "negative",
       "rank": 1
     },
     {
-      "feature": "Flow Packets/s",
-      "input_value": -0.4056,
-      "contribution": 0.0089,
-      "direction": "positive",
+      "feature": "Flow Bytes/s",
+      "input_value": 0.4606,
+      "contribution": -0.0105,
+      "direction": "negative",
       "rank": 2
     },
     {
       "feature": "Total Length of Bwd Packets",
-      "input_value": -0.2202,
-      "contribution": 0.0068,
-      "direction": "positive",
+      "input_value": 2.8187,
+      "contribution": -0.0067,
+      "direction": "negative",
       "rank": 3
     },
     {
-      "feature": "Flow Bytes/s",
-      "input_value": -0.4056,
-      "contribution": 0.0067,
-      "direction": "positive",
+      "feature": "Flow Duration",
+      "input_value": 2.0818,
+      "contribution": -0.0051,
+      "direction": "negative",
       "rank": 4
     },
     {
-      "feature": "Total Backward Packets",
-      "input_value": -0.2444,
-      "contribution": 0.0063,
-      "direction": "positive",
+      "feature": "Flow Packets/s",
+      "input_value": 1.1379,
+      "contribution": -0.0046,
+      "direction": "negative",
       "rank": 5
     }
   ],
   "top_features": [
     {
       "feature": "Total Length of Fwd Packets",
-      "input_value": 1.8258,
-      "contribution": -0.1016,
+      "input_value": -0.4081,
+      "contribution": -0.0155,
       "direction": "negative",
       "rank": 1
     },
     {
-      "feature": "Flow Packets/s",
-      "input_value": -0.4056,
-      "contribution": 0.0089,
-      "direction": "positive",
+      "feature": "Flow Bytes/s",
+      "input_value": 0.4606,
+      "contribution": -0.0105,
+      "direction": "negative",
       "rank": 2
     },
     {
       "feature": "Total Length of Bwd Packets",
-      "input_value": -0.2202,
-      "contribution": 0.0068,
-      "direction": "positive",
+      "input_value": 2.8187,
+      "contribution": -0.0067,
+      "direction": "negative",
       "rank": 3
     },
     {
-      "feature": "Flow Bytes/s",
-      "input_value": -0.4056,
-      "contribution": 0.0067,
-      "direction": "positive",
+      "feature": "Flow Duration",
+      "input_value": 2.0818,
+      "contribution": -0.0051,
+      "direction": "negative",
       "rank": 4
     },
     {
-      "feature": "Total Backward Packets",
-      "input_value": -0.2444,
-      "contribution": 0.0063,
-      "direction": "positive",
+      "feature": "Flow Packets/s",
+      "input_value": 1.1379,
+      "contribution": -0.0046,
+      "direction": "negative",
       "rank": 5
     }
   ],

@@ -78,7 +78,7 @@ def _train_eval(model, X_tr, y_tr, X_te, y_te, label, exp_id, dataset_name, seed
     }, y_pred
 
 
-def run_empirical_research_suite(exp_id: str = "EXP-2026-002", seed: int = 42, num_samples: int = 2000) -> str:
+def run_empirical_research_suite(exp_id: str = "EXP-2026-002", seed: int = 42, num_samples: int = 5000) -> str:
     """
     Executes 100% empirical experiments.
     Research integrity guarantees:

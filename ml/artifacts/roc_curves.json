@@ -1,7 +1,7 @@
 {
   "active_model": {
     "model_name": "Naive Bayes",
-    "auc": 0.9996,
+    "auc": 0.9972,
     "fpr": [
       0.0,
       0.1,

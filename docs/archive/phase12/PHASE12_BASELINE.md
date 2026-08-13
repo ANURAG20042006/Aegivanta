@@ -13,15 +13,15 @@
 
 ### A. Base64-Obfuscated Passwords Found in Source Code
 - **`backend/app/main.py`**:
-  - `os.environ.get("SENTINEL_ADMIN_PASSWORD") or base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode()`
-  - `os.environ.get("SENTINEL_ANALYST_PASSWORD") or base64.b64decode(b"QW5hbHlzdFNlY3VyZTIwMjYh").decode()`
-  - `os.environ.get("SENTINEL_VIEWER_PASSWORD") or base64.b64decode(b"Vmlld2VyU2VjdXJlMjAyNiE=").decode()`
+  - `os.environ.get("SENTINEL_ADMIN_PASSWORD") or base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode()`
+  - `os.environ.get("SENTINEL_ANALYST_PASSWORD") or base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode()`
+  - `os.environ.get("SENTINEL_VIEWER_PASSWORD") or base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode()`
 - **`backend/app/reset_users.py`**:
-  - `admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", base64.b64decode(b"QWRtaW5TZWN1cmUyMDI2IQ==").decode())`
-  - `analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", base64.b64decode(b"QW5hbHlzdFNlY3VyZTIwMjYh").decode())`
-  - `viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", base64.b64decode(b"Vmlld2VyU2VjdXJlMjAyNiE=").decode())`
+  - `admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode())`
+  - `analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode())`
+  - `viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", base64.b64decode(b"<REDACTED_BASE64_CREDENTIAL>").decode())`
 - **`frontend/src/pages/Login.tsx`**:
-  - Quick role fill buttons called `atob('QWRtaW5TZWN1cmUyMDI2IQ==')`, `atob('QW5hbHlzdFNlY3VyZTIwMjYh')`, `atob('Vmlld2VyU2VjdXJlMjAyNiE=')`.
+  - Quick role fill buttons called `atob('<REDACTED_BASE64_CREDENTIAL>')`.
 - **Integration Tests**:
   - `tests/integration/test_app_lifespan_flow.py` and `tests/integration_test_runner.py` used `base64.b64decode` fallbacks.
 
