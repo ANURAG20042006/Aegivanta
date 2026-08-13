@@ -213,11 +213,14 @@ def run_training_pipeline(
 
     # Step 5: Evaluate frozen champion ONCE on test set
     X_test_preprocessed = preprocessor.transform_test(X_test_raw)
-    final_test_metrics = selector.evaluate_final_test_set(X_test_preprocessed, y_test_raw)
+    class_names = [str(c) for c in label_encoder.classes_] if hasattr(label_encoder, "classes_") else None
+    final_test_metrics = selector.evaluate_final_test_set(X_test_preprocessed, y_test_raw, class_names=class_names)
 
     # Step 6: Metadata Generation with 4 Required Metric Sections
     champion_name = selector.best_model.model_name if selector.best_model else "Random Forest"
     champion_results = next(r for r in results if r["model_name"] == champion_name)
+    champion_results["per_class_metrics"] = final_test_metrics.get("per_class_metrics", {})
+
 
     experiment_id = "EXP-2026-002"
 

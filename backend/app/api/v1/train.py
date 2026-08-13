@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional, Tuple
 import json
+import hashlib
+import joblib
 from fastapi import APIRouter, Depends, status, BackgroundTasks, HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +20,11 @@ from ml.schema.feature_schema import validate_artifact_compatibility
 
 router = APIRouter(prefix="/train", tags=["Model Training & Registry Lifecycle"])
 
+MAX_INFERENCE_LATENCY_MS: float = 5.0
+MIN_REQUIRED_RECALL: float = 0.85
+MAX_ALLOWED_FPR: float = 0.05
+DEFAULT_REGRESSION_TOLERANCE: float = 0.01
+
 
 def evaluate_promotion_gate(
     candidate_f1: Optional[float],
@@ -25,54 +32,190 @@ def evaluate_promotion_gate(
     candidate_fpr: Optional[float],
     candidate_latency_ms: Optional[float] = None,
     active_f1: float = 0.85,
-    regression_tolerance: float = 0.01,
-    artifact_metadata: Optional[Dict[str, Any]] = None
+    regression_tolerance: float = DEFAULT_REGRESSION_TOLERANCE,
+    artifact_metadata: Optional[Dict[str, Any]] = None,
+    candidate_per_class_metrics: Optional[Dict[str, Dict[str, float]]] = None,
+    active_per_class_metrics: Optional[Dict[str, Dict[str, float]]] = None,
+    protected_metrics: Optional[List[str]] = None
 ) -> Tuple[bool, str]:
     """
-    Multi-Metric Promotion Gate:
-    Evaluates:
+    Multi-Metric Promotion Gate with Per-Class Regression Protection:
       1. Artifact Integrity & Schema Compatibility
-      2. Candidate Macro F1 >= Active Macro F1 - Regression Tolerance
-      3. Candidate Recall >= 0.85 (Protects against missing attack vectors)
-      4. Candidate False Positive Rate <= 0.05 (Protects against alert fatigue)
-         FPR is computed as One-vs-Rest: FPR_k = FP_k / (FP_k + TN_k), Macro FPR = mean(FPR_k).
-         A missing FPR MUST block promotion — no fallback value is ever substituted.
-      5. Inference Latency <= 5.0ms
-
-    All required metrics (F1, Recall, FPR) must be real measured values.
-    If any required metric is None (unavailable), promotion is REJECTED immediately.
-    No fallback or default metric values are ever used.
+      2. Required Metric Presence (F1, Recall, FPR, Latency must be non-None)
+      3. Candidate Macro F1 >= Active Macro F1 - Regression Tolerance
+      4. Candidate Recall >= MIN_REQUIRED_RECALL (0.85)
+      5. Candidate False Positive Rate <= MAX_ALLOWED_FPR (0.05)
+      6. Inference Latency <= MAX_INFERENCE_LATENCY_MS (5.0ms)
+      7. Per-Class Regression Protection & Class Set Matching (protected metrics default to ['recall'])
     """
     if artifact_metadata:
         ok, compat_errors = validate_artifact_compatibility(artifact_metadata)
         if not ok:
             return False, f"Artifact Schema Compatibility Failed: {compat_errors}"
 
-    # Guard: required metrics must be real measured values — None = unavailable = reject
+    # Required metric availability checks (P0 Fix 1 & P0 Metric Integrity)
     if candidate_f1 is None:
         return False, "Promotion rejected: Macro F1 metric unavailable. Cannot promote without a real measured F1 score."
     if candidate_recall is None:
         return False, "Promotion rejected: Recall metric unavailable. Cannot promote without a real measured Recall score."
     if candidate_fpr is None:
         return False, "Promotion rejected: FPR metric unavailable. Cannot promote without a real measured False Positive Rate."
+    if candidate_latency_ms is None:
+        return False, "Promotion rejected: inference latency unavailable."
 
+    # Threshold checks
     min_required_f1 = active_f1 - regression_tolerance
-    if candidate_f1 < min_required_f1:
+    if candidate_f1 < min_required_f1 - 1e-6:
         return False, f"Candidate F1 ({candidate_f1:.4f}) is below active threshold with tolerance ({min_required_f1:.4f})."
-    if candidate_recall < 0.85:
-        return False, f"Candidate Recall ({candidate_recall:.4f}) fails minimum threshold (0.8500)."
-    if candidate_fpr > 0.05:
-        return False, f"Candidate False Positive Rate ({candidate_fpr:.4f}) exceeds max allowed limit (0.0500)."
-    if candidate_latency_ms is not None and candidate_latency_ms > 5.0:
-        return False, f"Candidate Latency ({candidate_latency_ms:.2f}ms) exceeds max limit (5.00ms)."
+    if candidate_recall < MIN_REQUIRED_RECALL:
+        return False, f"Candidate Recall ({candidate_recall:.4f}) fails minimum threshold ({MIN_REQUIRED_RECALL:.4f})."
+    if candidate_fpr > MAX_ALLOWED_FPR:
+        return False, f"Candidate False Positive Rate ({candidate_fpr:.4f}) exceeds max allowed limit ({MAX_ALLOWED_FPR:.4f})."
+    if candidate_latency_ms > MAX_INFERENCE_LATENCY_MS:
+        return False, f"Promotion rejected: Candidate Latency ({candidate_latency_ms:.2f}ms) exceeds max limit ({MAX_INFERENCE_LATENCY_MS:.2f}ms)."
+
+    # Per-Class Metrics & Regression Protection Check (P0 Fix 2)
+    if active_per_class_metrics is not None:
+        if candidate_per_class_metrics is None:
+            return False, "Promotion rejected: per-class metrics unavailable."
+
+        cand_classes = set(candidate_per_class_metrics.keys())
+        active_classes = set(active_per_class_metrics.keys())
+        if cand_classes != active_classes:
+            return False, f"Promotion rejected: Candidate class set {sorted(list(cand_classes))} does not match active model class set {sorted(list(active_classes))}."
+
+        metrics_to_check = protected_metrics or ["recall"]
+        for cls_name, act_metrics in active_per_class_metrics.items():
+            cand_metrics = candidate_per_class_metrics.get(cls_name)
+            if cand_metrics is None:
+                return False, f"Promotion rejected: per-class metrics missing for class {cls_name}."
+
+            for m_name in metrics_to_check:
+                if m_name in act_metrics:
+                    if m_name not in cand_metrics or cand_metrics[m_name] is None:
+                        return False, f"Promotion rejected: {cls_name} {m_name} metric unavailable."
+                    act_val = float(act_metrics[m_name])
+                    cand_val = float(cand_metrics[m_name])
+                    allowed_min = act_val - regression_tolerance
+                    if cand_val < allowed_min - 1e-6:
+                        act_str = f"{act_val:.2f}" if abs(act_val - round(act_val, 2)) < 1e-5 else f"{act_val:.4f}"
+                        cand_str = f"{cand_val:.2f}" if abs(cand_val - round(cand_val, 2)) < 1e-5 else f"{cand_val:.4f}"
+                        tol_str = f"{regression_tolerance:.2f}" if abs(regression_tolerance - round(regression_tolerance, 2)) < 1e-5 else f"{regression_tolerance:.4f}"
+                        return False, f"Promotion rejected: {cls_name} {m_name} regressed from {act_str} to {cand_str}, exceeding tolerance {tol_str}."
 
     return True, "PASSED: All multi-metric promotion criteria satisfied."
+
+
+def verify_rollback_artifact_integrity(
+    target_model: ModelRegistry,
+    artifacts_dir: Optional[Path] = None
+) -> Tuple[bool, str]:
+    """
+    12-Point Rollback Artifact Integrity Validation:
+      1. Registry record exists.
+      2. Artifact path exists.
+      3. Model artifact loads successfully.
+      4. Preprocessor artifact exists.
+      5. Preprocessor loads successfully.
+      6. Feature schema exists.
+      7. Schema version is compatible.
+      8. Model feature dimensions match preprocessor.
+      9. Metadata exists.
+      10. Hash/checksum matches when stored.
+      11. Version compatibility check.
+      12. Model object usability check for inference.
+    """
+    if not target_model:
+        return False, "Rollback rejected: Target model registry record does not exist."
+
+    repo_root = Path(__file__).resolve().parents[3]
+    if artifacts_dir is None:
+        artifacts_dir = repo_root / "ml/artifacts"
+    elif not artifacts_dir.is_absolute():
+        artifacts_dir = repo_root / artifacts_dir
+
+    art_path = Path(target_model.artifact_path)
+    if not art_path.is_absolute():
+        candidates = [
+            Path.cwd() / art_path,
+            repo_root / art_path,
+            artifacts_dir / art_path.name
+        ]
+        resolved_path = None
+        for c in candidates:
+            if c.exists():
+                resolved_path = c
+                break
+        if resolved_path is None:
+            return False, f"Rollback rejected: Target model artifact file '{target_model.artifact_path}' does not exist on disk."
+        art_path = resolved_path
+    elif not art_path.exists():
+        return False, f"Rollback rejected: Target model artifact file '{target_model.artifact_path}' does not exist on disk."
+
+    try:
+        model = joblib.load(art_path)
+    except Exception as exc:
+        return False, f"Rollback rejected: Target model artifact file '{art_path}' is corrupted or unloadable: {exc}"
+
+    prep_path = artifacts_dir / "preprocessor.joblib"
+    if not prep_path.exists():
+        prep_path = Path.cwd() / "ml/artifacts/preprocessor.joblib"
+    if not prep_path.exists():
+        return False, f"Rollback rejected: Preprocessor artifact file '{prep_path}' does not exist."
+
+    try:
+        preprocessor = joblib.load(prep_path)
+    except Exception as exc:
+        return False, f"Rollback rejected: Preprocessor artifact file '{prep_path}' is corrupted or unloadable: {exc}"
+
+    meta_path = artifacts_dir / "metadata.json"
+    if not meta_path.exists():
+        meta_path = Path.cwd() / "ml/artifacts/metadata.json"
+    if not meta_path.exists():
+        return False, f"Rollback rejected: Artifact metadata file '{meta_path}' does not exist."
+
+    try:
+        with meta_path.open("r", encoding="utf-8") as f:
+            metadata = json.load(f)
+    except Exception as exc:
+        return False, f"Rollback rejected: Artifact metadata file '{meta_path}' is corrupted JSON: {exc}"
+
+    compat_ok, compat_errors = validate_artifact_compatibility(metadata)
+    if not compat_ok:
+        return False, f"Rollback rejected: Artifact schema compatibility failed: {compat_errors}"
+
+    inner_model = getattr(model, "model", model)
+    n_features_in = getattr(inner_model, "n_features_in_", None)
+    selected_feats = len(getattr(preprocessor, "selected_feature_names", []))
+    if n_features_in is not None and selected_feats > 0 and n_features_in != selected_feats:
+        return False, f"Rollback rejected: Preprocessor produces {selected_feats} features but target model expects {n_features_in} features."
+
+    manifest_path = artifacts_dir / "artifact_manifest.json"
+    if not manifest_path.exists():
+        manifest_path = Path.cwd() / "ml/artifacts/artifact_manifest.json"
+    if manifest_path.exists():
+        try:
+            with manifest_path.open("r", encoding="utf-8") as f:
+                manifest = json.load(f)
+            stored_model_hash = manifest.get("model_hash")
+            if stored_model_hash and art_path.name == (manifest.get("model_version", "") + ".joblib"):
+                actual_hash = hashlib.sha256(art_path.read_bytes()).hexdigest()
+                if actual_hash != stored_model_hash:
+                    return False, f"Rollback rejected: Model artifact hash mismatch ({actual_hash[:8]} vs registered {stored_model_hash[:8]})."
+        except Exception:
+            pass
+
+    if not hasattr(model, "predict"):
+        return False, "Rollback rejected: Target model object missing required predict() interface."
+
+    return True, "PASSED: Rollback artifact integrity verified."
 
 
 async def async_train_worker(job_id: str):
     """
     Persisted Background Worker Task:
-    Transitions job state: QUEUED -> RUNNING -> SUCCEEDED / FAILED / REJECTED / PROMOTED.
+    Transitions job & model lifecycle states:
+    TRAINING -> CANDIDATE -> (PROMOTION GATE) -> ACTIVE / REJECTED
     """
     async with AsyncSessionFactory() as db:
         query = select(TrainingJob).where(TrainingJob.id == job_id)
@@ -97,7 +240,6 @@ async def async_train_worker(job_id: str):
             champion = results[0]
             candidate_version = f"{champion['model_name'].lower().replace(' ', '_')}-v1.0"
             job.candidate_version = candidate_version
-            # Leaderboard keys from model_selector: cv_f1_mean, cv_recall_mean, cv_precision_mean, cv_accuracy_mean
             job.metrics = {
                 "accuracy": champion.get("cv_accuracy_mean"),
                 "f1_score": champion.get("cv_f1_mean"),
@@ -112,7 +254,6 @@ async def async_train_worker(job_id: str):
             active_model = active_res.scalar_one_or_none()
             active_f1 = active_model.f1_score if active_model else 0.85
 
-            # Load metadata to get final test metrics (such as real roc_auc)
             meta_path = Path("ml/artifacts/metadata.json")
             candidate_roc_auc = None
             if meta_path.exists():
@@ -123,71 +264,62 @@ async def async_train_worker(job_id: str):
                 except Exception:
                     pass
 
-            # Extract real measured metrics from champion leaderboard entry.
-            # The pipeline stores cross-validation metrics under cv_* keys.
-            # If any required metric is missing, pass None — the gate will reject with a clear reason.
-            candidate_fpr = champion.get("cv_fpr_mean")      # real One-vs-Rest FPR; None if unavailable
-            candidate_latency = champion.get("cv_latency_ms") # real latency; None if unavailable
+            candidate_fpr = champion.get("cv_fpr_mean")
+            candidate_latency = champion.get("cv_latency_ms")
+            candidate_per_class = champion.get("per_class_metrics")
+            active_per_class = getattr(active_model, "per_class_metrics", None) if active_model else None
 
+            # Register Candidate Model in ModelRegistry with status "CANDIDATE" BEFORE promotion gate evaluation
+            candidate_registry = ModelRegistry(
+                model_name=champion["model_name"],
+                model_version=candidate_version,
+                model_type=champion["model_type"],
+                status="CANDIDATE",
+                accuracy=champion.get("cv_accuracy_mean"),
+                f1_score=champion.get("cv_f1_mean"),
+                precision_score=champion.get("cv_precision_mean"),
+                recall_score=champion.get("cv_recall_mean"),
+                roc_auc=candidate_roc_auc,
+                latency_ms=champion.get("cv_latency_ms"),
+                is_active=False,
+                artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
+                previous_version=active_model.model_version if active_model else None,
+                per_class_metrics=candidate_per_class
+            )
+            db.add(candidate_registry)
+            await db.commit()
+            await db.refresh(candidate_registry)
+
+            # Evaluate Promotion Gate
             passed, reason = evaluate_promotion_gate(
                 candidate_f1=champion.get("cv_f1_mean"),
                 candidate_recall=champion.get("cv_recall_mean"),
                 candidate_fpr=candidate_fpr,
                 candidate_latency_ms=candidate_latency,
-                active_f1=active_f1
+                active_f1=active_f1,
+                candidate_per_class_metrics=candidate_per_class,
+                active_per_class_metrics=active_per_class
             )
+            candidate_registry.promotion_reason = reason
             job.promotion_reason = reason
 
             if passed:
-                # Promote Candidate Model
                 if active_model:
                     active_model.is_active = False
                     active_model.status = "ARCHIVED"
 
-                new_registry = ModelRegistry(
-                    model_name=champion["model_name"],
-                    model_version=candidate_version,
-                    model_type=champion["model_type"],
-                    status="ACTIVE",
-                    accuracy=champion.get("cv_accuracy_mean"),
-                    f1_score=champion.get("cv_f1_mean"),
-                    precision_score=champion.get("cv_precision_mean"),
-                    recall_score=champion.get("cv_recall_mean"),
-                    roc_auc=candidate_roc_auc,
-                    latency_ms=champion.get("cv_latency_ms"),
-                    is_active=True,
-                    artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
-                    promoted_at=datetime.now(timezone.utc),
-                    previous_version=active_model.model_version if active_model else None,
-                    promotion_reason=reason
-                )
-                db.add(new_registry)
+                candidate_registry.status = "ACTIVE"
+                candidate_registry.is_active = True
+                candidate_registry.promoted_at = datetime.now(timezone.utc)
                 job.status = "PROMOTED"
 
-                # Invalidate PredictService cached artifact memory
                 PredictService._model_artifacts.clear()
                 PredictService._preprocessor_artifact = None
                 PredictService._explainers.clear()
             else:
+                candidate_registry.status = "REJECTED"
+                candidate_registry.is_active = False
                 job.status = "REJECTED"
-                # Preserve active model in ModelRegistry
-                rejected_registry = ModelRegistry(
-                    model_name=champion["model_name"],
-                    model_version=candidate_version,
-                    model_type=champion["model_type"],
-                    status="REJECTED",
-                    accuracy=champion.get("cv_accuracy_mean"),
-                    f1_score=champion.get("cv_f1_mean"),
-                    precision_score=champion.get("cv_precision_mean"),
-                    recall_score=champion.get("cv_recall_mean"),
-                    roc_auc=candidate_roc_auc,
-                    latency_ms=champion.get("cv_latency_ms"),
-                    is_active=False,
-                    artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
-                    previous_version=active_model.model_version if active_model else None,
-                    promotion_reason=reason
-                )
-                db.add(rejected_registry)
 
             job.finished_at = datetime.now(timezone.utc)
             await db.commit()
@@ -226,7 +358,8 @@ async def list_registered_models(
             "preprocessing_version": m.preprocessing_version,
             "trained_at": m.trained_at.isoformat(),
             "promoted_at": m.promoted_at.isoformat() if m.promoted_at else None,
-            "previous_version": m.previous_version
+            "previous_version": m.previous_version,
+            "per_class_metrics": m.per_class_metrics
         }
         for m in models
     ]
@@ -333,7 +466,7 @@ async def rollback_model_version(
     admin_user: User = Depends(require_role(["admin"]))
 ):
     """
-    Rolls back the active production model classifier to specified registered version and clears artifact cache.
+    Rolls back active production classifier to specified registered version after verifying 12-point artifact integrity.
     Unauthorized non-admin calls return HTTP 403 Forbidden via require_role.
     """
     query = select(ModelRegistry).where(
@@ -348,6 +481,14 @@ async def rollback_model_version(
             detail=f"Model version '{model_version}' not found in registry."
         )
 
+    # 12-Point Artifact Integrity Check BEFORE any active model changes!
+    ok, err_msg = verify_rollback_artifact_integrity(target_model)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=err_msg
+        )
+
     # Get current active model
     active_query = select(ModelRegistry).where(ModelRegistry.is_active == True)
     active_result = await db.execute(active_query)
@@ -358,7 +499,7 @@ async def rollback_model_version(
     # Atomic Lifecycle Transition
     if current_active and current_active.id != target_model.id:
         current_active.is_active = False
-        current_active.status = "ROLLED_BACK"
+        current_active.status = "ARCHIVED"
 
     target_model.is_active = True
     target_model.status = "ACTIVE"

@@ -157,45 +157,37 @@ def test_phase_n_o_p_q_api_schema():
 
 
 # Phase 2 — FPR Integrity: correct formula, no fallbacks, promotion gate uses real metric
-def test_phase2_fpr_formula_exact():
-    """Phase 2: FPR = FP / (FP + TN) — verified against hand-calculated confusion matrix.
+# Phase 2 — FPR Integrity: TEST 13 (Binary FPR) and TEST 14 (Multiclass FPR)
+def test_13_binary_fpr_correctness():
+    """TEST 13 — Binary FPR correctness: FPR = FP / (FP + TN) for binary classification."""
+    # TP = 80, FN = 10, FP = 5, TN = 905
+    # Class 1: 80 TP, 10 FN -> 90 actual positive
+    # Class 0: 905 TN, 5 FP -> 910 actual negative
+    y_true = np.array([1]*90 + [0]*910)
+    y_pred = np.array([1]*80 + [0]*10 + [1]*5 + [0]*905)
 
-    NOTE: In binary classification, macro FPR == macro FNR == 1-recall by mathematical identity
-    (FP_1/(FP_1+TN_1) == FN_0/(FN_0+TP_0) for the two classes). A multiclass example is required
-    to demonstrate that FPR and 1-recall are genuinely distinct metrics.
-    """
-    # 3-class example where FPR ≠ 1-recall:
-    # Confusion matrix (row=true, col=pred):
-    #   [[2, 1, 0],
-    #    [0, 2, 1],
-    #    [1, 0, 2]]
-    # fp = col_sum - diag = [3-2, 3-2, 3-2] = [1, 1, 1]
-    # fn = row_sum - diag = [3-2, 3-2, 3-2] = [1, 1, 1]
-    # tp = diag            = [2, 2, 2]
-    # tn = total - fp - fn - tp = 9 - 1 - 1 - 2 = 5  (for each class)
-    # FPR_k = fp_k / (fp_k + tn_k) = 1 / (1 + 5) = 1/6 ≈ 0.1667
-    # Macro FPR = 1/6 ≈ 0.1667
-    # Recall_k = tp_k / (tp_k + fn_k) = 2 / (2 + 1) = 2/3 ≈ 0.6667
-    # Macro Recall = 2/3; 1 - Macro Recall = 1/3 ≈ 0.3333
-    # Therefore FPR (0.1667) ≠ 1-recall (0.3333) by a factor of 2. ✓
+    fpr = calculate_true_fpr(y_true, y_pred)
+    # Binary One-vs-Rest macro FPR for symmetric 2 classes:
+    # Class 1 FPR = FP_1 / (FP_1 + TN_1) = 5 / (5 + 905) = 5 / 910 ≈ 0.0054945
+    # Class 0 FPR = FP_0 / (FP_0 + TN_0) = 10 / (10 + 80) = 10 / 90 ≈ 0.1111111
+    # Macro FPR = (5/910 + 10/90) / 2 = (0.0054945 + 0.1111111) / 2 ≈ 0.05830
+    assert abs(fpr - 0.0583) < 1e-3, f"Binary FPR calculated incorrectly: got {fpr}, expected ~0.0583"
+
+
+def test_14_multiclass_fpr_correctness():
+    """TEST 14 — Multiclass FPR: Verify One-vs-Rest macro FPR = FP/(FP+TN) per class and prove FPR != 1 - recall."""
     y_true = np.array([0, 0, 0,  1, 1, 1,  2, 2, 2])
     y_pred = np.array([0, 0, 1,  1, 1, 2,  2, 2, 0])
 
     fpr = calculate_true_fpr(y_true, y_pred)
     expected_fpr = 1.0 / 6.0   # = 0.16667
-    assert abs(fpr - expected_fpr) < 1e-4, (
-        f"FPR formula incorrect. Got {fpr:.5f}, expected {expected_fpr:.5f} (= 1/6). "
-        "FPR must be FP/(FP+TN) per class, averaged over classes (One-vs-Rest macro)."
-    )
+    assert abs(fpr - expected_fpr) < 1e-4, f"Multiclass FPR incorrect. Got {fpr:.5f}, expected {expected_fpr:.5f}"
 
-    # Confirm it is NOT 1 - recall in multiclass — they differ by >0.10
     from sklearn.metrics import recall_score
     recall = recall_score(y_true, y_pred, average="macro", zero_division=0)
-    fnr = 1.0 - recall   # False Negative Rate (macro), NOT FPR
-    assert abs(fpr - fnr) > 0.10, (
-        f"In this 3-class case FPR ({fpr:.4f}) must differ from 1-recall ({fnr:.4f}) by >0.10. "
-        "FPR = FP/(FP+TN) and 1-recall = FNR = FN/(FN+TP) are distinct security metrics."
-    )
+    fnr = 1.0 - recall
+    assert abs(fpr - fnr) > 0.10, f"FPR ({fpr:.4f}) must differ from 1-recall ({fnr:.4f})"
+
 
 
 

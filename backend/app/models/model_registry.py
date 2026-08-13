@@ -44,3 +44,5 @@ class ModelRegistry(Base):
     previous_version: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     promotion_reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     confusion_matrix: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    per_class_metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+

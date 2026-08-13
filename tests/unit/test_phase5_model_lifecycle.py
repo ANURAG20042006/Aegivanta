@@ -101,3 +101,61 @@ def test_promotion_gate_rejects_missing_fpr_phase2():
         f"Rejection reason must explicitly state FPR unavailability. Got: {reason}"
     )
 
+
+def test_candidate_lifecycle_transitions():
+    """
+    TEST 12 — Candidate Lifecycle:
+    Verify TRAINING -> CANDIDATE -> ACTIVE and TRAINING -> CANDIDATE -> REJECTED.
+    Model MUST NOT be ACTIVE before promotion gate passes.
+    """
+    # 1. Registered initial candidate state
+    cand = ModelRegistry(
+        model_name="XGBoost Classifier",
+        model_version="xgb-cand-v1.0",
+        model_type="Boosting",
+        status="CANDIDATE",
+        is_active=False,
+        artifact_path="ml/artifacts/xgboost.joblib"
+    )
+    assert cand.status == "CANDIDATE"
+    assert cand.is_active is False
+
+    # 2. Gate evaluation passes -> transitions CANDIDATE -> ACTIVE
+    passed_pass, reason_pass = evaluate_promotion_gate(
+        candidate_f1=0.98,
+        candidate_recall=0.95,
+        candidate_fpr=0.01,
+        candidate_latency_ms=0.45,
+        active_f1=0.90
+    )
+    assert passed_pass is True
+    if passed_pass:
+        cand.status = "ACTIVE"
+        cand.is_active = True
+    assert cand.status == "ACTIVE"
+    assert cand.is_active is True
+
+    # 3. Gate evaluation fails -> transitions CANDIDATE -> REJECTED
+    cand_reject = ModelRegistry(
+        model_name="Decision Tree",
+        model_version="dt-cand-v1.0",
+        model_type="Classical",
+        status="CANDIDATE",
+        is_active=False,
+        artifact_path="ml/artifacts/decision_tree.joblib"
+    )
+    passed_rej, reason_rej = evaluate_promotion_gate(
+        candidate_f1=0.70,   # Low F1 vs active 0.90
+        candidate_recall=0.95,
+        candidate_fpr=0.01,
+        candidate_latency_ms=0.45,
+        active_f1=0.90
+    )
+    assert passed_rej is False
+    if not passed_rej:
+        cand_reject.status = "REJECTED"
+        cand_reject.is_active = False
+    assert cand_reject.status == "REJECTED"
+    assert cand_reject.is_active is False
+
+

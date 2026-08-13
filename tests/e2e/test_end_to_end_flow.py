@@ -58,6 +58,7 @@ def test_full_sentinelai_end_to_end_pipeline():
         candidate_f1=0.9850,
         candidate_recall=0.9500,
         candidate_fpr=0.0120,
+        candidate_latency_ms=0.45,
         active_f1=0.9800
     )
     assert passed is True

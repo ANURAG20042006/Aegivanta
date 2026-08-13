@@ -25,7 +25,7 @@ from ml.models.boosting_models import XGBoostModel, LightGBMModel, CatBoostModel
 from ml.models.deep_learning import CNN1DModel, LSTMModel, AutoencoderModel
 
 
-from ml.metrics.security_metrics import calculate_macro_fpr, calculate_fpr
+from ml.metrics.security_metrics import calculate_macro_fpr, calculate_fpr, compute_per_class_metrics
 
 def calculate_true_fpr(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Calculates mathematically exact One-vs-Rest False Positive Rate (FPR = FP / (FP + TN))."""
@@ -226,11 +226,12 @@ class ModelSelectorSuite:
     def evaluate_final_test_set(
         self,
         X_test: np.ndarray,
-        y_test: np.ndarray
+        y_test: np.ndarray,
+        class_names: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Evaluates the frozen champion model ONCE on the untouched test set after model selection has finished.
-        Returns final_test_metrics.
+        Returns final_test_metrics including per_class_metrics.
         """
         if not self.best_model:
             raise RuntimeError("Cannot evaluate final test set: No champion model selected.")
@@ -246,6 +247,7 @@ class ModelSelectorSuite:
         f1 = float(f1_score(y_test, y_pred, average="macro", zero_division=0))
         fpr = float(calculate_true_fpr(y_test, y_pred))
         cm = confusion_matrix(y_test, y_pred).tolist()
+        per_class = compute_per_class_metrics(y_test, y_pred, class_names=class_names)
 
         roc_auc = None
         probs = self.best_model.predict_proba(X_test)
@@ -303,6 +305,7 @@ class ModelSelectorSuite:
             "roc_auc": roc_auc,
             "inference_latency_ms": latency_ms,
             "confusion_matrix": cm,
+            "per_class_metrics": per_class,
             "test_sample_count": len(y_test)
         }
         return self.final_test_metrics
