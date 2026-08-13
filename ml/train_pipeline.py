@@ -126,7 +126,7 @@ def run_leakage_free_cv(
 
 def run_training_pipeline(
     dataset_path: Optional[str] = None,
-    num_synthetic_samples: int = 1500,
+    num_synthetic_samples: int = 5000,
     artifacts_dir: str = "ml/artifacts",
     n_splits: int = 5,
     random_seed: int = 42

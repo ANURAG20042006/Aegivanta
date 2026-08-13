@@ -4,7 +4,7 @@
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "62aa92a7d54fe464",
-  "training_timestamp": "2026-08-13T09:50:21.539493+00:00",
+  "training_timestamp": "2026-08-13T10:36:44.058398+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -86,7 +86,7 @@
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.948908269956682,
+    "best_selection_score": 0.9489627898902576,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -101,7 +101,7 @@
     "recall": 0.9611,
     "fpr": 0.0012,
     "roc_auc": 0.9996,
-    "inference_latency_ms": 0.0241,
+    "inference_latency_ms": 0.0101,
     "confusion_matrix": [
       [
         4,
@@ -588,7 +588,7 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.955,
       "cv_accuracy_std": 0.0128,
-      "selection_score": 0.9296
+      "selection_score": 0.932
     },
     {
       "model_name": "XGBoost",
@@ -601,7 +601,7 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.9475,
       "cv_accuracy_std": 0.0127,
-      "selection_score": 0.8732
+      "selection_score": 0.8872
     },
     {
       "model_name": "LightGBM",
@@ -640,7 +640,7 @@
       "cv_precision_std": 0.0395,
       "cv_accuracy_mean": 0.95,
       "cv_accuracy_std": 0.0187,
-      "selection_score": 0.9384
+      "selection_score": 0.9392
     },
     {
       "model_name": "Logistic Regression",
@@ -653,7 +653,7 @@
       "cv_precision_std": 0.0182,
       "cv_accuracy_mean": 0.8951,
       "cv_accuracy_std": 0.0514,
-      "selection_score": 0.8974
+      "selection_score": 0.9058
     },
     {
       "model_name": "SVM",
@@ -666,7 +666,7 @@
       "cv_precision_std": 0.0151,
       "cv_accuracy_mean": 0.7779,
       "cv_accuracy_std": 0.1415,
-      "selection_score": 0.8832
+      "selection_score": 0.8876
     },
     {
       "model_name": "KNN",
@@ -692,48 +692,48 @@
       "cv_precision_std": 0.0297,
       "cv_accuracy_mean": 0.9576,
       "cv_accuracy_std": 0.0214,
-      "selection_score": 0.9489
+      "selection_score": 0.949
     },
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.8465,
-      "cv_f1_std": 0.0305,
-      "cv_recall_mean": 0.8679,
-      "cv_recall_std": 0.0332,
-      "cv_precision_mean": 0.8616,
-      "cv_precision_std": 0.0255,
-      "cv_accuracy_mean": 0.8527,
-      "cv_accuracy_std": 0.0801,
-      "selection_score": 0.7973
+      "cv_f1_mean": 0.8528,
+      "cv_f1_std": 0.0642,
+      "cv_recall_mean": 0.8846,
+      "cv_recall_std": 0.0635,
+      "cv_precision_mean": 0.8631,
+      "cv_precision_std": 0.0322,
+      "cv_accuracy_mean": 0.8229,
+      "cv_accuracy_std": 0.1452,
+      "selection_score": 0.8044
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.5882,
-      "cv_f1_std": 0.0234,
-      "cv_recall_mean": 0.6621,
-      "cv_recall_std": 0.0342,
-      "cv_precision_mean": 0.6514,
-      "cv_precision_std": 0.0455,
-      "cv_accuracy_mean": 0.5224,
-      "cv_accuracy_std": 0.053,
-      "selection_score": 0.6613
+      "cv_f1_mean": 0.6294,
+      "cv_f1_std": 0.031,
+      "cv_recall_mean": 0.6836,
+      "cv_recall_std": 0.0324,
+      "cv_precision_mean": 0.6892,
+      "cv_precision_std": 0.0454,
+      "cv_accuracy_mean": 0.475,
+      "cv_accuracy_std": 0.0227,
+      "selection_score": 0.6915
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0373,
-      "cv_f1_std": 0.0134,
-      "cv_recall_mean": 0.0701,
-      "cv_recall_std": 0.0253,
-      "cv_precision_mean": 0.0254,
-      "cv_precision_std": 0.0091,
-      "cv_accuracy_mean": 0.345,
-      "cv_accuracy_std": 0.0253,
-      "selection_score": 0.2898
+      "cv_f1_mean": 0.0297,
+      "cv_f1_std": 0.0004,
+      "cv_recall_mean": 0.0556,
+      "cv_recall_std": 0.0,
+      "cv_precision_mean": 0.0203,
+      "cv_precision_std": 0.0004,
+      "cv_accuracy_mean": 0.3575,
+      "cv_accuracy_std": 0.0038,
+      "selection_score": 0.2984
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "fb963a96a5ffc921053608ece1770b8d2f2540d1"
+  "git_commit": "c94bc89626d5e35bfc611277cba79aeca776cae7"
 }

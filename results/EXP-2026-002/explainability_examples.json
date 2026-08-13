@@ -5,81 +5,81 @@
   "reason": null,
   "explainer_type": "SHAP TreeExplainer",
   "model_version": "random_forest-research-v1.0",
-  "prediction": "16",
+  "prediction": "6",
   "confidence": 0.34,
-  "timestamp": "2026-08-13T09:28:39.446133+00:00",
-  "xai_latency_ms": 156.88,
+  "timestamp": "2026-08-13T10:35:05.953846+00:00",
+  "xai_latency_ms": 31.16,
   "features": [
     {
-      "feature": "Flow Duration",
-      "input_value": 0.8528,
-      "contribution": 0.0408,
-      "direction": "positive",
+      "feature": "Total Length of Fwd Packets",
+      "input_value": 1.8258,
+      "contribution": -0.1016,
+      "direction": "negative",
       "rank": 1
     },
     {
-      "feature": "RST Flag Count",
-      "input_value": 0.8063,
-      "contribution": 0.0245,
+      "feature": "Flow Packets/s",
+      "input_value": -0.4056,
+      "contribution": 0.0089,
       "direction": "positive",
       "rank": 2
     },
     {
-      "feature": "Packet Length Mean",
-      "input_value": 0.8008,
-      "contribution": 0.0213,
+      "feature": "Total Length of Bwd Packets",
+      "input_value": -0.2202,
+      "contribution": 0.0068,
       "direction": "positive",
       "rank": 3
     },
     {
-      "feature": "Average Packet Size",
-      "input_value": -1.2762,
-      "contribution": 0.0125,
+      "feature": "Flow Bytes/s",
+      "input_value": -0.4056,
+      "contribution": 0.0067,
       "direction": "positive",
       "rank": 4
     },
     {
-      "feature": "ACK Flag Count",
-      "input_value": 0.4156,
-      "contribution": -0.0115,
-      "direction": "negative",
+      "feature": "Total Backward Packets",
+      "input_value": -0.2444,
+      "contribution": 0.0063,
+      "direction": "positive",
       "rank": 5
     }
   ],
   "top_features": [
     {
-      "feature": "Flow Duration",
-      "input_value": 0.8528,
-      "contribution": 0.0408,
-      "direction": "positive",
+      "feature": "Total Length of Fwd Packets",
+      "input_value": 1.8258,
+      "contribution": -0.1016,
+      "direction": "negative",
       "rank": 1
     },
     {
-      "feature": "RST Flag Count",
-      "input_value": 0.8063,
-      "contribution": 0.0245,
+      "feature": "Flow Packets/s",
+      "input_value": -0.4056,
+      "contribution": 0.0089,
       "direction": "positive",
       "rank": 2
     },
     {
-      "feature": "Packet Length Mean",
-      "input_value": 0.8008,
-      "contribution": 0.0213,
+      "feature": "Total Length of Bwd Packets",
+      "input_value": -0.2202,
+      "contribution": 0.0068,
       "direction": "positive",
       "rank": 3
     },
     {
-      "feature": "Average Packet Size",
-      "input_value": -1.2762,
-      "contribution": 0.0125,
+      "feature": "Flow Bytes/s",
+      "input_value": -0.4056,
+      "contribution": 0.0067,
       "direction": "positive",
       "rank": 4
     },
     {
-      "feature": "ACK Flag Count",
-      "input_value": 0.4156,
-      "contribution": -0.0115,
-      "direction": "negative",
+      "feature": "Total Backward Packets",
+      "input_value": -0.2444,
+      "contribution": 0.0063,
+      "direction": "positive",
       "rank": 5
     }
   ],

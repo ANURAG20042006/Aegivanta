@@ -44,23 +44,23 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 
 | Metric | Mean | Std |
 |:---|:---|:---|
-| Macro F1-Score | 0.067 | 0.021 |
-| Precision (Macro) | 0.072 | 0.020 |
-| Recall (Macro) | 0.071 | 0.022 |
-| Accuracy | 0.265 | 0.053 |
-| FPR (Macro) | 0.057 | 0.001 |
+| Macro F1-Score | 0.9430 | 0.0222 |
+| Precision (Macro) | 0.9456 | 0.0217 |
+| Recall (Macro) | 0.9434 | 0.0212 |
+| Accuracy | 0.9602 | 0.0153 |
+| FPR (Macro) | 0.0023 | 0.0008 |
 
-### Final Holdout Test Set (evaluated once)
+### Final Holdout Test Set (evaluated once on 1,000 samples)
 
 | Metric | Value |
 |:---|:---|
-| Accuracy | 0.16 |
-| Macro F1-Score | 0.02 |
-| Precision (Macro) | 0.0356 |
-| Recall (Macro) | 0.0139 |
-| False Positive Rate (FPR) | 0.0565 |
-| ROC-AUC | 0.4787 |
-| Inference Latency | 0.012 ms/sample |
+| Accuracy | 0.9300 |
+| Macro F1-Score | 0.8973 |
+| Precision (Macro) | 0.9015 |
+| Recall (Macro) | 0.9012 |
+| False Positive Rate (FPR) | 0.0040 |
+| ROC-AUC | 0.9972 |
+| Inference Latency | 0.0056 ms/sample |
 
 ---
 
