@@ -20,10 +20,10 @@ router = APIRouter(prefix="/train", tags=["Model Training & Registry Lifecycle"]
 
 
 def evaluate_promotion_gate(
-    candidate_f1: float,
-    candidate_recall: float,
-    candidate_fpr: float,
-    candidate_latency_ms: float = 0.45,
+    candidate_f1: Optional[float],
+    candidate_recall: Optional[float],
+    candidate_fpr: Optional[float],
+    candidate_latency_ms: Optional[float] = None,
     active_f1: float = 0.85,
     regression_tolerance: float = 0.01,
     artifact_metadata: Optional[Dict[str, Any]] = None
@@ -35,12 +35,26 @@ def evaluate_promotion_gate(
       2. Candidate Macro F1 >= Active Macro F1 - Regression Tolerance
       3. Candidate Recall >= 0.85 (Protects against missing attack vectors)
       4. Candidate False Positive Rate <= 0.05 (Protects against alert fatigue)
+         FPR is computed as One-vs-Rest: FPR_k = FP_k / (FP_k + TN_k), Macro FPR = mean(FPR_k).
+         A missing FPR MUST block promotion — no fallback value is ever substituted.
       5. Inference Latency <= 5.0ms
+
+    All required metrics (F1, Recall, FPR) must be real measured values.
+    If any required metric is None (unavailable), promotion is REJECTED immediately.
+    No fallback or default metric values are ever used.
     """
     if artifact_metadata:
         ok, compat_errors = validate_artifact_compatibility(artifact_metadata)
         if not ok:
             return False, f"Artifact Schema Compatibility Failed: {compat_errors}"
+
+    # Guard: required metrics must be real measured values — None = unavailable = reject
+    if candidate_f1 is None:
+        return False, "Promotion rejected: Macro F1 metric unavailable. Cannot promote without a real measured F1 score."
+    if candidate_recall is None:
+        return False, "Promotion rejected: Recall metric unavailable. Cannot promote without a real measured Recall score."
+    if candidate_fpr is None:
+        return False, "Promotion rejected: FPR metric unavailable. Cannot promote without a real measured False Positive Rate."
 
     min_required_f1 = active_f1 - regression_tolerance
     if candidate_f1 < min_required_f1:
@@ -49,7 +63,7 @@ def evaluate_promotion_gate(
         return False, f"Candidate Recall ({candidate_recall:.4f}) fails minimum threshold (0.8500)."
     if candidate_fpr > 0.05:
         return False, f"Candidate False Positive Rate ({candidate_fpr:.4f}) exceeds max allowed limit (0.0500)."
-    if candidate_latency_ms > 5.0:
+    if candidate_latency_ms is not None and candidate_latency_ms > 5.0:
         return False, f"Candidate Latency ({candidate_latency_ms:.2f}ms) exceeds max limit (5.00ms)."
 
     return True, "PASSED: All multi-metric promotion criteria satisfied."
@@ -83,11 +97,13 @@ async def async_train_worker(job_id: str):
             champion = results[0]
             candidate_version = f"{champion['model_name'].lower().replace(' ', '_')}-v1.0"
             job.candidate_version = candidate_version
+            # Leaderboard keys from model_selector: cv_f1_mean, cv_recall_mean, cv_precision_mean, cv_accuracy_mean
             job.metrics = {
-                "accuracy": champion["accuracy"],
-                "f1_score": champion["f1_score"],
-                "precision": champion["precision"],
-                "recall": champion["recall"]
+                "accuracy": champion.get("cv_accuracy_mean"),
+                "f1_score": champion.get("cv_f1_mean"),
+                "precision": champion.get("cv_precision_mean"),
+                "recall": champion.get("cv_recall_mean"),
+                "fpr": champion.get("cv_fpr_mean")
             }
 
             # Evaluate against active production model
@@ -107,10 +123,17 @@ async def async_train_worker(job_id: str):
                 except Exception:
                     pass
 
+            # Extract real measured metrics from champion leaderboard entry.
+            # The pipeline stores cross-validation metrics under cv_* keys.
+            # If any required metric is missing, pass None — the gate will reject with a clear reason.
+            candidate_fpr = champion.get("cv_fpr_mean")      # real One-vs-Rest FPR; None if unavailable
+            candidate_latency = champion.get("cv_latency_ms") # real latency; None if unavailable
+
             passed, reason = evaluate_promotion_gate(
-                candidate_f1=champion["f1_score"],
-                candidate_recall=champion["recall"],
-                candidate_fpr=champion.get("fpr", 0.05),
+                candidate_f1=champion.get("cv_f1_mean"),
+                candidate_recall=champion.get("cv_recall_mean"),
+                candidate_fpr=candidate_fpr,
+                candidate_latency_ms=candidate_latency,
                 active_f1=active_f1
             )
             job.promotion_reason = reason
@@ -126,12 +149,12 @@ async def async_train_worker(job_id: str):
                     model_version=candidate_version,
                     model_type=champion["model_type"],
                     status="ACTIVE",
-                    accuracy=champion["accuracy"],
-                    f1_score=champion["f1_score"],
-                    precision_score=champion["precision"],
-                    recall_score=champion["recall"],
-                    roc_auc=candidate_roc_auc,  # Expose real AUC value
-                    latency_ms=0.45,
+                    accuracy=champion.get("cv_accuracy_mean"),
+                    f1_score=champion.get("cv_f1_mean"),
+                    precision_score=champion.get("cv_precision_mean"),
+                    recall_score=champion.get("cv_recall_mean"),
+                    roc_auc=candidate_roc_auc,
+                    latency_ms=champion.get("cv_latency_ms"),
                     is_active=True,
                     artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
                     promoted_at=datetime.now(timezone.utc),
@@ -153,12 +176,12 @@ async def async_train_worker(job_id: str):
                     model_version=candidate_version,
                     model_type=champion["model_type"],
                     status="REJECTED",
-                    accuracy=champion["accuracy"],
-                    f1_score=champion["f1_score"],
-                    precision_score=champion["precision"],
-                    recall_score=champion["recall"],
-                    roc_auc=candidate_roc_auc,  # Expose real AUC value
-                    latency_ms=0.45,
+                    accuracy=champion.get("cv_accuracy_mean"),
+                    f1_score=champion.get("cv_f1_mean"),
+                    precision_score=champion.get("cv_precision_mean"),
+                    recall_score=champion.get("cv_recall_mean"),
+                    roc_auc=candidate_roc_auc,
+                    latency_ms=champion.get("cv_latency_ms"),
                     is_active=False,
                     artifact_path=f"ml/artifacts/{champion['model_name'].lower().replace(' ', '_')}.joblib",
                     previous_version=active_model.model_version if active_model else None,

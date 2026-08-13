@@ -81,3 +81,23 @@ def test_artifact_compatibility_in_promotion():
     )
     assert passed is False
     assert "Schema Compatibility Failed" in reason
+
+
+def test_promotion_gate_rejects_missing_fpr_phase2():
+    """Phase 2 Proof: Missing FPR (None) MUST block promotion — no fallback value ever substituted."""
+    passed, reason = evaluate_promotion_gate(
+        candidate_f1=0.9850,
+        candidate_recall=0.9500,
+        candidate_fpr=None,           # FPR unavailable — gate must reject
+        candidate_latency_ms=0.45,
+        active_f1=0.9800,
+        regression_tolerance=0.01
+    )
+    assert passed is False, (
+        "CRITICAL: Promotion must be rejected when FPR is None. "
+        "A missing security metric must never be replaced with an invented value."
+    )
+    assert "FPR metric unavailable" in reason, (
+        f"Rejection reason must explicitly state FPR unavailability. Got: {reason}"
+    )
+

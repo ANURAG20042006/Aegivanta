@@ -154,3 +154,105 @@ def test_phase_n_o_p_q_api_schema():
     assert res.confidence_score is None
     assert res.confidence_available is False
     assert res.attack_probabilities is None
+
+
+# Phase 2 — FPR Integrity: correct formula, no fallbacks, promotion gate uses real metric
+def test_phase2_fpr_formula_exact():
+    """Phase 2: FPR = FP / (FP + TN) — verified against hand-calculated confusion matrix.
+
+    NOTE: In binary classification, macro FPR == macro FNR == 1-recall by mathematical identity
+    (FP_1/(FP_1+TN_1) == FN_0/(FN_0+TP_0) for the two classes). A multiclass example is required
+    to demonstrate that FPR and 1-recall are genuinely distinct metrics.
+    """
+    # 3-class example where FPR ≠ 1-recall:
+    # Confusion matrix (row=true, col=pred):
+    #   [[2, 1, 0],
+    #    [0, 2, 1],
+    #    [1, 0, 2]]
+    # fp = col_sum - diag = [3-2, 3-2, 3-2] = [1, 1, 1]
+    # fn = row_sum - diag = [3-2, 3-2, 3-2] = [1, 1, 1]
+    # tp = diag            = [2, 2, 2]
+    # tn = total - fp - fn - tp = 9 - 1 - 1 - 2 = 5  (for each class)
+    # FPR_k = fp_k / (fp_k + tn_k) = 1 / (1 + 5) = 1/6 ≈ 0.1667
+    # Macro FPR = 1/6 ≈ 0.1667
+    # Recall_k = tp_k / (tp_k + fn_k) = 2 / (2 + 1) = 2/3 ≈ 0.6667
+    # Macro Recall = 2/3; 1 - Macro Recall = 1/3 ≈ 0.3333
+    # Therefore FPR (0.1667) ≠ 1-recall (0.3333) by a factor of 2. ✓
+    y_true = np.array([0, 0, 0,  1, 1, 1,  2, 2, 2])
+    y_pred = np.array([0, 0, 1,  1, 1, 2,  2, 2, 0])
+
+    fpr = calculate_true_fpr(y_true, y_pred)
+    expected_fpr = 1.0 / 6.0   # = 0.16667
+    assert abs(fpr - expected_fpr) < 1e-4, (
+        f"FPR formula incorrect. Got {fpr:.5f}, expected {expected_fpr:.5f} (= 1/6). "
+        "FPR must be FP/(FP+TN) per class, averaged over classes (One-vs-Rest macro)."
+    )
+
+    # Confirm it is NOT 1 - recall in multiclass — they differ by >0.10
+    from sklearn.metrics import recall_score
+    recall = recall_score(y_true, y_pred, average="macro", zero_division=0)
+    fnr = 1.0 - recall   # False Negative Rate (macro), NOT FPR
+    assert abs(fpr - fnr) > 0.10, (
+        f"In this 3-class case FPR ({fpr:.4f}) must differ from 1-recall ({fnr:.4f}) by >0.10. "
+        "FPR = FP/(FP+TN) and 1-recall = FNR = FN/(FN+TP) are distinct security metrics."
+    )
+
+
+
+def test_phase2_no_fpr_fallback_in_promotion_gate():
+    """Phase 2: The promotion gate must NEVER substitute a fallback for a missing FPR."""
+    from backend.app.api.v1.train import evaluate_promotion_gate
+    passed, reason = evaluate_promotion_gate(
+        candidate_f1=0.98,
+        candidate_recall=0.95,
+        candidate_fpr=None,
+        active_f1=0.85
+    )
+    assert passed is False, (
+        "CRITICAL: champion.get('cv_fpr_mean') returns None when key missing. "
+        "The gate must reject, not fall back to 0.05."
+    )
+    assert "FPR metric unavailable" in reason
+
+
+def test_phase2_promotion_gate_uses_real_leaderboard_key():
+    """Phase 2: Verifies the leaderboard dict key 'cv_fpr_mean' carries the real FPR to the gate."""
+    # Simulate a champion leaderboard entry as returned by model_selector.py
+    champion = {
+        "model_name": "Random Forest",
+        "model_type": "Classical",
+        "cv_f1_mean": 0.72,
+        "cv_recall_mean": 0.68,
+        "cv_fpr_mean": 0.04,    # real One-vs-Rest FPR
+        "cv_latency_ms": 0.35,
+        "cv_accuracy_mean": 0.71,
+        "cv_precision_mean": 0.69,
+        "selection_score": 0.65
+    }
+    from backend.app.api.v1.train import evaluate_promotion_gate
+    candidate_fpr = champion.get("cv_fpr_mean")          # correct key
+    assert candidate_fpr is not None, "cv_fpr_mean should be present in leaderboard entry"
+
+    passed, reason = evaluate_promotion_gate(
+        candidate_f1=champion.get("cv_f1_mean"),
+        candidate_recall=champion.get("cv_recall_mean"),
+        candidate_fpr=candidate_fpr,
+        candidate_latency_ms=champion.get("cv_latency_ms"),
+        active_f1=0.85
+    )
+    # Low F1 (0.72) should fail the regression tolerance check vs default active 0.85
+    assert passed is False
+    assert "below active threshold" in reason
+
+    # Missing key (old bug scenario: champion.get("fpr")) should be None and reject
+    missing_fpr = champion.get("fpr")  # intentionally wrong key — old bug
+    assert missing_fpr is None, "Old 'fpr' key must not exist in leaderboard; cv_fpr_mean is the real key"
+    passed2, reason2 = evaluate_promotion_gate(
+        candidate_f1=0.98,
+        candidate_recall=0.95,
+        candidate_fpr=missing_fpr,
+        active_f1=0.85
+    )
+    assert passed2 is False
+    assert "FPR metric unavailable" in reason2
+
