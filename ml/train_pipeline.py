@@ -105,20 +105,23 @@ def run_leakage_free_cv(
         X_val_selected = fold_selector.transform(X_val_scaled)
         
         # 6. Predict on val fold
+        t0 = time.perf_counter()
         preds = fold_model.predict(X_val_selected)
-        
+        latency_ms = (time.perf_counter() - t0) * 1000.0 / max(len(X_val_selected), 1)
+
         acc = float(accuracy_score(y_val_raw, preds))
         f1 = float(f1_score(y_val_raw, preds, average="macro", zero_division=0))
         prec = float(precision_score(y_val_raw, preds, average="macro", zero_division=0))
         rec = float(recall_score(y_val_raw, preds, average="macro", zero_division=0))
-        
+
         f1_scores.append(f1)
         fold_results.append({
             "Fold": fold,
             "Accuracy": round(acc, 4),
             "Macro F1": round(f1, 4),
             "Precision": round(prec, 4),
-            "Recall": round(rec, 4)
+            "Recall": round(rec, 4),
+            "Inference Latency (ms/sample)": round(latency_ms, 4)
         })
 
     return float(np.mean(f1_scores)), float(np.std(f1_scores)), fold_results
