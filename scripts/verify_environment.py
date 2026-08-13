@@ -56,16 +56,22 @@ def check_package(import_name: str, pip_name: str, version_attr: str, required: 
         mod = importlib.import_module(import_name)
         version = getattr(mod, version_attr, "unknown")
         if pip_name == "scikit-learn" and version != "unknown":
-            # Enforce scikit-learn >= 1.6, < 1.7 constraint check
+            # Strict scikit-learn 1.6.x constraint check — non-1.6.x fails verification
             parts = [int(p) for p in version.split(".")[:2] if p.isdigit()]
             if len(parts) >= 2 and (parts[0] != 1 or parts[1] != 6):
-                print(f"  [WARN] {pip_name} ({import_name}) == {version} — WARNING: Expected scikit-learn >=1.6,<1.7 (e.g. 1.6.1)")
-                return True
+                print(f"  [FAIL] scikit-learn ({import_name}) == {version}")
+                print(f"         Installed: {version}")
+                print(f"         Required:  1.6.1 (>=1.6.0, <1.7.0)")
+                print(f"         Reason:    Serialized ML artifacts (best_model.joblib) were generated with sklearn 1.6.1.")
+                print(f"         Fix:       pip install scikit-learn==1.6.1 (or pip install -r requirements.txt inside .venv)")
+                return False
         print(f"  [OK]  {pip_name} ({import_name}) == {version}")
         return True
     except ImportError as e:
         status = "FAIL" if required else "SKIP"
         print(f"  [{status}] {pip_name} ({import_name}) — NOT FOUND: {e}")
+        if required:
+            print(f"         Fix: pip install {pip_name} (or pip install -r requirements.txt inside .venv)")
         return not required
 
 def main():

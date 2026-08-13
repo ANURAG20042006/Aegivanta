@@ -4,7 +4,7 @@
   "feature_schema_version": "schema-v1.0",
   "dataset_identifier": "synthetic_cicids2017_benchmark",
   "dataset_hash": "62aa92a7d54fe464",
-  "training_timestamp": "2026-08-13T11:15:12.004504+00:00",
+  "training_timestamp": "2026-08-13T11:27:39.697935+00:00",
   "random_seed": 42,
   "python_version": "3.11.5",
   "library_versions": {
@@ -86,7 +86,7 @@
     ]
   },
   "validation_metrics": {
-    "best_selection_score": 0.9490536864272812,
+    "best_selection_score": 0.9490531426656096,
     "selection_criteria_weights": {
       "f1": 0.4,
       "recall": 0.3,
@@ -588,7 +588,7 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.955,
       "cv_accuracy_std": 0.0128,
-      "selection_score": 0.9241
+      "selection_score": 0.8605
     },
     {
       "model_name": "XGBoost",
@@ -601,7 +601,7 @@
       "cv_precision_std": 0.0168,
       "cv_accuracy_mean": 0.9475,
       "cv_accuracy_std": 0.0127,
-      "selection_score": 0.8761
+      "selection_score": 0.8484
     },
     {
       "model_name": "LightGBM",
@@ -640,7 +640,7 @@
       "cv_precision_std": 0.0395,
       "cv_accuracy_mean": 0.95,
       "cv_accuracy_std": 0.0187,
-      "selection_score": 0.9379
+      "selection_score": 0.9383
     },
     {
       "model_name": "Logistic Regression",
@@ -653,7 +653,7 @@
       "cv_precision_std": 0.0182,
       "cv_accuracy_mean": 0.8951,
       "cv_accuracy_std": 0.0514,
-      "selection_score": 0.9061
+      "selection_score": 0.905
     },
     {
       "model_name": "SVM",
@@ -666,7 +666,7 @@
       "cv_precision_std": 0.0151,
       "cv_accuracy_mean": 0.7779,
       "cv_accuracy_std": 0.1415,
-      "selection_score": 0.8823
+      "selection_score": 0.8834
     },
     {
       "model_name": "KNN",
@@ -679,7 +679,7 @@
       "cv_precision_std": 0.0058,
       "cv_accuracy_mean": 0.9375,
       "cv_accuracy_std": 0.0112,
-      "selection_score": 0.9347
+      "selection_score": 0.9346
     },
     {
       "model_name": "Naive Bayes",
@@ -697,43 +697,43 @@
     {
       "model_name": "1D-CNN",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.8318,
-      "cv_f1_std": 0.0347,
-      "cv_recall_mean": 0.855,
-      "cv_recall_std": 0.0217,
-      "cv_precision_mean": 0.8501,
-      "cv_precision_std": 0.0256,
+      "cv_f1_mean": 0.8514,
+      "cv_f1_std": 0.0426,
+      "cv_recall_mean": 0.878,
+      "cv_recall_std": 0.0461,
+      "cv_precision_mean": 0.8727,
+      "cv_precision_std": 0.0313,
       "cv_accuracy_mean": 0.8003,
-      "cv_accuracy_std": 0.1154,
-      "selection_score": 0.7869
+      "cv_accuracy_std": 0.1304,
+      "selection_score": 0.8016
     },
     {
       "model_name": "LSTM",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.533,
-      "cv_f1_std": 0.0859,
-      "cv_recall_mean": 0.6108,
-      "cv_recall_std": 0.0677,
-      "cv_precision_mean": 0.5565,
-      "cv_precision_std": 0.0881,
-      "cv_accuracy_mean": 0.5376,
-      "cv_accuracy_std": 0.2178,
-      "selection_score": 0.6254
+      "cv_f1_mean": 0.5582,
+      "cv_f1_std": 0.1783,
+      "cv_recall_mean": 0.6307,
+      "cv_recall_std": 0.1499,
+      "cv_precision_mean": 0.6244,
+      "cv_precision_std": 0.1877,
+      "cv_accuracy_mean": 0.5152,
+      "cv_accuracy_std": 0.228,
+      "selection_score": 0.6448
     },
     {
       "model_name": "Autoencoder",
       "model_type": "DeepLearning",
-      "cv_f1_mean": 0.0292,
-      "cv_f1_std": 0.0001,
-      "cv_recall_mean": 0.0552,
-      "cv_recall_std": 0.0007,
-      "cv_precision_mean": 0.0198,
+      "cv_f1_mean": 0.0293,
+      "cv_f1_std": 0.0002,
+      "cv_recall_mean": 0.0556,
+      "cv_recall_std": 0.0,
+      "cv_precision_mean": 0.0199,
       "cv_precision_std": 0.0002,
-      "cv_accuracy_mean": 0.355,
-      "cv_accuracy_std": 0.0028,
-      "selection_score": 0.2961
+      "cv_accuracy_mean": 0.3575,
+      "cv_accuracy_std": 0.0038,
+      "selection_score": 0.2964
     }
   ],
   "preprocessing_version": "split_first_smote_inside_folds_only",
-  "git_commit": "b26ed6d88b61352ccbf4b1a428b38ed92ff0e9ff"
+  "git_commit": "f9f16228bf54cf4b4f3f3253fb1800923e517a6d"
 }

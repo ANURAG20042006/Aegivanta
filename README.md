@@ -136,12 +136,13 @@ docker-compose -f docker/docker-compose.yml up -d --build
 
 #### 1. Backend & ML Setup
 ```bash
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+# Create and activate virtual environment (Python 3.11.x)
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install dependencies
-pip install -r backend/requirements.txt
+# Install exact declared dependencies (enforces scikit-learn 1.6.1 for ML artifacts)
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 
 # Run ML pipeline & artifact generator
 python -m ml.train_pipeline
