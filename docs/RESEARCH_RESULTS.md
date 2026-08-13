@@ -63,3 +63,13 @@
 | Full Pipeline (Selection + SMOTE) | 0.8475 | 0.7964 | 0.0091 |
 | Without Feature Selection | 0.8500 | 0.7985 | 0.0089 |
 | Without SMOTE | 0.8450 | 0.7912 | 0.0093 |
+
+---
+
+## 5. Historical & Superseded Experiments
+
+> [!NOTE]
+> **Historical Experiments Log**:
+> - **EXP-2026-001** (Historical / Superseded Run): CV F1 = 0.9289 ± 0.0349, Test F1 = 0.9623. Superseded by authoritative run `EXP-2026-002` on 5,000 samples.
+> - **Authoritative Active Experiment**: `EXP-2026-002` sitting in `ml/artifacts/metadata.json` (CV F1 = **`0.9430 ± 0.0222`**, Test F1 = **`0.8973`**, Test Accuracy = **`0.9300`**, Test FPR = **`0.0040`**).
+
