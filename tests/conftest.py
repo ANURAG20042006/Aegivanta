@@ -10,12 +10,17 @@ os.environ.setdefault("APP_ENV", "development")
 os.environ.setdefault("OPERATING_MODE", "DEMO")
 
 import asyncio
-from backend.app.main import initialize_application
 
 @pytest.fixture(autouse=True, scope="session")
 def setup_test_env():
     """Session fixture ensuring environment variables are set and database tables are initialized."""
+    async def _init():
+        from backend.app.database import async_engine
+        from backend.app.main import initialize_application
+        await initialize_application()
+        await async_engine.dispose()
+
     try:
-        asyncio.run(initialize_application())
+        asyncio.run(_init())
     except Exception as e:
         print(f"Warning initializing database in tests: {e}")
