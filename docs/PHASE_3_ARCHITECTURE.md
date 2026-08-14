@@ -100,7 +100,7 @@ Phase 3 is built strictly as an **additive layer** on top of the immutable Phase
 | Subsystem / Metric | Target Specification | Empirical Verified Result | Status |
 |---|---|---|---|
 | **CatBoost Model** | SHA-256 `efb4067565...` | `efb4067565f1837c3dc7ccced66c5debace56dd563b43f64c173ab68b7392e82` | **VERIFIED IMMUTABLE** |
-| **Preprocessor** | SHA-256 `e5c07b23b9...` | `e5c07b23b9a82ca25d1e4c7ba9be90b6a22fdfc5a5e3d74c0b6df42cb6d95368` | **VERIFIED IMMUTABLE** |
+| **Preprocessor** | SHA-256 `e5c07b23b9...` | `e5c07b23b9a82ca28b6805e0a2eeff3c42c97b47d6816fd089dbb92d12d93691` | **VERIFIED IMMUTABLE** |
 | **PyTest Suite** | $\ge 227$ tests passing | **241 passed, 17 skipped, 0 failures** | **PASSED** |
 | **Frontend Production Build** | TypeScript zero errors | Vite bundle built in 3.5s (0 errors) | **PASSED** |
 | **10-Point Master Audit** | 10 / 10 items pass | **10 / 10 PASSED (0 FAILURES)** | **PASSED** |

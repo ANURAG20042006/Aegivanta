@@ -82,3 +82,11 @@ reports/*.xlsx
 
 # CatBoost Training Artifacts (generated locally, not for version control)
 catboost_info/
+*.tsv
+*.tfevents
+
+# Generated codebooks and review bundles
+SENTINELAI_*_CODEBOOK.txt
+SENTINELAI_*.txt
+SENTINELAI_*.md
+*.zip
