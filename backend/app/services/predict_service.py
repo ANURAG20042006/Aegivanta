@@ -298,17 +298,23 @@ class PredictService:
             from backend.app.services.risk_engine import RiskScoringEngine
             from backend.app.services.correlation_engine import IncidentCorrelationEngine
             from backend.app.api.v1.websockets import manager
-            from sqlalchemy import or_
+            from sqlalchemy import or_, and_
 
-            # 1. Resolve Target Protected Asset if configured
-            asset_stmt = select(ProtectedAsset).where(
-                or_(
-                    ProtectedAsset.ip_address == vector.destination_ip,
-                    ProtectedAsset.hostname == vector.destination_ip
-                )
-            ).limit(1)
-            asset_res = await db.execute(asset_stmt)
-            asset = asset_res.scalar_one_or_none()
+            # 1. Resolve Target Protected Asset deterministically (active only)
+            asset = None
+            if vector.destination_ip:
+                asset_stmt = select(ProtectedAsset).where(
+                    and_(
+                        ProtectedAsset.status != "inactive",
+                        or_(
+                            ProtectedAsset.ip_address == vector.destination_ip,
+                            ProtectedAsset.hostname == vector.destination_ip
+                        )
+                    )
+                ).limit(1)
+                asset_res = await db.execute(asset_stmt)
+                asset = asset_res.scalar_one_or_none()
+
             asset_crit = asset.criticality if asset else "medium"
 
             # 2. Calculate dynamic operational risk score
@@ -364,16 +370,19 @@ class PredictService:
                 )
                 db.add(sec_event)
 
-                # 6. Publish real-time event to WebSocket subscribers
+                # Commit transaction first to ensure persistence
+                await db.commit()
+
+                # 6. Publish real-time event to WebSocket subscribers AFTER commit
                 try:
                     await manager.broadcast_event("ALERT_TRIGGERED", {
                         "alert_id": alert.alert_id,
                         "incident_id": incident.id,
                         "incident_code": incident.incident_code,
                         "attack_type": attack_type,
-                        "severity": severity,
+                        "severity": incident.severity,
                         "confidence": confidence_score,
-                        "risk_score": risk_score,
+                        "risk_score": incident.risk_score,
                         "source_ip": vector.source_ip,
                         "destination_ip": vector.destination_ip,
                         "asset_name": asset.name if asset else None,
@@ -385,6 +394,7 @@ class PredictService:
             else:
                 # Benign Flow: Record Incident for telemetry tracking and baseline stats
                 incident = Incident(
+                    asset_id=asset.id if asset else None,
                     source_ip=vector.source_ip,
                     destination_ip=vector.destination_ip,
                     source_port=vector.source_port,
@@ -433,6 +443,7 @@ class PredictService:
                     status="PROCESSED"
                 )
                 db.add(sec_event)
+                await db.commit()
 
         else:
             # Baseline Fallback Path (When SOC Phase 1 is disabled)

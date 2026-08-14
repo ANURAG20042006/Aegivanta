@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { useAuth } from './hooks/useAuth';
 import { Navbar } from './components/common/Navbar';
+import { Sidebar } from './components/common/Sidebar';
 
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -39,6 +40,7 @@ const ProtectedLayout: React.FC = () => {
       <div className="app-shell min-h-screen flex flex-col">
         <Navbar />
         <div className="flex flex-1">
+          <Sidebar />
           <main className="flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
