@@ -1,19 +1,19 @@
 # SentinelAI — Testing Guide
 
-**Last Updated**: 2026-08-13
+**Last Updated**: 2026-08-14
 
 ---
 
 ## 1. Test Suite Summary
 
-| Category | Test Files | Tests |
+| Category | Scope / Directory | Tests |
 |:---|:---|:---|
-| ML Pipeline | `tests/ml/` | ~40 |
-| Security & Auth | `tests/test_security*.py` | ~25 |
-| API Endpoints | `tests/test_api*.py` | ~30 |
+| ML & Provenance | `tests/ml/` | 50+ |
+| Security, Auth & RBAC | `tests/test_security*.py`, `tests/security/` | 30+ |
+| API Endpoints & Health | `tests/api/`, `tests/test_backend_api_integrity.py` | 40+ |
 | XAI & Drift | `tests/test_drift_and_xai.py` | 6 |
-| Integration | `tests/test_integration*.py` | ~20 |
-| **Total** | | **125 passed, 1 skipped** |
+| Phase 1 SOC End-to-End | `tests/integration/` | 30+ |
+| **Total Test Count** | **Full Pytest Suite** | **193 passed, 17 skipped, 0 failed (210 collected)** |
 
 ---
 
@@ -21,63 +21,64 @@
 
 ### Full Suite
 ```bash
-py -m pytest -q
-# Expected: 125 passed, 1 skipped, 12 warnings
+python -m pytest -q
+# Expected: 193 passed, 17 skipped, 0 failed
 ```
 
 ### With Verbose Output
 ```bash
-py -m pytest -v
+python -m pytest -v
 ```
 
-### Specific Modules
+### Specific Focus Modules
 ```bash
-py -m pytest tests/ml/ -v         # ML pipeline tests only
-py -m pytest tests/test_security* -v   # Security tests only
+python -m pytest tests/ml/ -v                              # ML pipeline tests only
+python -m pytest tests/test_security_rbac_hardening.py -v   # Security & RBAC tests only
+python -m pytest tests/integration/test_complete_soc_pipeline.py -v  # Phase 1 SOC E2E tests
 ```
 
 ---
 
-## 3. ML Pipeline Tests (`tests/ml/`)
+## 3. ML Pipeline & Research Integrity Tests
 
 Key verified behaviors:
 
-| Test | File | What It Verifies |
+| Test | Module | What It Verifies |
 |:---|:---|:---|
-| `test_split_before_smote` | `test_phase2_*.py` | Train/test split before SMOTE |
-| `test_cv_isolation` | `test_phase2_*.py` | Validation fold not used in fitting |
-| `test_fpr_formula` | `test_phase2_*.py` | FPR = FP/(FP+TN), not 1-recall |
-| `test_missing_fpr_rejects` | `test_phase2_*.py` | Missing FPR → promotion rejected |
-| `test_missing_latency_rejects` | `test_phase2_*.py` | Missing latency → promotion rejected |
-| `test_final_test_not_in_promotion` | `test_phase2_*.py` | Final test metrics never reach promotion gate |
-| `test_rollback_hash_mismatch` | `test_phase2_*.py` | Hash mismatch → rollback rejected |
-| `test_shap_tree_explainer` | `test_drift_and_xai.py` | Real SHAP values returned |
-| `test_drift_psi_detection` | `test_drift_and_xai.py` | PSI > 0.25 triggers DRIFT_DETECTED |
+| `test_split_before_smote` | `tests/ml/` | Train/test split executed before SMOTE |
+| `test_cv_isolation` | `tests/ml/` | Validation folds strictly isolated during fitting |
+| `test_fpr_formula` | `tests/test_fpr.py` | FPR = FP/(FP+TN), not 1-recall |
+| `test_final_test_not_in_promotion` | `tests/ml/` | Final test metrics never reach promotion gate |
+| `test_shap_tree_explainer` | `tests/test_drift_and_xai.py` | Real SHAP values returned from model |
+| `test_drift_psi_detection` | `tests/test_drift_and_xai.py` | PSI calculation and alert triggering |
+| `test_16_step_complete_operational_pipeline` | `tests/integration/` | Full telemetry -> ML -> asset matching -> risk -> alert -> correlation -> timeline -> WebSocket |
 
 ---
 
 ## 4. Intentional Skips
 
-| Skip | Reason |
+| Skips | Reason |
 |:---|:---|
-| 1 GPU benchmark test | Test host has no CUDA-capable GPU; guarded with `pytest.mark.skipif` |
+| 17 GPU / long-running benchmark tests | Test host environment has no CUDA-capable GPU or tests are marked for nightly benchmarks; guarded with `@pytest.mark.skipif`. |
 
 ---
 
-## 5. Static Checks
+## 5. Static & Integrity Audits
 
 ```bash
 # Python syntax compilation check
-py -m compileall -q backend ml scripts tests
+python -m compileall -q backend ml scripts tests
 # Expected: 0 errors
+
+# Master 10-Point Release Audit
+python scripts/final_10_point_audit.py
+# Expected: ALL 10 AUDIT ITEMS PASSED (0 FAILURES)
+
+# Final Integrity Audit
+python scripts/final_integrity_audit.py
+# Expected: ALL CRITICAL CHECKS PASSED
 
 # Frontend production build
 cd frontend && npm run build
 # Expected: 0 TypeScript errors, 0 build failures
 ```
-
----
-
-## 6. Known Warnings
-
-12 `PydanticDeprecatedSince20` warnings from `backend/app/schemas/auth.py` and `schemas/user.py` — using `example=` kwargs on `Field()` which is deprecated in Pydantic V2. These are non-breaking and will be cleaned up in a future schema refactor.

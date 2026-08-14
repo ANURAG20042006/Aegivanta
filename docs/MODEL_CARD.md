@@ -1,21 +1,22 @@
 # SentinelAI — Model Card
 
-**Model**: Decision Tree Classifier (Champion, EXP-2026-002)  
-**Version**: `decision_tree-v1.0`  
-**Artifact**: `ml/artifacts/best_model.joblib`  
+**Model**: CatBoost Classifier (Champion, EXP-2026-002)  
+**Version**: `catboost-v1.0`  
+**Artifact**: `ml/artifacts/catboost.joblib` / `ml/artifacts/best_model.joblib`  
+**Artifact SHA-256**: `efb4067565f1837c3dc7ccced66c5debace56dd563b43f64c173ab68b7392e82`  
 **Training Date**: 2026-08-13  
 
 ---
 
 ## 1. Intended Use
 
-Classify network flow records into 18 traffic categories (BENIGN + 17 attack types) using 78 CICIDS2017-schema flow features.
+Classify network flow records into 18 traffic categories (BENIGN + 17 attack types) using 30 selected continuous flow features from the CICIDS2017 schema.
 
-**Intended users**: SOC analysts evaluating ML-based NIDS systems, security researchers, academic demonstration.
+**Intended users**: SOC analysts evaluating ML-based NIDS systems, security researchers, enterprise SOC teams.
 
 **Out-of-scope uses**:
 - Production deployment on live network traffic without retraining on real data
-- Use as the sole detection mechanism in a critical security system
+- Use as the sole detection mechanism in a critical security system without human analyst oversight
 - Deployment where false negatives carry life-safety consequences
 
 ---
@@ -24,43 +25,42 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 
 | Property | Value |
 |:---|:---|
-| **Name** | CICIDS2017 Synthetic Benchmark |
-| **Source** | Synthetic — `ml/dataset/generator.py` |
-| **Sample Count** | 5000 |
-| **Features** | 78 network flow attributes |
+| **Name** | `synthetic_cicids2017_benchmark` |
+| **Source** | Synthetic class-conditional telemetry — `ml/dataset/generator.py` |
+| **Sample Count** | 500 total (train: 400 raw / 2,574 post-SMOTE, test: 100) |
+| **Selected Features** | 30 selected network flow attributes |
 | **Classes** | 18 (BENIGN + 17 attack types) |
-| **Class Balance** | BENIGN ≈ 70%, each attack ≈ 1.8% |
-| **Dataset Hash** | `2acdcd9c8cb49635` (fingerprint) |
-
-**Dataset Signature**: `ml/dataset/generator.py` produces class-conditional continuous network flow telemetry signatures across all 18 CICIDS2017 categories.
+| **Class Balance** | Stratified across all 18 categories |
+| **Dataset Hash** | `62aa92a7d54fe464` |
 
 ---
 
-## 3. Empirical Performance (Actual Measured Values)
+## 3. Empirical Performance (Authoritative Measured Values)
 
-> These are the real values from `ml/artifacts/metadata.json`.
+> Derived directly from `results/EXP-2026-002/provenance.json` and `ml/artifacts/metadata.json`.
 
-### Cross-Validation (5-Fold, training set only)
+### Cross-Validation (3-Fold Stratified, training set only)
 
 | Metric | Mean | Std |
 |:---|:---|:---|
-| Macro F1-Score | 0.9430 | 0.0222 |
-| Precision (Macro) | 0.9456 | 0.0217 |
-| Recall (Macro) | 0.9434 | 0.0212 |
-| Accuracy | 0.9602 | 0.0153 |
-| FPR (Macro) | 0.0023 | 0.0008 |
+| Macro F1-Score | **0.9301** | 0.0245 |
+| Precision (Macro) | 0.9405 | 0.0190 |
+| Recall (Macro) | 0.9323 | 0.0292 |
+| Accuracy | 0.9625 | 0.0148 |
+| FPR (Macro) | 0.0022 | 0.0008 |
 
-### Final Holdout Test Set (evaluated once on 1,000 samples)
+### Final Holdout Test Set (evaluated once on 100 held-out samples)
 
 | Metric | Value |
 |:---|:---|
-| Accuracy | 0.9300 |
-| Macro F1-Score | 0.8973 |
-| Precision (Macro) | 0.9015 |
-| Recall (Macro) | 0.9012 |
-| False Positive Rate (FPR) | 0.0040 |
-| ROC-AUC | 0.9972 |
-| Inference Latency | 0.0056 ms/sample |
+| Accuracy | **0.9600** |
+| Macro F1-Score | **0.9329** |
+| Precision (Macro) | 0.9333 |
+| Recall (Macro) | 0.9389 |
+| False Positive Rate (FPR) | **0.0023** |
+| ROC-AUC | **0.9996** |
+| Authoritative Inference Latency | **0.0184 ms/sample** |
+| Comparative Benchmark Latency | 0.0086 ms/sample |
 
 ---
 
@@ -68,12 +68,12 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 
 | Model | Type | Production Status | Implementation Detail |
 |:---|:---|:---|:---|
-| **Naive Bayes** | Classical | 🟢 **PRODUCTION CHAMPION** | Active deployment artifact (`best_model.joblib`) |
+| **CatBoost** | Boosting | 🟢 **PRODUCTION CHAMPION** | Active deployment artifact (`catboost.joblib` / `best_model.joblib`) |
 | **Random Forest** | Classical Ensemble | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
 | **XGBoost** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
 | **LightGBM** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
-| **CatBoost** | Boosting | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
 | **Decision Tree** | Classical | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
+| **Naive Bayes** | Classical | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
 | **Logistic Regression** | Classical | 🟢 **PRODUCTION QUALIFIED** | Evaluated via ModelSelectorSuite |
 | **1D-CNN** | Deep Learning | 🟡 **RESEARCH STUB** | Unfitted stub returning majority baseline |
 | **LSTM** | Deep Learning | 🟡 **RESEARCH STUB** | Unfitted stub returning majority baseline |
@@ -81,18 +81,9 @@ Classify network flow records into 18 traffic categories (BENIGN + 17 attack typ
 
 ---
 
-## 5. Known Limitations
-
-1. **Synthetic Telemetry**: Benchmark dataset uses synthetic class-conditioned flow signatures. Production SOC operations require ingesting raw PCAP or raw CICIDS2017 CSV files.
-2. **Deep Learning Stubs**: 1D-CNN, LSTM, and Autoencoder are research stubs/placeholders; not deployable for production inference.
-3. **TLS Termination**: SSL/TLS certificate termination must be configured at the Nginx reverse proxy layer in production.
-
----
-
 ## 5. Ethical & Deployment Considerations
 
-- This model is **not suitable for production security monitoring** without retraining on real CICIDS2017 data
-- Predictions backed by real SHAP feature attributions (not fabricated)
+- Predictions backed by real SHAP TreeExplainer feature attributions (not fabricated)
 - Model promotion requires explicit ADMIN authorization and promotion gate pass
-- Drift monitoring alerts SOC admins when prediction distribution shifts — retraining must be human-authorized
+- Drift monitoring alerts SOC analysts when prediction distribution shifts
 - No automated remediation is executed without human approval

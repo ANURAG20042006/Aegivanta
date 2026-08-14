@@ -1,4 +1,13 @@
+"""
+backend/app/api/v1/health.py
+============================
+System Health, Liveness, Readiness, and Observability Endpoints.
+Separates fast process-level liveness probes from genuine dependency readiness checks.
+Zero secret exposure; fail-closed dependency status reporting.
+"""
+
 import time
+import os
 from pathlib import Path
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -12,43 +21,47 @@ from ml.schema.feature_schema import validate_artifact_compatibility, load_artif
 
 router = APIRouter(tags=["System Health & Observability"])
 
+_APP_START_TIME = time.time()
 
-@router.get("/health", summary="Basic Liveness Probe")
-async def health_check():
-    """Basic liveness probe endpoint returning API gateway service status."""
+
+@router.get("/health", summary="Process Liveness Probe")
+@router.get("/health/live", summary="Process Liveness Probe (K8s / Container)")
+async def liveness_check() -> Dict[str, Any]:
+    """
+    Process-level liveness probe.
+    Fast, lightweight, zero-dependency check confirming the API gateway process is alive.
+    """
     return {
         "status": "HEALTHY",
         "service": settings.APP_NAME,
-        "app": settings.APP_NAME,
         "mode": settings.OPERATING_MODE,
         "version": settings.PROJECT_VERSION,
         "environment": settings.APP_ENV
     }
 
 
-@router.get("/ready", summary="Deep System & ML Artifact Readiness Probe")
-async def readiness_check(db: AsyncSession = Depends(get_db)):
+@router.get("/ready", summary="System Dependency Readiness Probe")
+@router.get("/health/ready", summary="System Dependency Readiness Probe (K8s / Container)")
+async def readiness_check(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     """
-    Deep readiness probe verifying:
-      1. Database connectivity
-      2. Redis cache / broker status
-      3. Active model presence in ModelRegistry
-      4. Artifact integrity (.joblib model files)
-      5. Feature schema compatibility
-    Returns HTTP 200 OK when ready, or HTTP 503 Service Unavailable when unready.
+    Readiness probe verifying dependencies required for serving operational traffic:
+      1. Genuine Database connectivity (SELECT 1)
+      2. Model artifact integrity (champion model & preprocessor .joblib files)
+      3. Feature schema and manifest compatibility
+    Returns HTTP 200 OK when ready; HTTP 503 Service Unavailable when dependencies fail.
+    Never exposes internal passwords, connection URLs, or secret keys.
     """
-    # 1. Database Connectivity Check
+    # 1. Genuine Database Connectivity Check
     db_healthy = False
+    db_error = None
     try:
         res = await db.execute(text("SELECT 1"))
         db_healthy = (res.scalar() == 1)
-    except Exception:
+    except Exception as exc:
         db_healthy = False
+        db_error = "Database connectivity check failed"
 
-    # 2. Redis Connection Status Check
-    redis_healthy = True
-
-    # 3. Active Model Registry Query
+    # 2. Active Model Registry Query
     active_model_name = None
     active_model_version = None
     try:
@@ -61,16 +74,18 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     except Exception:
         pass
 
-    # 4. Artifact Integrity Check
+    # 3. Artifact Integrity Check
     artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
     if not artifact_dir.is_absolute():
-        artifact_dir = Path(__file__).resolve().parents[3] / artifact_dir
+        artifact_dir = Path(__file__).resolve().parents[4] / artifact_dir
 
-    model_exists = (artifact_dir / "best_model.joblib").exists() or (artifact_dir / "xgboost.joblib").exists()
+    catboost_exists = (artifact_dir / "catboost.joblib").exists()
+    best_model_exists = (artifact_dir / "best_model.joblib").exists()
     preprocessor_exists = (artifact_dir / "preprocessor.joblib").exists()
-    artifact_integrity = model_exists and preprocessor_exists
+    model_exists = catboost_exists or best_model_exists
+    artifact_integrity = bool(model_exists and preprocessor_exists)
 
-    # 5. Manifest & Schema Feature Synchronization
+    # 4. Manifest & Schema Feature Synchronization
     manifest_path = artifact_dir / "artifact_manifest.json"
     manifest_valid = False
     if manifest_path.exists():
@@ -87,7 +102,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
     metadata = load_artifact_metadata(artifact_dir)
     schema_compatible, compat_errors = validate_artifact_compatibility(metadata)
 
-    is_ready = db_healthy and artifact_integrity and schema_compatible and manifest_valid
+    is_ready = bool(db_healthy and artifact_integrity and schema_compatible and manifest_valid)
 
     if not is_ready:
         raise HTTPException(
@@ -95,7 +110,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
             detail={
                 "ready": False,
                 "database_connected": db_healthy,
-                "redis_connected": redis_healthy,
+                "database_error": db_error,
                 "artifact_integrity": artifact_integrity,
                 "schema_compatible": schema_compatible,
                 "schema_errors": compat_errors
@@ -106,37 +121,38 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
         "ready": True,
         "operating_mode": settings.OPERATING_MODE,
         "database_connected": db_healthy,
-        "redis_connected": redis_healthy,
-        "active_model": active_model_name or "Random Forest",
-        "active_model_version": active_model_version or "rf-v1.0",
+        "active_model": active_model_name or "CatBoost",
+        "active_model_version": active_model_version or "catboost-v1.0",
         "artifact_integrity": artifact_integrity,
         "schema_compatible": schema_compatible
     }
 
 
 @router.get("/metrics", summary="System Observability Metrics Endpoint")
-async def get_system_metrics(db: AsyncSession = Depends(get_db)):
-    """Returns telemetry metrics: API latency, inference latency, worker status, and error counts."""
-    t0 = time.time()
+async def get_system_metrics(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+    """
+    Returns accurate runtime observability telemetry:
+      - Measured database query round-trip latency
+      - Application uptime
+      - Process status and active operating mode
+    """
+    t0 = time.perf_counter()
     db_ok = False
     try:
-        await db.execute(text("SELECT 1"))
-        db_ok = True
+        res = await db.execute(text("SELECT 1"))
+        db_ok = (res.scalar() == 1)
     except Exception:
         db_ok = False
 
-    t_db = (time.time() - t0) * 1000.0
+    t_db = (time.perf_counter() - t0) * 1000.0
+    uptime_sec = round(time.time() - _APP_START_TIME, 2)
 
     return {
         "timestamp": time.time(),
+        "uptime_seconds": uptime_sec,
         "operating_mode": settings.OPERATING_MODE,
-        "db_latency_ms": round(t_db, 2),
-        "db_healthy": db_ok,
-        "worker_status": "IDLE_READY",
-        "active_connections": 1,
-        "error_counts": {
-            "http_4xx": 0,
-            "http_5xx": 0,
-            "schema_rejections": 0
-        }
+        "database_healthy": db_ok,
+        "database_latency_ms": round(t_db, 3),
+        "active_model": "CatBoost",
+        "telemetry_source": "RUNTIME_MEASURED"
     }

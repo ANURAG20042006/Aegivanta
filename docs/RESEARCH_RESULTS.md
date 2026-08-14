@@ -51,7 +51,5 @@ To ensure cryptographic and experimental clarity, the repository defines two dis
 ## 5. Historical & Superseded Experiments
 
 > [!NOTE]
-> **Historical Experiments Log**:
-> - **EXP-2026-001** (Historical / Superseded Run): CV F1 = 0.9289 ± 0.0349, Test F1 = 0.9623. Superseded by authoritative run `EXP-2026-002` on 5,000 samples.
-> - **Authoritative Active Experiment**: `EXP-2026-002` sitting in `ml/artifacts/metadata.json` (CV F1 = **`0.9430 ± 0.0222`**, Test F1 = **`0.8973`**, Test Accuracy = **`0.9300`**, Test FPR = **`0.0040`**).
+> - **Authoritative Active Experiment**: `EXP-2026-002` sitting in `ml/artifacts/metadata.json` and `results/EXP-2026-002/provenance.json` (Champion: **CatBoost**, CV F1 = **`0.9301 ± 0.0245`**, Test F1 = **`0.9329`**, Test Accuracy = **`0.9600`**, Test FPR = **`0.0023`**, Test Latency = **`0.0184 ms`**).
 

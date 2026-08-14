@@ -33,21 +33,45 @@ async def get_current_user(
     return user
 
 
+# Canonical internal RBAC roles
+CANONICAL_ROLES = {"admin", "analyst", "viewer"}
+
+# Role alias dictionary for backward compatibility
+ROLE_ALIASES = {
+    "admin": "admin",
+    "administrator": "admin",
+    "root": "admin",
+    "analyst": "analyst",
+    "soc_analyst": "analyst",
+    "security_analyst": "analyst",
+    "viewer": "viewer",
+    "read_only": "viewer",
+    "guest": "viewer",
+    "auditor": "viewer"
+}
+
+
+def normalize_role(role: str) -> str:
+    """
+    Normalizes a role string into its canonical representation.
+    Returns 'unknown' for unrecognized or unmapped roles (fail-closed).
+    """
+    clean_role = (role or "").strip().lower()
+    return ROLE_ALIASES.get(clean_role, "unknown")
+
+
 def require_role(allowed_roles: list[str]) -> Callable:
     """
     Factory dependency for enforcing Role-Based Access Control (RBAC).
-    Supported canonical roles: ADMIN, SOC_ANALYST (ANALYST), RESEARCHER, VIEWER.
-    Validates authorization strictly on the server-side.
+    Normalizes both required and user roles to canonical representations.
+    Fails closed if the user role is unrecognized or not permitted.
     """
-    normalized_allowed = set(r.lower() for r in allowed_roles)
-    if "soc_analyst" in normalized_allowed:
-        normalized_allowed.add("analyst")
-    if "analyst" in normalized_allowed:
-        normalized_allowed.add("soc_analyst")
+    canonical_allowed = {normalize_role(r) for r in allowed_roles}
+    canonical_allowed.discard("unknown")
 
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:
-        user_role = current_user.role.lower()
-        if user_role not in normalized_allowed:
+        user_role_canonical = normalize_role(current_user.role)
+        if user_role_canonical not in canonical_allowed:
             raise PermissionDeniedError(
                 detail=f"User role '{current_user.role}' is not authorized to access this resource. Required: {allowed_roles}"
             )

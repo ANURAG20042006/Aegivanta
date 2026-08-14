@@ -16,27 +16,27 @@ SentinelAI is a production-grade, end-to-end Machine Learning Operations (MLOps)
 
 ## Authoritative Experiment: `EXP-2026-002`
 
-- **Benchmark Dataset**: `synthetic_cicids2017_benchmark` (5,000 samples, 82 raw columns)
-- **Train / Test Split**: 80% Train (`4,000` samples) / 20% Held-Out Test (`1,000` samples)
-- **CV Strategy**: 5-Fold Stratified K-Fold CV (fitted strictly inside training splits)
-- **Champion Model**: Naive Bayes v1.0 (`best_model.joblib`)
+- **Benchmark Dataset**: `synthetic_cicids2017_benchmark` (Hash: `62aa92a7d54fe464`, 30 selected features)
+- **Train / Test Split**: 80% Train (`400` raw / `2,574` post-SMOTE) / 20% Held-Out Test (`100` samples)
+- **CV Strategy**: 3-Fold Stratified K-Fold CV (fitted strictly inside training folds)
+- **Champion Model**: CatBoost v1.0 (`catboost.joblib` / `best_model.joblib`)
 
 ### Primary Performance Metrics
 
 | Evaluation Boundary | Metric | Authoritative Value |
 |:---|:---|:---|
-| **5-Fold Cross-Validation** (Train split, N=4,000) | **Macro F1 Mean** | **`0.9430 ± 0.0222`** |
-| | Precision Mean | `0.9456 ± 0.0217` |
-| | Recall Mean | `0.9434 ± 0.0212` |
-| | Accuracy Mean | `0.9602 ± 0.0153` |
-| | Macro FPR | `0.0023 ± 0.0008` |
-| **Untouched Test Set** (Evaluated ONCE, N=1,000) | **Holdout Test Macro F1** | **`0.8973`** |
-| | Accuracy | `0.9300` |
-| | Precision | `0.9015` |
-| | Recall | `0.9012` |
-| | Macro FPR | `0.0040` |
-| | ROC-AUC | `0.9972` |
-| | Inference Latency | `0.0056 ms / sample` |
+| **3-Fold Cross-Validation** (Train split, N=2,574) | **Macro F1 Mean** | **`0.9301 ± 0.0245`** |
+| | Precision Mean | `0.9405 ± 0.0190` |
+| | Recall Mean | `0.9323 ± 0.0292` |
+| | Accuracy Mean | `0.9625 ± 0.0148` |
+| | Macro FPR | `0.0022 ± 0.0008` |
+| **Untouched Test Set** (Evaluated ONCE, N=100) | **Holdout Test Macro F1** | **`0.9329`** |
+| | Accuracy | `0.9600` |
+| | Precision | `0.9333` |
+| | Recall | `0.9389` |
+| | Macro FPR | `0.0023` |
+| | ROC-AUC | `0.9996` |
+| | Authoritative Inference Latency | `0.0184 ms / sample` |
 
 ---
 

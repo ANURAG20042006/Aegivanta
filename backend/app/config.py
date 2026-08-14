@@ -75,34 +75,56 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def validate_production_settings() -> None:
-    """Stops accidental production deployments with insecure development configurations."""
+def validate_production_settings(custom_settings: "Settings" = None) -> None:
+    """
+    Validates that production environments have secure, non-default configuration.
+    Fails safely with a RuntimeError if mandatory production secrets are missing or weak.
+    """
+    target_settings = custom_settings or settings
     valid_modes = ["DEMO", "LAB", "PRODUCTION"]
-    mode_upper = settings.OPERATING_MODE.upper()
+    mode_upper = target_settings.OPERATING_MODE.upper()
     if mode_upper not in valid_modes:
-        raise RuntimeError(f"Invalid OPERATING_MODE '{settings.OPERATING_MODE}'. Valid choices: {valid_modes}")
+        raise RuntimeError(f"Invalid OPERATING_MODE '{target_settings.OPERATING_MODE}'. Valid choices: {valid_modes}")
 
-    is_production = (settings.APP_ENV.lower() == "production" or mode_upper == "PRODUCTION")
+    is_production = (
+        target_settings.APP_ENV.lower() == "production"
+        or mode_upper == "PRODUCTION"
+        or target_settings.ENVIRONMENT.lower() == "production"
+    )
     if not is_production:
         return
 
-    if not os.environ.get("SECRET_KEY") or len(settings.SECRET_KEY) < 32:
+    # 1. SECRET_KEY validation in production
+    secret_key = os.environ.get("SECRET_KEY", "") or target_settings.SECRET_KEY
+    if not secret_key or len(secret_key) < 32:
         raise RuntimeError("Production requires a unique SECRET_KEY of at least 32 characters in environment variables.")
 
-    if not os.environ.get("POSTGRES_PASSWORD"):
-        raise RuntimeError("Production requires POSTGRES_PASSWORD environment variable to be set.")
+    insecure_keys = {"secret", "changeme", "sentinelai", "admin", "password", "123456", "default", "default_secret_key"}
+    if secret_key.lower() in insecure_keys or any(secret_key.lower().startswith(k) for k in ["default_", "dev_", "test_"]):
+        raise RuntimeError("Production SECRET_KEY cannot be a known insecure or default string.")
 
-    if not os.environ.get("SENTINEL_ADMIN_PASSWORD"):
-        raise RuntimeError("Production requires SENTINEL_ADMIN_PASSWORD environment variable to be set.")
+    # 2. Database Password validation
+    pg_pass = os.environ.get("POSTGRES_PASSWORD", "") or target_settings.POSTGRES_PASSWORD
+    if not pg_pass or len(pg_pass) < 8:
+        raise RuntimeError("Production requires POSTGRES_PASSWORD of at least 8 characters.")
 
-    if not os.environ.get("SENTINEL_ANALYST_PASSWORD"):
-        raise RuntimeError("Production requires SENTINEL_ANALYST_PASSWORD environment variable to be set.")
+    # 3. User Seed Passwords validation
+    admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", "")
+    if not admin_pass or len(admin_pass) < 8:
+        raise RuntimeError("Production requires SENTINEL_ADMIN_PASSWORD of at least 8 characters in environment variables.")
 
-    if not os.environ.get("SENTINEL_VIEWER_PASSWORD"):
-        raise RuntimeError("Production requires SENTINEL_VIEWER_PASSWORD environment variable to be set.")
+    analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", "")
+    if not analyst_pass or len(analyst_pass) < 8:
+        raise RuntimeError("Production requires SENTINEL_ANALYST_PASSWORD of at least 8 characters in environment variables.")
 
-    if settings.DEBUG:
+    viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", "")
+    if not viewer_pass or len(viewer_pass) < 8:
+        raise RuntimeError("Production requires SENTINEL_VIEWER_PASSWORD of at least 8 characters in environment variables.")
+
+    # 4. Debug Mode Check
+    if target_settings.DEBUG:
         raise RuntimeError("Production requires DEBUG=False.")
 
-    if any(origin == "*" or origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in settings.CORS_ORIGINS):
+    # 5. CORS Origins Check
+    if any(origin == "*" or origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in target_settings.CORS_ORIGINS):
         raise RuntimeError("Production CORS_ORIGINS must not use wildcard '*' or localhost entries.")

@@ -77,19 +77,22 @@ async def register(
             detail="Username or email is already registered."
         )
 
-    requested_role = (payload.role or "viewer").lower()
-    if requested_role == "admin":
+    requested_role = (payload.role or "viewer").strip().lower()
+    if requested_role in ["admin", "administrator", "root", "analyst", "soc_analyst", "security_analyst"]:
         raise SentinelAIException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Public registration cannot create Admin accounts. Admin accounts must be provisioned by an administrator."
+            detail="Public registration cannot provision privileged accounts (Admin or Analyst). Privileged accounts must be created by an administrator."
         )
+
+    # Public self-registration is strictly restricted to Viewer role
+    assigned_role = "viewer"
 
     new_user = User(
         username=payload.username,
         email=payload.email,
         password_hash=hash_password(payload.password),
         full_name=payload.full_name,
-        role=requested_role
+        role=assigned_role
     )
     db.add(new_user)
     await db.flush()

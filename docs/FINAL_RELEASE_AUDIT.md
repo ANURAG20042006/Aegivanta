@@ -50,24 +50,25 @@
 
 ## 4. Empirical ML Metrics Disclosure (Authoritative Experiment: EXP-2026-002)
 
-- **Authoritative Source**: `ml/artifacts/metadata.json` (Experiment ID: `EXP-2026-002`)
-- **Benchmark Dataset**: `synthetic_cicids2017_benchmark`
-- **Dataset Size**: `5,000` samples, `82` features (78 flow telemetry + metadata)
+- **Authoritative Source**: `ml/artifacts/metadata.json` & `results/EXP-2026-002/provenance.json` (Experiment ID: `EXP-2026-002`)
+- **Benchmark Dataset**: `synthetic_cicids2017_benchmark` (Hash: `62aa92a7d54fe464`)
+- **Dataset Size**: `500` samples total (`400` raw train / `2,574` post-SMOTE, `100` held-out test), `30` selected features
 - **Class Taxonomy**: `18` classes (`BENIGN` + 17 attack categories)
-- **5-Fold Cross-Validation Metrics (TRAIN split only, N=4,000)**:
-  - Macro F1 Mean: `0.9430 ± 0.0222`
-  - Precision Mean: `0.9456 ± 0.0217`
-  - Recall Mean: `0.9434 ± 0.0212`
-  - Accuracy Mean: `0.9602 ± 0.0153`
-  - Macro FPR: `0.0023 ± 0.0008`
-- **Final Holdout Test Evaluation (Evaluated ONCE on 20% untouched test set, N=1,000)**:
-  - Accuracy: `0.9300`
-  - Macro F1: `0.8973`
-  - Precision: `0.9015`
-  - Recall: `0.9012`
-  - Macro FPR: `0.0040`
-  - ROC-AUC: `0.9972`
-  - Inference Latency: `0.0056 ms/sample`
+- **Champion Model**: `CatBoost` (`catboost-v1.0`, SHA-256: `efb40675...`)
+- **3-Fold Cross-Validation Metrics (TRAIN split only, N=2,574)**:
+  - Macro F1 Mean: `0.9301 ± 0.0245`
+  - Precision Mean: `0.9405 ± 0.0190`
+  - Recall Mean: `0.9323 ± 0.0292`
+  - Accuracy Mean: `0.9625 ± 0.0148`
+  - Macro FPR: `0.0022 ± 0.0008`
+- **Final Holdout Test Evaluation (Evaluated ONCE on untouched test set, N=100)**:
+  - Accuracy: `0.9600`
+  - Macro F1: `0.9329`
+  - Precision: `0.9333`
+  - Recall: `0.9389`
+  - Macro FPR: `0.0023`
+  - ROC-AUC: `0.9996`
+  - Authoritative Inference Latency: `0.0184 ms/sample`
 
 ---
 

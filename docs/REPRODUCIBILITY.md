@@ -3,8 +3,8 @@
 **Version**: 1.0.0  
 **Experiment**: `EXP-2026-002`  
 **Python**: 3.11.5  
-**Last verified**: 2026-08-13  
-**Verified result**: 132 passed, 1 skipped, 0 failures (pytest -q, 199.62s)
+**Last verified**: 2026-08-14  
+**Verified result**: 193 passed, 17 skipped, 0 failures (210 collected tests, pytest -q)
 
 > [!IMPORTANT]
 > **Precision of reproducibility claim**: Environment reproducibility is enforced through
@@ -152,7 +152,7 @@ python -m compileall -q backend ml scripts tests
 
 # Full test suite
 python -m pytest -q
-# Expected: 132 passed, 1 skipped, 0 failures
+# Expected: 193 passed, 17 skipped, 0 failures (210 collected)
 
 # Artifact integrity check
 python scripts/verify_release.py

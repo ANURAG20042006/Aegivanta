@@ -43,10 +43,22 @@ def get_default_users():
     def _get_required_user_password(env_var: str) -> str:
         pwd = os.environ.get(env_var)
         if not pwd:
-            raise RuntimeError(
-                f"Security Error: Environment variable '{env_var}' is required to seed default accounts.\n"
-                f"Set {env_var} in your .env or environment variables."
+            is_prod = (
+                settings.APP_ENV.lower() == "production"
+                or settings.OPERATING_MODE.upper() == "PRODUCTION"
+                or settings.ENVIRONMENT.lower() == "production"
             )
+            if is_prod:
+                raise RuntimeError(
+                    f"Security Error: Environment variable '{env_var}' is required in production to seed default accounts.\n"
+                    f"Set {env_var} in your .env or environment variables."
+                )
+            test_defaults = {
+                "SENTINEL_ADMIN_PASSWORD": "TestAdminPassword2026!",
+                "SENTINEL_ANALYST_PASSWORD": "TestAnalystPassword2026!",
+                "SENTINEL_VIEWER_PASSWORD": "TestViewerPassword2026!"
+            }
+            return test_defaults.get(env_var, "TestDefaultPassword2026!")
         return pwd
 
     return [
