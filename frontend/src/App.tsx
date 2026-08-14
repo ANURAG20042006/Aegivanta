@@ -23,6 +23,14 @@ import { ThreatIntelView } from './pages/ThreatIntelView';
 import { InvestigationsView } from './pages/InvestigationsView';
 import { AnalyticsView } from './pages/AnalyticsView';
 
+// Phase 3 Advanced SOC Pages
+import { ThreatHunting } from './pages/ThreatHunting';
+import { PredictiveAnalytics } from './pages/PredictiveAnalytics';
+import { ThreatGraph } from './pages/ThreatGraph';
+import { AttackCoverage } from './pages/AttackCoverage';
+import { SOCAnalytics } from './pages/SOCAnalytics';
+import { ResponseCenter } from './pages/ResponseCenter';
+
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -54,6 +62,12 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/investigations" element={<InvestigationsView />} />
               <Route path="/incidents/:id" element={<IncidentDetailPage />} />
               <Route path="/analytics" element={<AnalyticsView />} />
+              <Route path="/threat-hunting" element={<ThreatHunting />} />
+              <Route path="/predictive-analytics" element={<PredictiveAnalytics />} />
+              <Route path="/threat-graph" element={<ThreatGraph />} />
+              <Route path="/attack-coverage" element={<AttackCoverage />} />
+              <Route path="/soc-analytics" element={<SOCAnalytics />} />
+              <Route path="/response-center" element={<ResponseCenter />} />
               <Route path="/guide" element={<GuidePage />} />
               <Route path="/prediction" element={<Prediction />} />
               <Route path="/reports" element={<Reports />} />

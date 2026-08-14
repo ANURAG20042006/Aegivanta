@@ -16,7 +16,12 @@ import {
   BellRing,
   Globe,
   Database,
-  SearchCode
+  SearchCode,
+  Network,
+  TrendingUp,
+  Target,
+  Activity,
+  Zap
 } from 'lucide-react';
 
 export const navItems = [
@@ -24,13 +29,23 @@ export const navItems = [
   { path: '/alerts', label: 'Live alerts', section: 'Monitor', icon: BellRing },
   { path: '/assets', label: 'Protected assets', section: 'Monitor', icon: Server },
   { path: '/monitoring', label: 'Asset health', section: 'Monitor', icon: Globe },
+  
   { path: '/threat-intel', label: 'Threat intel', section: 'Intelligence', icon: Database },
   { path: '/investigations', label: 'Investigations', section: 'Intelligence', icon: SearchCode },
   { path: '/analytics', label: 'Model insights', section: 'Intelligence', icon: BarChart3 },
+
+  { path: '/threat-hunting', label: 'Threat Hunting', section: 'Advanced SOC', icon: Search },
+  { path: '/predictive-analytics', label: 'Predictive Risk', section: 'Advanced SOC', icon: TrendingUp },
+  { path: '/threat-graph', label: 'Threat Graph', section: 'Advanced SOC', icon: Network },
+  { path: '/attack-coverage', label: 'ATT&CK Matrix', section: 'Advanced SOC', icon: Target },
+  { path: '/soc-analytics', label: 'SOC Analytics', section: 'Advanced SOC', icon: Activity },
+
+  { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },
   { path: '/history', label: 'Incident history', section: 'Actions', icon: History },
+  
   { path: '/users', label: 'Team members', section: 'Manage', icon: Users },
   { path: '/settings', label: 'Settings', section: 'Manage', icon: Settings },
   { path: '/about', label: 'About SentinelAI', section: 'Manage', icon: Info },
@@ -39,10 +54,10 @@ export const navItems = [
 export const Sidebar: React.FC = () => {
   return (
     <aside className="app-sidebar w-64 border-r border-slate-800 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-4rem)] sticky top-16">
-      <div className="p-4 space-y-1">
+      <div className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-12rem)]">
         <div className="sidebar-workspace-heading">
           <span className="flex items-center gap-2"><span className="sidebar-heading-icon"><ShieldCheck className="w-3.5 h-3.5" /></span>Workspace</span>
-          <span>11 tools</span>
+          <span>17 tools</span>
         </div>
         {navItems.map((item, index) => {
           const Icon = item.icon;
@@ -58,9 +73,9 @@ export const Sidebar: React.FC = () => {
               >
                 <span className="sidebar-nav-icon"><Icon className="w-4 h-4" /></span>
                 <span>{item.label}</span>
-                {item.path === '/guide' && (
-                  <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                    NEW
+                {item.section === 'Advanced SOC' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                    P3
                   </span>
                 )}
               </NavLink>
@@ -73,14 +88,14 @@ export const Sidebar: React.FC = () => {
       <div className="sidebar-status-card p-4 m-4 rounded-xl text-xs font-mono space-y-3">
         <div className="flex items-center gap-2">
           <span className="status-dot is-online" />
-          <span className="text-slate-300 font-semibold">Protection is on</span>
+          <span className="text-slate-300 font-semibold">Phase 3 SOC Active</span>
           <span className="ml-auto text-[10px] text-emerald-400 font-bold">READY</span>
         </div>
         <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-          <div className="bg-cyan-400 h-full w-[94%] animate-pulse"></div>
+          <div className="bg-cyan-400 h-full w-[100%] animate-pulse"></div>
         </div>
         <div className="flex items-center justify-between text-[10px] text-slate-500">
-          <span>Traffic detection is ready</span>
+          <span>Unified SOC Engine</span>
           <HelpCircle className="w-3.5 h-3.5" aria-label="Protection status help" />
         </div>
       </div>

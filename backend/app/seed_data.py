@@ -376,5 +376,94 @@ async def seed_demo_operational_data(db: AsyncSession) -> None:
         created_at=now
     ))
 
+    # 8. Phase 3: Saved Threat Hunting Queries
+    from backend.app.models.hunting import HuntingQuery
+    db.add(HuntingQuery(
+        name="High-Severity External Port Scanners",
+        description="Identifies multi-port scanning vectors targeting production subnets in past 24h",
+        query_definition={
+            "entity": "alerts",
+            "time_range": "24h",
+            "filters": {"attack_type": "PortScan", "severity": "HIGH"}
+        },
+        created_by="admin",
+        is_saved=True,
+        created_at=now
+    ))
+    db.add(HuntingQuery(
+        name="Tor & C2 Indicators Matching Ingress Traffic",
+        description="Searches active C2 and Tor exit node indicators",
+        query_definition={
+            "entity": "iocs",
+            "filters": {"ioc_type": "ipv4", "keyword": "185."}
+        },
+        created_by="analyst",
+        is_saved=True,
+        created_at=now
+    ))
+
+    # 9. Phase 3: Predictive Risk Forecasts
+    from backend.app.models.predictive import RiskForecast, AlertVolumeForecast
+    db.add(RiskForecast(
+        asset_id=asset_objs["api-gateway"].id,
+        forecast_type="24H",
+        forecast_horizon="24_HOURS",
+        predicted_score=87.5,
+        confidence=0.89,
+        baseline_score=65.0,
+        model_family="phase3_predictive",
+        model_version="forecast-v1",
+        explanation={
+            "status": "ACTIVE_TREND_FORECAST",
+            "velocity_factor": 15.0,
+            "outage_penalty": 7.5,
+            "recent_alerts": 4,
+            "recent_anomalies": 2
+        },
+        created_at=now
+    ))
+    db.add(AlertVolumeForecast(
+        forecast_window="NEXT_24H",
+        predicted_alert_count=42,
+        confidence=0.86,
+        model_family="phase3_predictive",
+        model_version="volume-forecast-v1",
+        historical_reference_count=36,
+        created_at=now
+    ))
+
+    # 10. Phase 3: MITRE ATT&CK Matrix Coverage Snapshot
+    from backend.app.models.attack_coverage import AttackCoverageSnapshot
+    db.add(AttackCoverageSnapshot(
+        observed_techniques_count=4,
+        detected_techniques_count=4,
+        total_matrix_techniques=26,
+        coverage_percentage=15.4,
+        tactic_breakdown={
+            "Reconnaissance": {"total_techniques": 2, "detected_count": 1, "coverage_pct": 50.0, "is_active_observation": True},
+            "Impact": {"total_techniques": 2, "detected_count": 1, "coverage_pct": 50.0, "is_active_observation": True},
+            "Command and Control": {"total_techniques": 2, "detected_count": 1, "coverage_pct": 50.0, "is_active_observation": True},
+            "Initial Access": {"total_techniques": 2, "detected_count": 1, "coverage_pct": 50.0, "is_active_observation": True}
+        },
+        technique_details={
+            "detected_techniques": ["T1595 - Active Scanning", "T1498 - Network Denial of Service", "T1071 - Application Layer Protocol", "T1190 - Exploit Public-Facing App"]
+        },
+        created_at=now
+    ))
+
+    # 11. Phase 3: SOAR Response Approval Request
+    from backend.app.models.response_approval import ResponseApproval
+    db.add(ResponseApproval(
+        incident_id=inc.id,
+        requested_action="BLOCK_IOC_SIMULATION",
+        target_entity="45.154.255.89",
+        parameters={"firewall_profile": "edge-perimeter", "rule_action": "DROP"},
+        requested_by="analyst",
+        requested_at=now,
+        status="REQUESTED",
+        is_dry_run=True,
+        reason="Correlated multi-alert DDoS vector confirmed with C2 threat intelligence feed match."
+    ))
+
     await db.commit()
-    logger.info("Successfully seeded operational demo dataset.")
+    logger.info("Successfully seeded Phase 1, Phase 2 & Phase 3 operational demo dataset.")

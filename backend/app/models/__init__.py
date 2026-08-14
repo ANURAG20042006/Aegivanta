@@ -12,6 +12,12 @@ from backend.app.models.threat_intel import ThreatIndicator, ThreatFeed
 from backend.app.models.behavioral import BehavioralBaseline, AnomalyEvent
 from backend.app.models.investigation import Investigation, InvestigationEvidence
 from backend.app.models.playbook import PlaybookExecution
+from backend.app.models.hunting import HuntingQuery, HuntingExecution
+from backend.app.models.predictive import RiskForecast, AlertVolumeForecast
+from backend.app.models.threat_graph import ThreatGraphNode, ThreatGraphEdge
+from backend.app.models.response_approval import ResponseApproval
+from backend.app.models.attack_coverage import AttackCoverageSnapshot
+from backend.app.models.job import BackgroundJob
 
 __all__ = [
     "User",
@@ -30,5 +36,14 @@ __all__ = [
     "AnomalyEvent",
     "Investigation",
     "InvestigationEvidence",
-    "PlaybookExecution"
+    "PlaybookExecution",
+    "HuntingQuery",
+    "HuntingExecution",
+    "RiskForecast",
+    "AlertVolumeForecast",
+    "ThreatGraphNode",
+    "ThreatGraphEdge",
+    "ResponseApproval",
+    "AttackCoverageSnapshot",
+    "BackgroundJob"
 ]

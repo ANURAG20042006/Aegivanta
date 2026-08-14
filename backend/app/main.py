@@ -35,6 +35,13 @@ from backend.app.api.v1.monitoring import router as monitoring_router
 from backend.app.api.v1.threat_intel import router as threat_intel_router
 from backend.app.api.v1.investigations import router as investigations_router
 from backend.app.api.v1.playbooks import router as playbooks_router
+from backend.app.api.v1.hunting import router as hunting_router
+from backend.app.api.v1.predictive import router as predictive_router
+from backend.app.api.v1.threat_graph import router as threat_graph_router
+from backend.app.api.v1.campaigns import router as campaigns_router
+from backend.app.api.v1.response import router as response_router
+from backend.app.api.v1.attack_coverage import router as attack_coverage_router
+from backend.app.api.v1.soc_metrics import router as soc_metrics_router
 
 
 from dotenv import load_dotenv
@@ -244,4 +251,11 @@ app.include_router(monitoring_router, prefix=settings.API_V1_STR)
 app.include_router(threat_intel_router, prefix=settings.API_V1_STR)
 app.include_router(investigations_router, prefix=settings.API_V1_STR)
 app.include_router(playbooks_router, prefix=settings.API_V1_STR)
+app.include_router(hunting_router, prefix=settings.API_V1_STR)
+app.include_router(predictive_router, prefix=settings.API_V1_STR)
+app.include_router(threat_graph_router, prefix=settings.API_V1_STR)
+app.include_router(campaigns_router, prefix=settings.API_V1_STR)
+app.include_router(response_router, prefix=settings.API_V1_STR)
+app.include_router(attack_coverage_router, prefix=settings.API_V1_STR)
+app.include_router(soc_metrics_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
