@@ -34,9 +34,20 @@ def get_artifact_spec(model_name: str) -> Dict[str, str]:
     if model_name in MODEL_ARTIFACT_SPECS:
         return MODEL_ARTIFACT_SPECS[model_name]
     
+    # Check normalized prefixes (e.g. 'XGBoost v2.1' -> 'XGBoost')
+    clean_name = model_name.split(" v")[0].split(" V")[0].strip()
+    if clean_name in MODEL_ARTIFACT_SPECS:
+        return MODEL_ARTIFACT_SPECS[clean_name]
+    for k, v in MODEL_ARTIFACT_SPECS.items():
+        if k.lower() == clean_name.lower():
+            return v
+    for k, v in MODEL_ARTIFACT_SPECS.items():
+        if k.lower() in model_name.lower():
+            return v
+
     # Fallback heuristic if an unlisted model name is passed
-    slug = model_name.lower().replace(" ", "_")
-    if model_name in PYTORCH_MODEL_NAMES or "cnn" in slug or "lstm" in slug or "autoencoder" in slug:
+    slug = clean_name.lower().replace(" ", "_")
+    if clean_name in PYTORCH_MODEL_NAMES or "cnn" in slug or "lstm" in slug or "autoencoder" in slug:
         return {"filename": f"{slug}.pt", "type": "pytorch"}
     return {"filename": f"{slug}.joblib", "type": "joblib"}
 
