@@ -1,4 +1,13 @@
-# SentinelAI — Final Release Audit & Evidence Matrix
+# HISTORICAL — NOT CURRENT SYSTEM STATUS
+
+This document describes a previous repository state (Phase 1 Release Candidate).
+
+Current authoritative project status:
+[docs/CURRENT_STATUS.md](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/CURRENT_STATUS.md)
+
+---
+
+# SentinelAI — Final Release Audit & Evidence Matrix (Historical Phase 1)
 
 **Audit Type**: Release Candidate (RC) Clean-Environment Hardening Audit  
 **Audit Date**: 2026-08-13  

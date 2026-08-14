@@ -313,12 +313,15 @@ class MonitoringService:
             now_utc = datetime.now(timezone.utc)
             alert = Alert(
                 asset_id=check.asset_id,
+                title=f"Service Outage: Monitored Endpoint {check.target_url} DOWN",
                 source_ip=asset_ip,
                 destination_ip=asset_ip,
                 source_port=0,
                 destination_port=80,
                 protocol="HTTP",
                 attack_type="DoS_Service_Outage",
+                severity="high",
+                risk_score=risk_score,
                 status="new",
                 explanation={
                     "reason": f"Monitored endpoint {check.target_url} is DOWN ({check.consecutive_failures} consecutive failures).",

@@ -1,4 +1,13 @@
-# SentinelAI — Executive Master Release Report
+# HISTORICAL — NOT CURRENT SYSTEM STATUS
+
+This document describes a previous repository state (Phase 1 Initial Release Report).
+
+Current authoritative project status:
+[docs/CURRENT_STATUS.md](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/CURRENT_STATUS.md)
+
+---
+
+# SentinelAI — Executive Master Release Report (Historical Phase 1)
 
 **Project Name**: SentinelAI — Multi-Class ML-Powered Threat Detection & MLOps System  
 **Release Target**: Production Candidate Release Candidate (RC)  

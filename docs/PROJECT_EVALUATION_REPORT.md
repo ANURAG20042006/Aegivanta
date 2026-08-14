@@ -1,4 +1,13 @@
-# 🛡️ SentinelAI: Comprehensive Project Evaluation Report
+# HISTORICAL — NOT CURRENT SYSTEM STATUS
+
+This document describes a previous repository state (Initial Project Evaluation).
+
+Current authoritative project status:
+[docs/CURRENT_STATUS.md](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/CURRENT_STATUS.md)
+
+---
+
+# 🛡️ SentinelAI: Comprehensive Project Evaluation Report (Historical Phase 1)
 
 **Project Name**: SentinelAI – Intelligent Network Intrusion Detection & Threat Analytics Platform  
 **Repository**: [ANURAG20042006/SENTINELAI](https://github.com/ANURAG20042006/SENTINELAI)  

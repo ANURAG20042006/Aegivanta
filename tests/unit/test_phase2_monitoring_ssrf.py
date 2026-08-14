@@ -2,7 +2,7 @@
 tests/unit/test_phase2_monitoring_ssrf.py
 =========================================
 Unit Tests for Continuous Monitoring Enterprise SSRF Protection,
-IPv4-Mapped IPv6 Blocking, Multi-IP Resolution, and Health State Debounce.
+IPv4-Mapped IPv6 Blocking, Multi-IP Resolution, and Deterministic Alert Confidence.
 """
 
 import pytest
@@ -97,3 +97,49 @@ def test_ssrf_allows_valid_public_url():
     assert is_safe is True
     assert resolved_ip is not None
     assert len(all_ips) > 0
+
+
+@pytest.mark.asyncio
+async def test_monitoring_outage_escalation_uses_deterministic_confidence():
+    """Verify monitoring outage alerts explicitly tag confidence source and do NOT fabricate ML probabilities."""
+    from backend.app.services.monitoring_service import MonitoringService
+    from backend.app.models.monitoring import MonitoringCheck
+    from backend.app.models.protected_asset import ProtectedAsset
+    from backend.app.models.alert import Alert
+    from backend.app.database import AsyncSessionFactory
+    from sqlalchemy import select
+
+    async with AsyncSessionFactory() as db:
+        asset = ProtectedAsset(
+            name="Monitoring Confidence Test Asset",
+            hostname="mon-conf.corp",
+            ip_address="198.51.100.33",
+            asset_type="api",
+            criticality="high"
+        )
+        db.add(asset)
+        await db.commit()
+        await db.refresh(asset)
+
+        check = MonitoringCheck(
+            asset_id=asset.id,
+            monitor_type="HTTP",
+            target_url="https://api.sentinelai.io/health",
+            expected_status_code=200,
+            consecutive_failures=3,
+            health_state="DOWN"
+        )
+        db.add(check)
+        await db.commit()
+        await db.refresh(check)
+
+        # Trigger escalation
+        await MonitoringService._escalate_persistent_outage(check, db)
+        await db.commit()
+
+        # Query created alert
+        res = await db.execute(select(Alert).where(Alert.asset_id == asset.id).order_by(Alert.created_at.desc()).limit(1))
+        alert = res.scalar_one_or_none()
+        assert alert is not None
+        assert alert.explanation.get("confidence_source") == "DETERMINISTIC_HEALTH_PROBE"
+        assert alert.explanation.get("is_ml_generated") is False

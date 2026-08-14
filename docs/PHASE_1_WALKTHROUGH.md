@@ -1,4 +1,13 @@
-# SentinelAI — Phase 1 Upgrade: Advanced Dynamic SOC Platform
+# HISTORICAL — NOT CURRENT SYSTEM STATUS
+
+This document describes a previous repository state (Phase 1 Baseline Walkthrough).
+
+Current authoritative project status:
+[docs/CURRENT_STATUS.md](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/CURRENT_STATUS.md)
+
+---
+
+# SentinelAI — Phase 1 Upgrade: Advanced Dynamic SOC Platform (Historical Baseline)
 
 ## Executive Summary
 SentinelAI has completed the **Phase 1: Advanced Dynamic SOC Platform Upgrade**. SentinelAI has evolved into a professional Security Operations Center (SOC) platform with:
