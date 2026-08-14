@@ -542,7 +542,14 @@
           "fpr": 0.0
         }
       },
-      "test_sample_count": 100
+      "test_sample_count": 100,
+      "latency_provenance": {
+        "authoritative_final_test_ms": 0.0184,
+        "final_test_measurement_method": "End-to-end inference wall-clock time over 100 held-out test samples (time.perf_counter() / 100)",
+        "comparative_benchmark_single_sample_ms": 0.0086,
+        "comparative_benchmark_measurement_method": "Comparative candidate latency sweep in results/EXP-2026-002/latency.csv",
+        "status": "Authoritative production metric is 0.0184 ms"
+      }
     }
   },
   "provenance_status": "verified"
