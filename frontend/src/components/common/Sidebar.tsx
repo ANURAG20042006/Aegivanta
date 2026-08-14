@@ -11,16 +11,20 @@ import {
   Info,
   ShieldCheck,
   HelpCircle,
-  Sparkles
+  Sparkles,
+  Server,
+  BellRing
 } from 'lucide-react';
 
 export const navItems = [
   { path: '/dashboard', label: 'Dashboard', section: 'Monitor', icon: LayoutDashboard },
+  { path: '/alerts', label: 'Live alerts', section: 'Monitor', icon: BellRing },
+  { path: '/assets', label: 'Protected assets', section: 'Monitor', icon: Server },
   { path: '/analytics', label: 'Model insights', section: 'Monitor', icon: BarChart3 },
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },
-  { path: '/history', label: 'Alert history', section: 'Actions', icon: History },
+  { path: '/history', label: 'Incident history', section: 'Actions', icon: History },
   { path: '/users', label: 'Team members', section: 'Manage', icon: Users },
   { path: '/settings', label: 'Settings', section: 'Manage', icon: Settings },
   { path: '/about', label: 'About SentinelAI', section: 'Manage', icon: Info },
@@ -32,7 +36,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 space-y-1">
         <div className="sidebar-workspace-heading">
           <span className="flex items-center gap-2"><span className="sidebar-heading-icon"><ShieldCheck className="w-3.5 h-3.5" /></span>Workspace</span>
-          <span>9 tools</span>
+          <span>11 tools</span>
         </div>
         {navItems.map((item, index) => {
           const Icon = item.icon;

@@ -72,6 +72,14 @@ export interface BatchPredictionResponse {
 
 export interface IncidentItem {
   id: string;
+  incident_code?: string;
+  alert_id?: string;
+  asset_id?: string;
+  title?: string;
+  description?: string;
+  status?: string;
+  risk_score?: number;
+  alert_count?: number;
   source_ip: string;
   destination_ip: string;
   source_port?: number;
@@ -83,14 +91,113 @@ export interface IncidentItem {
   severity: string;
   model_name?: string;
   timestamp: string;
+  first_seen?: string;
+  last_seen?: string;
+  notes?: string;
+  resolution?: string;
 }
 
 export interface IncidentListResponse {
   total: number;
+  page?: number;
+  size?: number;
+  limit?: number;
+  offset?: number;
+  incidents?: IncidentItem[];
+  items?: IncidentItem[];
+}
+
+export interface ProtectedAsset {
+  id: string;
+  name: string;
+  hostname: string;
+  url?: string;
+  ip_address?: string;
+  asset_type: 'website' | 'api' | 'server' | 'database' | 'endpoint' | 'network' | 'other';
+  environment: 'production' | 'staging' | 'development';
+  criticality: 'low' | 'medium' | 'high' | 'critical';
+  status: 'active' | 'degraded' | 'compromised' | 'maintenance' | 'inactive';
+  description?: string;
+  risk_score: number;
+  tags?: Record<string, any>;
+  last_seen: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssetListResponse {
+  total: number;
   page: number;
   size: number;
-  incidents: IncidentItem[];
-  items?: IncidentItem[];
+  items: ProtectedAsset[];
+}
+
+export interface AssetHealthSummary {
+  asset_id: string;
+  name: string;
+  status: string;
+  criticality: string;
+  risk_score: number;
+  risk_tier: string;
+  active_incidents_count: number;
+  total_alerts_count: number;
+  last_seen: string;
+}
+
+export interface AlertItem {
+  id: string;
+  alert_id: string;
+  asset_id?: string;
+  incident_id?: string;
+  title: string;
+  description?: string;
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  confidence: number | null;
+  risk_score: number;
+  source: string;
+  source_ip: string;
+  destination_ip: string;
+  source_port?: number;
+  destination_port?: number;
+  protocol: string;
+  attack_type: string;
+  status: 'new' | 'acknowledged' | 'investigating' | 'resolved' | 'dismissed';
+  explanation?: Record<string, number>;
+  timestamp: string;
+  created_at?: string;
+}
+
+export interface AlertListResponse {
+  total: number;
+  page: number;
+  size: number;
+  items: AlertItem[];
+}
+
+export interface AlertStatsResponse {
+  total_active_alerts: number;
+  critical_alerts_count: number;
+  high_alerts_count: number;
+  new_alerts_count: number;
+  alerts_last_hour: number;
+  severity_breakdown: Record<string, number>;
+}
+
+export interface TimelineEvent {
+  id: string;
+  incident_id: string;
+  timestamp: string;
+  event_type: 'DETECTION' | 'ALERT_CORRELATED' | 'TRIAGE' | 'STATUS_CHANGE' | 'ANALYST_ACTION' | 'REMEDIATION' | 'RESOLUTION';
+  title: string;
+  description?: string;
+  actor: string;
+  metadata_payload?: Record<string, any>;
+}
+
+export interface IncidentDetail extends IncidentItem {
+  asset?: ProtectedAsset;
+  alerts: AlertItem[];
+  timeline: TimelineEvent[];
 }
 
 export interface ModelPerformanceItem {

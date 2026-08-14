@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     # WebSockets Settings
     WEBSOCKET_BROADCAST_INTERVAL_MS: int = 1000
 
+    # SOC Platform Phase 1 Feature Flag
+    SOC_PHASE1_ENABLED: bool = Field(
+        default=True, 
+        description="Feature flag for Phase 1 SOC capabilities: Protected Assets, Alerts, Dynamic Risk Scoring, and Correlation."
+    )
+
     # Logging Settings
     LOG_LEVEL: str = "INFO"
     LOG_FILE_PATH: str = "logs/sentinelai.log"

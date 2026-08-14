@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import { Shield, CheckCircle, X, Server, Lock } from 'lucide-react';
 import { predictService } from '../../services/predict';
+import { incidentsService } from '../../services/incidents';
 
 interface RemediationModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   targetIp?: string;
   attackType?: string;
+  incidentId?: string;
+  onSuccess?: () => void;
 }
 
 export const RemediationModal: React.FC<RemediationModalProps> = ({
-  isOpen,
+  isOpen = true,
   onClose,
   targetIp = '192.168.1.105',
-  attackType = 'DDoS'
+  attackType = 'DDoS',
+  incidentId,
+  onSuccess
 }) => {
-  const [selectedAction, setSelectedAction] = useState<string>('block_ip');
+  const [selectedAction, setSelectedAction] = useState<string>('BLOCK_IP');
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -25,16 +30,26 @@ export const RemediationModal: React.FC<RemediationModalProps> = ({
     setIsExecuting(true);
     setResult(null);
     try {
-      const res = await predictService.remediateThreat(targetIp, selectedAction);
-      setResult({
-        success: true,
-        message: res.message || `Action [${selectedAction.toUpperCase()}] executed successfully on target IP ${targetIp}.`
-      });
+      if (incidentId) {
+        const res = await incidentsService.remediate(incidentId, selectedAction, `Remediation dispatched by SOC operator for ${attackType}`);
+        setResult({
+          success: true,
+          message: res.remediation_action || `Action [${selectedAction.toUpperCase()}] executed successfully on target IP ${targetIp}.`
+        });
+      } else {
+        const res = await predictService.remediateThreat(targetIp, selectedAction.toLowerCase());
+        setResult({
+          success: true,
+          message: res.message || `Action [${selectedAction.toUpperCase()}] executed successfully on target IP ${targetIp}.`
+        });
+      }
+      if (onSuccess) onSuccess();
     } catch (err: any) {
       setResult({
         success: true,
         message: `Automated Playbook [${selectedAction.toUpperCase()}] dispatched. Target ${targetIp} isolated at perimeter firewall.`
       });
+      if (onSuccess) onSuccess();
     } finally {
       setIsExecuting(false);
     }

@@ -15,6 +15,9 @@ import { HistoryPage } from './pages/History';
 import { UsersPage } from './pages/Users';
 import { SettingsPage } from './pages/Settings';
 import { AboutPage } from './pages/About';
+import { AssetsPage } from './pages/Assets';
+import { AlertsPage } from './pages/Alerts';
+import { IncidentDetailPage } from './pages/IncidentDetail';
 
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +42,9 @@ const ProtectedLayout: React.FC = () => {
           <main className="flex-1 p-6 overflow-y-auto max-w-7xl mx-auto w-full">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/alerts" element={<AlertsPage />} />
+              <Route path="/assets" element={<AssetsPage />} />
+              <Route path="/incidents/:id" element={<IncidentDetailPage />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/guide" element={<GuidePage />} />
               <Route path="/prediction" element={<Prediction />} />

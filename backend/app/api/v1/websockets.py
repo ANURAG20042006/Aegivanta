@@ -24,11 +24,21 @@ class ConnectionManager:
             logger.info("WebSocket client disconnected.")
 
     async def broadcast(self, message: str):
-        for connection in self.active_connections:
+        for connection in list(self.active_connections):
             try:
                 await connection.send_text(message)
             except Exception as e:
                 logger.error(f"Error broadcasting to WebSocket client: {str(e)}")
+                self.disconnect(connection)
+
+    async def broadcast_event(self, event_type: str, data: dict):
+        """Broadcast structured JSON event to all connected SOC clients."""
+        payload = json.dumps({
+            "type": event_type,
+            "data": data,
+            "timestamp": asyncio.get_event_loop().time()
+        })
+        await self.broadcast(payload)
 
 
 manager = ConnectionManager()

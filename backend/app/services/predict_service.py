@@ -285,40 +285,195 @@ class PredictService:
             vector, model_name
         )
 
-        incident = Incident(
+        from backend.app.models.protected_asset import ProtectedAsset
+        from backend.app.models.alert import Alert
+        now_utc = datetime.now(timezone.utc)
+        target_incident_id = None
+
+        if settings.SOC_PHASE1_ENABLED:
+            from backend.app.models.protected_asset import ProtectedAsset
+            from backend.app.models.alert import Alert
+            from backend.app.models.security_event import SecurityEvent
+            from backend.app.models.incident_timeline import IncidentTimelineEvent
+            from backend.app.services.risk_engine import RiskScoringEngine
+            from backend.app.services.correlation_engine import IncidentCorrelationEngine
+            from backend.app.api.v1.websockets import manager
+            from sqlalchemy import or_
+
+            # 1. Resolve Target Protected Asset if configured
+            asset_stmt = select(ProtectedAsset).where(
+                or_(
+                    ProtectedAsset.ip_address == vector.destination_ip,
+                    ProtectedAsset.hostname == vector.destination_ip
+                )
+            ).limit(1)
+            asset_res = await db.execute(asset_stmt)
+            asset = asset_res.scalar_one_or_none()
+            asset_crit = asset.criticality if asset else "medium"
+
+            # 2. Calculate dynamic operational risk score
+            risk_score = RiskScoringEngine.calculate_risk_score(
+                severity=severity,
+                confidence=confidence_score,
+                criticality=asset_crit,
+                alert_count=1
+            )
+
+            if is_malicious:
+                # 3. Create First-Class Security Alert
+                alert = Alert(
+                    asset_id=asset.id if asset else None,
+                    title=f"Detected {severity} {attack_type} Attack",
+                    description=f"Automated threat detection by {model_name} classified incoming packet flow as {attack_type}.",
+                    severity=severity.lower(),
+                    confidence=confidence_score,
+                    risk_score=risk_score,
+                    source=f"ML_ENGINE:{model_name}",
+                    source_ip=vector.source_ip,
+                    destination_ip=vector.destination_ip,
+                    source_port=vector.source_port,
+                    destination_port=vector.destination_port,
+                    protocol=vector.protocol,
+                    attack_type=attack_type,
+                    status="new",
+                    explanation=shap,
+                    timestamp=now_utc
+                )
+                db.add(alert)
+                await db.flush()
+
+                # 4. Correlate Alert into Incident & Append Chronological Timeline Event
+                incident, timeline_evt = await IncidentCorrelationEngine.process_alert(db, alert, asset)
+                target_incident_id = incident.id
+
+                # 5. Record Security Event Ledger
+                sec_event = SecurityEvent(
+                    asset_id=asset.id if asset else None,
+                    source_ip=vector.source_ip,
+                    destination_ip=vector.destination_ip,
+                    source_port=vector.source_port,
+                    destination_port=vector.destination_port,
+                    protocol=vector.protocol,
+                    event_type="ALERT_TRIGGERED",
+                    severity=severity.lower(),
+                    model_prediction=attack_type,
+                    confidence=confidence_score,
+                    risk_score=risk_score,
+                    status="ACTIONABLE",
+                    metadata_payload={"alert_id": alert.alert_id, "incident_id": incident.id, "attack_type": attack_type}
+                )
+                db.add(sec_event)
+
+                # 6. Publish real-time event to WebSocket subscribers
+                try:
+                    await manager.broadcast_event("ALERT_TRIGGERED", {
+                        "alert_id": alert.alert_id,
+                        "incident_id": incident.id,
+                        "incident_code": incident.incident_code,
+                        "attack_type": attack_type,
+                        "severity": severity,
+                        "confidence": confidence_score,
+                        "risk_score": risk_score,
+                        "source_ip": vector.source_ip,
+                        "destination_ip": vector.destination_ip,
+                        "asset_name": asset.name if asset else None,
+                        "timestamp": now_utc.isoformat()
+                    })
+                except Exception as ws_err:
+                    logger.warning("WebSocket broadcast skipped: %s", ws_err)
+
+            else:
+                # Benign Flow: Record Incident for telemetry tracking and baseline stats
+                incident = Incident(
+                    source_ip=vector.source_ip,
+                    destination_ip=vector.destination_ip,
+                    source_port=vector.source_port,
+                    destination_port=vector.destination_port,
+                    protocol=vector.protocol,
+                    packet_length=int(vector.packet_length_mean),
+                    flow_duration=vector.flow_duration,
+                    attack_type=attack_type,
+                    confidence_score=confidence_score,
+                    is_malicious=False,
+                    severity=severity,
+                    model_name=model_name,
+                    timestamp=now_utc,
+                    first_seen=now_utc,
+                    last_seen=now_utc,
+                    feature_payload=vector.model_dump()
+                )
+                db.add(incident)
+                await db.flush()
+                target_incident_id = incident.id
+
+                # Record root timeline event
+                timeline_evt = IncidentTimelineEvent(
+                    incident_id=incident.id,
+                    timestamp=now_utc,
+                    event_type="DETECTION",
+                    title=f"Telemetry Inspected: {attack_type}",
+                    description=f"Flow from {vector.source_ip} to {vector.destination_ip} evaluated as {attack_type} by {model_name}.",
+                    actor="ML_ENGINE",
+                    metadata_payload={"model": model_name, "is_malicious": False}
+                )
+                db.add(timeline_evt)
+
+                sec_event = SecurityEvent(
+                    asset_id=asset.id if asset else None,
+                    source_ip=vector.source_ip,
+                    destination_ip=vector.destination_ip,
+                    source_port=vector.source_port,
+                    destination_port=vector.destination_port,
+                    protocol=vector.protocol,
+                    event_type="FLOW_INSPECTED_BENIGN",
+                    severity="info",
+                    model_prediction=attack_type,
+                    confidence=confidence_score,
+                    risk_score=0.0,
+                    status="PROCESSED"
+                )
+                db.add(sec_event)
+
+        else:
+            # Baseline Fallback Path (When SOC Phase 1 is disabled)
+            incident = Incident(
+                source_ip=vector.source_ip,
+                destination_ip=vector.destination_ip,
+                source_port=vector.source_port,
+                destination_port=vector.destination_port,
+                protocol=vector.protocol,
+                packet_length=int(vector.packet_length_mean),
+                flow_duration=vector.flow_duration,
+                attack_type=attack_type,
+                confidence_score=confidence_score,
+                is_malicious=is_malicious,
+                severity=severity,
+                model_name=model_name,
+                timestamp=now_utc,
+                first_seen=now_utc,
+                last_seen=now_utc,
+                feature_payload=vector.model_dump()
+            )
+            db.add(incident)
+            await db.flush()
+            target_incident_id = incident.id
+
+        await db.commit()
+
+        return PredictionResult(
+            incident_id=target_incident_id,
             source_ip=vector.source_ip,
             destination_ip=vector.destination_ip,
             source_port=vector.source_port,
             destination_port=vector.destination_port,
             protocol=vector.protocol,
-            packet_length=int(vector.packet_length_mean),
-            flow_duration=vector.flow_duration,
             attack_type=attack_type,
             confidence_score=confidence_score,
+            confidence_available=(confidence_score is not None),
             is_malicious=is_malicious,
             severity=severity,
-            model_name=model_name,
-            timestamp=datetime.now(timezone.utc),
-            feature_payload=vector.model_dump()
-        )
-        db.add(incident)
-        await db.commit()
-        await db.refresh(incident)
-
-        return PredictionResult(
-            incident_id=incident.id,
-            source_ip=incident.source_ip,
-            destination_ip=incident.destination_ip,
-            source_port=incident.source_port,
-            destination_port=incident.destination_port,
-            protocol=incident.protocol,
-            attack_type=incident.attack_type,
-            confidence_score=incident.confidence_score,
-            confidence_available=(incident.confidence_score is not None),
-            is_malicious=incident.is_malicious,
-            severity=incident.severity,
-            model_used=incident.model_name,
-            timestamp=incident.timestamp,
+            model_used=model_name,
+            timestamp=now_utc,
             attack_probabilities=probs,
             shap_explanation=shap
         )

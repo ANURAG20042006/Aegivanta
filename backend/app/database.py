@@ -53,13 +53,30 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initializes database schema tables."""
+    """Initializes database schema tables and safely executes non-destructive column migrations."""
+    import backend.app.models  # Ensure all ORM models are registered with Base.metadata
     async with async_engine.begin() as conn:
         logger.info("Initializing database tables...")
         await conn.run_sync(Base.metadata.create_all)
-        try:
-            from sqlalchemy import text
-            await conn.execute(text("ALTER TABLE model_registry ADD COLUMN artifact_type VARCHAR(30)"))
-        except Exception:
-            pass
+        
+        # Non-destructive migrations for existing sqlite / postgres schemas
+        from sqlalchemy import text
+        migration_statements = [
+            "ALTER TABLE model_registry ADD COLUMN artifact_type VARCHAR(30)",
+            "ALTER TABLE incidents ADD COLUMN incident_code VARCHAR(50)",
+            "ALTER TABLE incidents ADD COLUMN asset_id VARCHAR(36)",
+            "ALTER TABLE incidents ADD COLUMN title VARCHAR(255)",
+            "ALTER TABLE incidents ADD COLUMN description TEXT",
+            "ALTER TABLE incidents ADD COLUMN risk_score FLOAT DEFAULT 0.0",
+            "ALTER TABLE incidents ADD COLUMN alert_count INTEGER DEFAULT 1",
+            "ALTER TABLE incidents ADD COLUMN first_seen TIMESTAMP",
+            "ALTER TABLE incidents ADD COLUMN last_seen TIMESTAMP",
+            "ALTER TABLE incidents ADD COLUMN resolution TEXT"
+        ]
+        for stmt in migration_statements:
+            try:
+                await conn.execute(text(stmt))
+            except Exception:
+                pass  # Column already exists or table freshly created
+                
         logger.info("Database tables successfully initialized.")

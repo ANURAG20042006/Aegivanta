@@ -5,24 +5,23 @@ import {
   Activity, 
   Cpu, 
   Zap, 
-  Radio, 
   Lock
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
-import { ThreatBadge } from '../components/common/ThreatBadge';
 import { LiveTrafficChart } from '../components/charts/LiveTrafficChart';
 import { AttackDistributionChart } from '../components/charts/AttackDistributionChart';
 import { PacketTable } from '../components/tables/PacketTable';
 import { NetworkTopologyCanvas } from '../components/dashboard/NetworkTopologyCanvas';
 import { GlobalAttackMap } from '../components/dashboard/GlobalAttackMap';
 import { RemediationModal } from '../components/dashboard/RemediationModal';
+import { LiveEventFeed } from '../components/dashboard/LiveEventFeed';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { analyticsService } from '../services/analytics';
 import api from '../services/api';
 import { AnalyticsSummary } from '../types';
 
 export const Dashboard: React.FC = () => {
-  const { isConnected, packets = [], alerts = [] } = useWebSocket();
+  const { packets = [], alerts = [] } = useWebSocket();
   const [remediationTarget, setRemediationTarget] = useState<{ ip: string; attack: string } | null>(null);
   
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
@@ -160,55 +159,12 @@ export const Dashboard: React.FC = () => {
       {/* Global Geolocation Attack Origin Matrix */}
       <GlobalAttackMap />
 
-      {/* Live WebSocket Alerts Panel & Packet Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Real-time Ticker */}
-        <div className="bg-slate-900/80 border border-slate-800/80 rounded-xl p-5 backdrop-blur-md space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center space-x-2">
-              <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Live WebSocket Feed</h3>
-            </div>
-            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
-          </div>
-
-          <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
-            {!alerts || alerts.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-500">
-                Listening for incoming threat telemetry...
-              </div>
-            ) : (
-              alerts.map((alert, i) => {
-                const attack = alert?.attack_type || 'Malicious Flow';
-                const ip = alert?.source_ip || '192.168.1.100';
-                const sev = alert?.severity || 'High';
-
-                return (
-                  <div
-                    key={i}
-                    className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 space-y-1 animate-slide-in"
-                  >
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-red-400">{attack}</span>
-                      <ThreatBadge severity={sev} />
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span className="font-mono">{ip}</span>
-                      <span>
-                        Confidence: {typeof alert?.confidence_score === 'number'
-                          ? `${(alert.confidence_score * 100).toFixed(0)}%`
-                          : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+      {/* Real-time Telemetry Event Feed & Packet Inspection Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <LiveEventFeed />
         </div>
-
-        {/* Packet Stream Table */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <PacketTable
             packets={packets}
             onSelectPacket={(pkt) => {
