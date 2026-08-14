@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
+    # User Accounts Passwords (from .env or environment)
+    SENTINEL_ADMIN_PASSWORD: str = Field(default="Admin_Secure2026!")
+    SENTINEL_ANALYST_PASSWORD: str = Field(default="Analyst_Secure2026!")
+    SENTINEL_VIEWER_PASSWORD: str = Field(default="Viewer_Secure2026!")
+
     # Database Settings
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432

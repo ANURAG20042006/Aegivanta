@@ -19,9 +19,11 @@ async def reset_and_seed_users():
         await db.execute(delete(User))
         await db.commit()
 
-        admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD")
-        analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD")
-        viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD")
+        from backend.app.config import settings
+
+        admin_pass = settings.SENTINEL_ADMIN_PASSWORD or os.environ.get("SENTINEL_ADMIN_PASSWORD")
+        analyst_pass = settings.SENTINEL_ANALYST_PASSWORD or os.environ.get("SENTINEL_ANALYST_PASSWORD")
+        viewer_pass = settings.SENTINEL_VIEWER_PASSWORD or os.environ.get("SENTINEL_VIEWER_PASSWORD")
 
         if not admin_pass or not analyst_pass or not viewer_pass:
             raise RuntimeError(
