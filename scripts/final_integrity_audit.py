@@ -109,11 +109,13 @@ check("compileall backend ml scripts", result.returncode == 0,
 run_section("3. ARTIFACT EXISTENCE")
 
 best_model_path = ARTIFACTS_DIR / "best_model.joblib"
+catboost_path = ARTIFACTS_DIR / "catboost.joblib"
 preprocessor_path = ARTIFACTS_DIR / "preprocessor.joblib"
 metadata_path = ARTIFACTS_DIR / "metadata.json"
 manifest_path = ARTIFACTS_DIR / "artifact_manifest.json"
 
 check("best_model.joblib exists", best_model_path.exists())
+check("catboost.joblib exists", catboost_path.exists())
 check("preprocessor.joblib exists", preprocessor_path.exists())
 check("metadata.json exists", metadata_path.exists())
 check("artifact_manifest.json exists", manifest_path.exists())
@@ -129,8 +131,8 @@ if manifest_path.exists():
         manifest = json.load(f)
 
     # Verify model hash
-    if best_model_path.exists():
-        actual_model_hash = sha256_file(best_model_path)
+    if catboost_path.exists():
+        actual_model_hash = sha256_file(catboost_path)
         expected_model_hash = manifest.get("model_hash", "")
         check("model SHA256 matches manifest",
               actual_model_hash == expected_model_hash,

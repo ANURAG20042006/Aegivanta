@@ -104,6 +104,7 @@ async def initialize_application() -> None:
         model_exists = (await db.execute(select(ModelRegistry.id).limit(1))).scalar_one_or_none()
         if not model_exists:
             # Seed from ml/artifacts/metadata.json if generated, otherwise create baseline registry entry
+            meta_path = Path("ml/artifacts/metadata.json")
             if meta_path.exists():
                 try:
                     from ml.schema.artifact_mapping import resolve_model_artifact_path

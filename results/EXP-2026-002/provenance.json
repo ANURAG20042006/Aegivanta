@@ -43,7 +43,7 @@
   "model": {
     "name": "CatBoost",
     "class": "CatBoostClassifier",
-    "artifact_path": "ml/artifacts/best_model.joblib",
+    "artifact_path": "ml/artifacts/catboost.joblib",
     "artifact_type": "joblib",
     "artifact_sha256": "efb4067565f1837c3dc7ccced66c5debace56dd563b43f64c173ab68b7392e82",
     "model_version": "catboost-v1.0"

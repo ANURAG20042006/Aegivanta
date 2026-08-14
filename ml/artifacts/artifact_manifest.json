@@ -1,7 +1,7 @@
 {
   "experiment_id": "EXP-2026-002",
-  "model_version": "naive_bayes-v1.0",
-  "model_type": "Classical",
+  "model_version": "catboost-v1.0",
+  "model_type": "Boosting",
   "feature_schema_version": "schema-v1.0",
   "raw_feature_count": 78,
   "processed_feature_count": 30,
@@ -39,8 +39,58 @@
   ],
   "model_n_features_in": 30,
   "preprocessor_hash": "e5c07b23b9a82ca28b6805e0a2eeff3c42c97b47d6816fd089dbb92d12d93691",
-  "model_hash": "5a01833d72ed2ec5b2774d940a1245bacd4b6b2d0b0a984285d73d7e8416ef13",
-  "training_timestamp": "2026-08-13T13:01:52.125597+00:00",
+  "model_hash": "efb4067565f1837c3dc7ccced66c5debace56dd563b43f64c173ab68b7392e82",
+  "training_timestamp": "2026-08-13T19:19:08.958713+00:00",
   "dataset_hash": "62aa92a7d54fe464",
-  "git_commit": "9d34be31d17b59036d7d1fedee50ff3f690c7a52"
+  "git_commit": "75fa5ca9953569752f3392ee55833294e5cec679",
+  "artifacts": {
+    "Random Forest": {
+      "path": "ml/artifacts/random_forest.joblib",
+      "type": "joblib"
+    },
+    "XGBoost": {
+      "path": "ml/artifacts/xgboost.joblib",
+      "type": "joblib"
+    },
+    "LightGBM": {
+      "path": "ml/artifacts/lightgbm.joblib",
+      "type": "joblib"
+    },
+    "CatBoost": {
+      "path": "ml/artifacts/catboost.joblib",
+      "type": "joblib"
+    },
+    "Decision Tree": {
+      "path": "ml/artifacts/decision_tree.joblib",
+      "type": "joblib"
+    },
+    "Logistic Regression": {
+      "path": "ml/artifacts/logistic_regression.joblib",
+      "type": "joblib"
+    },
+    "SVM": {
+      "path": "ml/artifacts/svm.joblib",
+      "type": "joblib"
+    },
+    "KNN": {
+      "path": "ml/artifacts/knn.joblib",
+      "type": "joblib"
+    },
+    "Naive Bayes": {
+      "path": "ml/artifacts/naive_bayes.joblib",
+      "type": "joblib"
+    },
+    "1D-CNN": {
+      "path": "ml/artifacts/cnn_1d.pt",
+      "type": "pytorch"
+    },
+    "LSTM": {
+      "path": "ml/artifacts/lstm.pt",
+      "type": "pytorch"
+    },
+    "Autoencoder": {
+      "path": "ml/artifacts/autoencoder.pt",
+      "type": "pytorch"
+    }
+  }
 }

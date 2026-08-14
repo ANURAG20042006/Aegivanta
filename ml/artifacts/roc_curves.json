@@ -1,6 +1,6 @@
 {
   "active_model": {
-    "model_name": "Naive Bayes",
+    "model_name": "CatBoost",
     "auc": 0.9996,
     "fpr": [
       0.0,

@@ -208,6 +208,12 @@ def run_training_pipeline(
         champion_path = artifacts_path / "best_model.joblib"
         selector.best_model.save(str(champion_path))
 
+        # Also save to canonical model artifact path
+        from ml.schema.artifact_mapping import get_artifact_spec
+        canonical_spec = get_artifact_spec(selector.best_model.model_name)
+        canonical_path = artifacts_path / canonical_spec["filename"]
+        selector.best_model.save(str(canonical_path))
+
     # Save Preprocessor Artifact
     preprocessor_path = artifacts_path / "preprocessor.joblib"
     joblib.dump(preprocessor, preprocessor_path)
@@ -373,8 +379,8 @@ def run_training_pipeline(
         "model": {
             "name": champion_name,
             "class": type(getattr(selector.best_model, "model", selector.best_model)).__name__,
-            "artifact_path": "ml/artifacts/best_model.joblib",
-            "artifact_type": "joblib",
+            "artifact_path": f"ml/artifacts/{get_artifact_spec(champion_name)['filename']}",
+            "artifact_type": get_artifact_spec(champion_name)["type"],
             "artifact_sha256": model_sha256,
             "model_version": f"{champion_name.lower().replace(' ', '_')}-v1.0"
         },
