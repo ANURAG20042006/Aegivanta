@@ -8,7 +8,9 @@
     "train_samples": 2574,
     "test_samples": 100,
     "n_raw_features": 78,
-    "n_selected_features": 30
+    "n_selected_features": 30,
+    "raw_train_samples": 400,
+    "raw_test_samples": 100
   },
   "reproducibility": {
     "python_version": "3.11.5",

@@ -31,5 +31,10 @@
     "latency.csv",
     "per_class_metrics.csv",
     "explainability_examples.json"
-  ]
+  ],
+  "dataset_total_samples": 500,
+  "raw_train_samples": 400,
+  "raw_test_samples": 100,
+  "train_samples_smote": 2574,
+  "final_test_inference_latency_ms": 0.0184
 }
