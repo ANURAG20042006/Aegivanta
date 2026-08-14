@@ -28,7 +28,8 @@ export const AnalyticsView: React.FC = () => {
           api.get('/analytics/anomalies'),
           api.get('/analytics/metrics')
         ]);
-        setAnomalies(anomRes.data || []);
+        const anomList = Array.isArray(anomRes.data) ? anomRes.data : (anomRes.data?.items || []);
+        setAnomalies(anomList);
         setMetrics(metricRes.data || {});
       } catch (err) {
         console.error('Failed to load analytics', err);

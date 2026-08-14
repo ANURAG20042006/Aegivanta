@@ -28,7 +28,8 @@ export const ThreatIntelView: React.FC = () => {
     try {
       const params = search ? { search } : {};
       const res = await api.get('/threat-intel/indicators', { params });
-      setIndicators(res.data || []);
+      const list = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setIndicators(list);
     } catch (err) {
       console.error('Failed to load threat indicators', err);
     } finally {

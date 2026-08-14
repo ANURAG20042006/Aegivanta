@@ -155,6 +155,11 @@ async def initialize_application() -> None:
         if not user_exists or not model_exists:
             await db.commit()
 
+        # Seed rich operational dataset for demo/development environments
+        if settings.OPERATING_MODE.upper() in ["DEMO", "LAB"] or settings.APP_ENV.lower() == "development":
+            from backend.app.seed_data import seed_demo_operational_data
+            await seed_demo_operational_data(db)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

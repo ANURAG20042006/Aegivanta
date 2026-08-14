@@ -29,7 +29,8 @@ export const MonitoringView: React.FC = () => {
   const fetchChecks = async () => {
     try {
       const res = await api.get('/monitoring/checks');
-      setChecks(res.data || []);
+      const list = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+      setChecks(list);
     } catch (err) {
       console.error('Failed to load monitoring checks', err);
     } finally {

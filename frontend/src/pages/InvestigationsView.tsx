@@ -24,7 +24,7 @@ export const InvestigationsView: React.FC = () => {
     const fetchIncidents = async () => {
       try {
         const res = await api.get('/incidents');
-        const list = res.data || [];
+        const list = Array.isArray(res.data) ? res.data : (res.data?.items || []);
         setIncidents(list);
         if (list.length > 0) {
           setSelectedIncidentId(list[0].id);
