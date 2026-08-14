@@ -27,7 +27,26 @@
 </div>
 
 > [!NOTE]
-> **SentinelAI** is an AI-powered Network Intrusion Detection System (NIDS) prototype designed to evaluate network flow statistics against benchmark intrusion datasets (such as **CICIDS2017**). It evaluates 12 Machine Learning and Deep Learning classifiers using a leakage-free split-first pipeline, with real SHAP explainability, multi-metric promotion gates, and an interactive React SOC dashboard operating in **DEMO MODE**.
+> **SentinelAI** is an AI-powered Network Intrusion Detection System (NIDS) & Next-Gen Security Operations Center (SOC) platform. It pairs a research-verified 12-Model ML/DL intrusion detection engine (featuring champion CatBoost with real SHAP explainability) with an **Advanced Dynamic SOC Platform (Phase 1)** providing Protected Asset Management, Live Threat Alert Triage, Deterministic Incident Correlation, Chronological Attack Timelines, and Multi-Factor Operational Risk Scoring.
+
+---
+
+## 🛡️ Phase 1 Upgrade: Advanced Dynamic SOC Platform
+
+SentinelAI includes a full-featured Dynamic SOC platform layer built on top of the real-time ML inference pipeline:
+
+| Phase 1 Feature | Backend Architecture & Engine | Frontend Workspace & Visuals | Status |
+|---|---|---|:---:|
+| **Protected Assets** | Asset inventory, criticality tiers, health metrics, soft-delete deactivation ([`assets.py`](backend/app/api/v1/assets.py)) | [`Assets.tsx`](frontend/src/pages/Assets.tsx) modal registration, environment filtering | ✅ **Verified** |
+| **Live Event Stream** | Real-time WebSocket telemetry channel ([`/ws/threats`](backend/app/api/v1/websockets.py)) | [`LiveEventFeed.tsx`](frontend/src/components/dashboard/LiveEventFeed.tsx) on Dashboard | ✅ **Verified** |
+| **Alerts & Triage** | Alert query, multi-state triage lifecycle, SHAP attribution link ([`alerts.py`](backend/app/api/v1/alerts.py)) | [`Alerts.tsx`](frontend/src/pages/Alerts.tsx) triage queue & SHAP viewer modal | ✅ **Verified** |
+| **Incident Correlation** | Deterministic 300s sliding window correlation engine ([`correlation_engine.py`](backend/app/services/correlation_engine.py)) | Auto-grouped incident ledger with root alert references | ✅ **Verified** |
+| **Attack Timeline** | Chronological attack progression ledger ([`incident_timeline.py`](backend/app/models/incident_timeline.py)) | [`AttackTimeline.tsx`](frontend/src/components/dashboard/AttackTimeline.tsx) vertical interactive timeline | ✅ **Verified** |
+| **Dynamic Risk Engine** | Transparent multi-factor operational risk scoring ([`risk_engine.py`](backend/app/services/risk_engine.py)) | Real-time 0–100 risk gauges & transparent factor breakdown | ✅ **Verified** |
+| **Incident Severity Policy** | Deterministic monotonic escalation policy: $\max(\text{Current}, \text{Alert}, \text{Risk})$ | Real-time severity badge elevation without accidental downgrade | ✅ **Verified** |
+| **Incident Detail View** | Incident state machine (`DETECTED` $\rightarrow$ `CLOSED`), analyst notes ([`incidents.py`](backend/app/api/v1/incidents.py)) | [`IncidentDetail.tsx`](frontend/src/pages/IncidentDetail.tsx) deep investigation view | ✅ **Verified** |
+| **Feature Flag Isolation** | `SOC_PHASE1_ENABLED` toggle in [`config.py`](backend/app/config.py) for pure ML fallback | Seamless fallback to legacy baseline if disabled | ✅ **Verified** |
+| **Phase 1 Test Suite** | 183 automated tests spanning API, correlation, risk engine, and ML | Full CI pytest suite with 0 failures | ✅ **Verified** |
 
 ---
 
@@ -47,7 +66,7 @@ flowchart TB
     end
 
     subgraph Inference ["3. 12-Model Inference Engine"]
-        F --> G1[Boosting: XGBoost / LightGBM / CatBoost]
+        F --> G1[Boosting: XGBoost / LightGBM / CatBoost 👑]
         F --> G2[Classical: Random Forest / Decision Tree / SVM]
         F --> G3[DeepNet: PyTorch 1D-CNN / LSTM / Autoencoder]
     end
@@ -56,16 +75,34 @@ flowchart TB
         G1 --> H[SHAP & LIME Feature Attribution]
     end
 
-    subgraph SOC ["5. Security Operations & Action"]
-        H --> I1[Cyberpunk React SPA Dashboard]
-        H --> I2[1-Click Automated Firewall Drop Rule]
-        H --> I3[Automated ReportLab PDF Exporter]
+    subgraph DynamicSOC ["5. Dynamic SOC Platform Layer (Phase 1)"]
+        H --> J1[Asset Resolution & Criticality]
+        J1 --> J2[Multi-Factor Risk Engine]
+        J2 --> J3[Deterministic Incident Correlation Engine]
+        J3 --> J4[Attack Timeline & State Machine]
+        J4 --> J5[Live WebSocket Stream /ws/threats]
+    end
+
+    subgraph SOC ["6. Security Operations & Response"]
+        J5 --> I1[Cyberpunk React SOC Dashboard & Live Feed]
+        J5 --> I2[Alerts Triage & Incident Detail Investigation]
+        J5 --> I3[Protected Assets Inventory Workspace]
+        J5 --> I4[1-Click Automated Firewall / VLAN Quarantine]
+        J5 --> I5[Automated ReportLab PDF / Excel Exporter]
     end
 ```
 
 ---
 
 ## ⚡ Key Features & Innovations
+
+### 🛡️ Next-Gen SOC Operations Platform (Phase 1)
+- **Asset Inventory & Health Monitoring**: Track enterprise assets (Websites, APIs, Databases, Endpoints, Network Devices) with environment tags (`production`, `staging`, `development`) and criticality tiers.
+- **Deterministic Incident Correlation**: Automatically groups related alerts arriving within a 300-second window by target asset, destination IP, and attack vector.
+- **Chronological Attack Timelines**: Interactive visual timelines detailing detection timestamps, correlated alerts, analyst triage logs, containment playbooks, and resolution.
+- **Deterministic Multi-Factor Operational Risk Scoring**:
+  $$\text{Operational Risk} = (\text{Threat Sev} \times 40.0) + (\text{Model Conf} \times 25.0) + (\text{Asset Crit} \times 20.0) + \left(\min\left(1.0, \frac{\text{Alert Count}}{10.0}\right) \times 15.0\right)$$
+- **Explicit Incident Severity Policy**: Monotonic escalation guarantee preventing accidental downgrades during active incidents.
 
 ### 🧠 12-Model Machine Learning Leaderboard
 - **Ensemble Boosting**: CatBoost *(current champion — see `results/EXP-2026-002/provenance.json`)*, XGBoost, LightGBM
@@ -183,8 +220,8 @@ Default user accounts are initialized on startup. Passwords can be configured in
 
 ## 📚 Complete Project Documentation
 
-Exhaustive technical documentation is available in the [`docs/`](docs/) directory:
-
+- 🛡️ [`docs/SOC_OPERATIONS.md`](docs/SOC_OPERATIONS.md) – Phase 1 SOC Operations Manual & Incident Correlation Policies
+- 📋 [`docs/PHASE_1_WALKTHROUGH.md`](docs/PHASE_1_WALKTHROUGH.md) – Phase 1 Upgrade & Architecture Walkthrough
 - 🏗️ [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) – System Topology & Data Flow
 - 💾 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md) – Entity-Relationship Database Schemas
 - 📐 [`docs/UML_DIAGRAMS.md`](docs/UML_DIAGRAMS.md) – Class, Sequence, & Activity Diagrams
