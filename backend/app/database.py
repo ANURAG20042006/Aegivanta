@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
 # Determine async engine args based on database driver
 engine_kwargs = {}
 if "sqlite" in settings.DATABASE_URL:
-    engine_kwargs["connect_args"] = {"check_same_thread": False}
+    engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": 60.0}
 else:
     engine_kwargs.update({
         "pool_size": 20,
@@ -58,25 +58,33 @@ async def init_db() -> None:
     async with async_engine.begin() as conn:
         logger.info("Initializing database tables...")
         await conn.run_sync(Base.metadata.create_all)
-        
-        # Non-destructive migrations for existing sqlite / postgres schemas
-        from sqlalchemy import text
-        migration_statements = [
-            "ALTER TABLE model_registry ADD COLUMN artifact_type VARCHAR(30)",
-            "ALTER TABLE incidents ADD COLUMN incident_code VARCHAR(50)",
-            "ALTER TABLE incidents ADD COLUMN asset_id VARCHAR(36)",
-            "ALTER TABLE incidents ADD COLUMN title VARCHAR(255)",
-            "ALTER TABLE incidents ADD COLUMN description TEXT",
-            "ALTER TABLE incidents ADD COLUMN risk_score FLOAT DEFAULT 0.0",
-            "ALTER TABLE incidents ADD COLUMN alert_count INTEGER DEFAULT 1",
-            "ALTER TABLE incidents ADD COLUMN first_seen TIMESTAMP",
-            "ALTER TABLE incidents ADD COLUMN last_seen TIMESTAMP",
-            "ALTER TABLE incidents ADD COLUMN resolution TEXT"
-        ]
-        for stmt in migration_statements:
-            try:
-                await conn.execute(text(stmt))
-            except Exception:
-                pass  # Column already exists or table freshly created
-                
+
+        def _safe_migrate(sync_conn):
+            from sqlalchemy import inspect, text
+            inspector = inspect(sync_conn)
+            table_names = inspector.get_table_names()
+
+            if "model_registry" in table_names:
+                mr_cols = {col["name"] for col in inspector.get_columns("model_registry")}
+                if "artifact_type" not in mr_cols:
+                    sync_conn.execute(text("ALTER TABLE model_registry ADD COLUMN artifact_type VARCHAR(30)"))
+
+            if "incidents" in table_names:
+                inc_cols = {col["name"] for col in inspector.get_columns("incidents")}
+                inc_migrations = [
+                    ("incident_code", "ALTER TABLE incidents ADD COLUMN incident_code VARCHAR(50)"),
+                    ("asset_id", "ALTER TABLE incidents ADD COLUMN asset_id VARCHAR(36)"),
+                    ("title", "ALTER TABLE incidents ADD COLUMN title VARCHAR(255)"),
+                    ("description", "ALTER TABLE incidents ADD COLUMN description TEXT"),
+                    ("risk_score", "ALTER TABLE incidents ADD COLUMN risk_score FLOAT DEFAULT 0.0"),
+                    ("alert_count", "ALTER TABLE incidents ADD COLUMN alert_count INTEGER DEFAULT 1"),
+                    ("first_seen", "ALTER TABLE incidents ADD COLUMN first_seen TIMESTAMP"),
+                    ("last_seen", "ALTER TABLE incidents ADD COLUMN last_seen TIMESTAMP"),
+                    ("resolution", "ALTER TABLE incidents ADD COLUMN resolution TEXT")
+                ]
+                for col_name, sql in inc_migrations:
+                    if col_name not in inc_cols:
+                        sync_conn.execute(text(sql))
+
+        await conn.run_sync(_safe_migrate)
         logger.info("Database tables successfully initialized.")
