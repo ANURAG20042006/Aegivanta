@@ -10,6 +10,11 @@ jobs:
   backend-checks:
     name: Backend Lint, Environment Verification & PyTest Suite
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: "ci-test-secret-key-32-chars-long-minimum!"
+      SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
+      SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
+      SENTINEL_VIEWER_PASSWORD: "TestViewerPassword2026!"
     steps:
       - uses: actions/checkout@v4
 
@@ -71,4 +76,4 @@ jobs:
 
       - name: Validate Docker Compose Configuration
         run: |
-          docker compose config || docker-compose config
+          docker compose -f docker/docker-compose.yml config
