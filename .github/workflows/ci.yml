@@ -71,6 +71,12 @@ jobs:
   docker-build-checks:
     name: Docker Configuration Validation
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: "ci_postgres_password_test"
+      SECRET_KEY: "ci_secret_key_minimum_32_characters_long"
+      SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
+      SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
+      SENTINEL_VIEWER_PASSWORD: "TestViewerPassword2026!"
     steps:
       - uses: actions/checkout@v4
 
