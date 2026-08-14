@@ -301,15 +301,15 @@ class MonitoringService:
             asset_crit = asset.criticality if asset else "high"
             asset_ip = asset.ip_address if asset else "127.0.0.1"
 
-            # 1. Calculate Risk using Phase 1 Risk Engine
+            # 1. Calculate Risk using Phase 1 Risk Engine (Deterministic Monitor Evidence)
             risk_score = RiskScoringEngine.calculate_risk_score(
                 severity="high",
-                confidence=0.95,
+                confidence=None,  # Not ML-generated; uses deterministic health check confidence default
                 criticality=asset_crit,
                 alert_count=check.consecutive_failures
             )
 
-            # 2. Create Alert via Alert model
+            # 2. Create Alert via Alert model with explicit confidence_source metadata
             now_utc = datetime.now(timezone.utc)
             alert = Alert(
                 asset_id=check.asset_id,
@@ -320,7 +320,13 @@ class MonitoringService:
                 protocol="HTTP",
                 attack_type="DoS_Service_Outage",
                 status="new",
-                explanation={"reason": f"Monitored endpoint {check.target_url} is DOWN ({check.consecutive_failures} consecutive failures)."},
+                explanation={
+                    "reason": f"Monitored endpoint {check.target_url} is DOWN ({check.consecutive_failures} consecutive failures).",
+                    "confidence_source": "DETERMINISTIC_HEALTH_PROBE",
+                    "is_ml_generated": False,
+                    "target_url": check.target_url,
+                    "consecutive_failures": check.consecutive_failures
+                },
                 timestamp=now_utc
             )
             db.add(alert)

@@ -1,5 +1,9 @@
 # SentinelAI SOC Operations Manual: Phase 1 Architecture & Workflows
 
+> [!NOTE]
+> **HISTORICAL BASELINE REFERENCE**:
+> This document details the baseline Phase 1 SOC operational workflows. For current system status, model provenance, and Phase 2 architecture, refer to [`docs/CURRENT_STATUS.md`](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/CURRENT_STATUS.md) and [`docs/PHASE_2_ARCHITECTURE.md`](file:///c:/Users/NJ542WS/Desktop/major%20project/docs/PHASE_2_ARCHITECTURE.md).
+
 ## 1. Executive Operational Overview
 SentinelAI is an enterprise-grade AI/ML Network Intrusion Detection and Security Operations Center (SOC) platform. **Phase 1** equips SOC tier-1, tier-2, and tier-3 analysts with an end-to-end incident management lifecycle:
 
