@@ -13,14 +13,20 @@ import {
   HelpCircle,
   Sparkles,
   Server,
-  BellRing
+  BellRing,
+  Globe,
+  Database,
+  SearchCode
 } from 'lucide-react';
 
 export const navItems = [
   { path: '/dashboard', label: 'Dashboard', section: 'Monitor', icon: LayoutDashboard },
   { path: '/alerts', label: 'Live alerts', section: 'Monitor', icon: BellRing },
   { path: '/assets', label: 'Protected assets', section: 'Monitor', icon: Server },
-  { path: '/analytics', label: 'Model insights', section: 'Monitor', icon: BarChart3 },
+  { path: '/monitoring', label: 'Asset health', section: 'Monitor', icon: Globe },
+  { path: '/threat-intel', label: 'Threat intel', section: 'Intelligence', icon: Database },
+  { path: '/investigations', label: 'Investigations', section: 'Intelligence', icon: SearchCode },
+  { path: '/analytics', label: 'Model insights', section: 'Intelligence', icon: BarChart3 },
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },

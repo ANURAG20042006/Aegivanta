@@ -31,6 +31,10 @@ from backend.app.api.v1.incidents import router as incidents_router
 from backend.app.api.v1.assets import router as assets_router
 from backend.app.api.v1.alerts import router as alerts_router
 from backend.app.api.v1.health import router as health_router
+from backend.app.api.v1.monitoring import router as monitoring_router
+from backend.app.api.v1.threat_intel import router as threat_intel_router
+from backend.app.api.v1.investigations import router as investigations_router
+from backend.app.api.v1.playbooks import router as playbooks_router
 
 
 from dotenv import load_dotenv
@@ -231,4 +235,8 @@ app.include_router(websockets_router)
 app.include_router(incidents_router, prefix=settings.API_V1_STR)
 app.include_router(assets_router, prefix=settings.API_V1_STR)
 app.include_router(alerts_router, prefix=settings.API_V1_STR)
+app.include_router(monitoring_router, prefix=settings.API_V1_STR)
+app.include_router(threat_intel_router, prefix=settings.API_V1_STR)
+app.include_router(investigations_router, prefix=settings.API_V1_STR)
+app.include_router(playbooks_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)

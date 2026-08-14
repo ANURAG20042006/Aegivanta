@@ -1,18 +1,34 @@
+"""
+backend/app/api/v1/analytics.py
+===============================
+Telemetry, Research Analytics, Behavioral Baselines & Anomaly Endpoints.
+Preserves all Phase 1 analytics contracts and adds Phase 2 behavioral metrics.
+"""
+
 import json
 from pathlib import Path
-from typing import List
-from fastapi import APIRouter, Depends
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.app.database import get_db
 from backend.app.models.user import User
 from backend.app.models.incident import Incident
+from backend.app.models.alert import Alert
 from backend.app.models.model_registry import ModelRegistry
+from backend.app.models.behavioral import BehavioralBaseline, AnomalyEvent
+from backend.app.models.threat_intel import ThreatIndicator
+from backend.app.models.monitoring import MonitoringCheck
 from backend.app.schemas.analytics import AnalyticsSummary, AttackDistributionItem, ModelPerformanceItem
 from backend.app.core.dependencies import get_current_user
 
 router = APIRouter(prefix="/analytics", tags=["Analytics & Telemetry"])
 
+
+# =========================================================================
+# PHASE 1 AUTHORITATIVE ANALYTICS CONTRACTS (FROZEN)
+# =========================================================================
 
 @router.get("/summary", response_model=AnalyticsSummary, summary="Get Dashboard Threat Analytics Summary")
 async def get_analytics_summary(
@@ -155,4 +171,111 @@ async def get_roc_curves(
         "status": "unavailable",
         "active_model": None,
         "historical_baselines": historical_baselines
+    }
+
+
+# =========================================================================
+# PHASE 2 ADDITIVE BEHAVIORAL & ADVANCED SOC ANALYTICS
+# =========================================================================
+
+@router.get("/anomalies", summary="List Behavioral Anomaly Events")
+async def list_anomalies(
+    asset_id: Optional[str] = None,
+    severity: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieves detected behavioral anomaly events with explainable reasoning."""
+    query = select(AnomalyEvent)
+    if asset_id:
+        query = query.where(AnomalyEvent.asset_id == asset_id)
+    if severity:
+        query = query.where(AnomalyEvent.severity == severity.upper())
+    query = query.order_by(AnomalyEvent.timestamp.desc()).limit(limit)
+
+    res = await db.execute(query)
+    anomalies = res.scalars().all()
+    return [
+        {
+            "id": a.id,
+            "asset_id": a.asset_id,
+            "metric_name": a.metric_name,
+            "observed_value": a.observed_value,
+            "baseline_mean": a.baseline_mean,
+            "baseline_std": a.baseline_std,
+            "z_score": a.z_score,
+            "anomaly_score": a.anomaly_score,
+            "severity": a.severity,
+            "explanation": a.explanation,
+            "status": a.status,
+            "timestamp": a.timestamp.isoformat() if a.timestamp else None
+        }
+        for a in anomalies
+    ]
+
+
+@router.get("/baselines/{asset_id}", summary="Get Asset Statistical Baselines")
+async def get_asset_baselines(
+    asset_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieves rolling behavioral baselines for a specific protected asset."""
+    query = select(BehavioralBaseline).where(BehavioralBaseline.asset_id == asset_id)
+    res = await db.execute(query)
+    baselines = res.scalars().all()
+    return [
+        {
+            "metric_name": b.metric_name,
+            "baseline_mean": b.baseline_mean,
+            "baseline_std": b.baseline_std,
+            "min_val": b.min_val,
+            "max_val": b.max_val,
+            "sample_count": b.sample_count,
+            "updated_at": b.updated_at.isoformat() if b.updated_at else None
+        }
+        for b in baselines
+    ]
+
+
+@router.get("/metrics", summary="Get Advanced SOC Analytics Summary")
+async def get_advanced_analytics(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Aggregates high-level SOC metrics across alerts, IOCs, anomalies, and monitors."""
+    # 1. Total Counts
+    res_alerts = await db.execute(select(func.count(Alert.id)))
+    total_alerts = res_alerts.scalar() or 0
+
+    res_inc = await db.execute(select(func.count(Incident.id)))
+    total_incidents = res_inc.scalar() or 0
+
+    res_iocs = await db.execute(select(func.count(ThreatIndicator.id)).where(ThreatIndicator.is_active == True))
+    active_iocs = res_iocs.scalar() or 0
+
+    res_anom = await db.execute(select(func.count(AnomalyEvent.id)))
+    total_anomalies = res_anom.scalar() or 0
+
+    res_mon = await db.execute(select(func.count(MonitoringCheck.id)))
+    monitored_targets = res_mon.scalar() or 0
+
+    # 2. Attack Category Breakdown
+    res_cat = await db.execute(
+        select(Alert.attack_type, func.count(Alert.id))
+        .group_by(Alert.attack_type)
+        .order_by(func.count(Alert.id).desc())
+        .limit(10)
+    )
+    attack_breakdown = [{"attack_type": row[0], "count": row[1]} for row in res_cat.all()]
+
+    return {
+        "total_alerts": total_alerts,
+        "total_incidents": total_incidents,
+        "active_threat_indicators": active_iocs,
+        "total_anomalies_detected": total_anomalies,
+        "monitored_endpoints": monitored_targets,
+        "attack_distribution": attack_breakdown,
+        "telemetry_status": "ONLINE"
     }

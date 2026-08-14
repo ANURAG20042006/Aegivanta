@@ -8,7 +8,6 @@ import { Sidebar } from './components/common/Sidebar';
 
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
-import { Analytics } from './pages/Analytics';
 import { GuidePage } from './pages/Guide';
 import { Prediction } from './pages/Prediction';
 import { Reports } from './pages/Reports';
@@ -19,6 +18,10 @@ import { AboutPage } from './pages/About';
 import { AssetsPage } from './pages/Assets';
 import { AlertsPage } from './pages/Alerts';
 import { IncidentDetailPage } from './pages/IncidentDetail';
+import { MonitoringView } from './pages/MonitoringView';
+import { ThreatIntelView } from './pages/ThreatIntelView';
+import { InvestigationsView } from './pages/InvestigationsView';
+import { AnalyticsView } from './pages/AnalyticsView';
 
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -46,8 +49,11 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/alerts" element={<AlertsPage />} />
               <Route path="/assets" element={<AssetsPage />} />
+              <Route path="/monitoring" element={<MonitoringView />} />
+              <Route path="/threat-intel" element={<ThreatIntelView />} />
+              <Route path="/investigations" element={<InvestigationsView />} />
               <Route path="/incidents/:id" element={<IncidentDetailPage />} />
-              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/guide" element={<GuidePage />} />
               <Route path="/prediction" element={<Prediction />} />
               <Route path="/reports" element={<Reports />} />

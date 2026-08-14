@@ -368,6 +368,29 @@ class PredictService:
                     status="ACTIONABLE",
                     metadata_payload={"alert_id": alert.alert_id, "incident_id": incident.id, "attack_type": attack_type}
                 )
+
+                # Phase 2 Enrichment: Threat Intel IOC Enrichment & Behavioral Anomaly Detection
+                try:
+                    from backend.app.services.threat_intel_service import ThreatIntelService
+                    ioc_res = await ThreatIntelService.enrich_telemetry(vector.source_ip, vector.destination_ip, None, db)
+                    if ioc_res.get("is_match"):
+                        sec_event.metadata_payload["ioc_enrichment"] = ioc_res
+                except Exception as tie:
+                    logger.debug("Threat intel enrichment skipped: %s", tie)
+
+                try:
+                    if asset and vector.flow_packets_s:
+                        from backend.app.services.anomaly_service import AnomalyService
+                        await AnomalyService.detect_anomaly(asset.id, "packet_rate", float(vector.flow_packets_s), db)
+                except Exception as ane:
+                    logger.debug("Anomaly detection check skipped: %s", ane)
+
+                try:
+                    from backend.app.services.investigation_service import InvestigationService
+                    await InvestigationService.analyze_incident(incident.id, db)
+                except Exception as ive:
+                    logger.debug("Automated investigation update skipped: %s", ive)
+
                 db.add(sec_event)
 
                 # Commit transaction first to ensure persistence
