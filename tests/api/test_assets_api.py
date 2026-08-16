@@ -56,7 +56,7 @@ def test_asset_crud_and_rbac():
     assert asset_data["risk_score"] == 0.0
 
     # 3. Viewer reads asset list -> 200 OK
-    res_list = client.get("/api/v1/assets", headers=viewer_hdr)
+    res_list = client.get(f"/api/v1/assets?search={uid}", headers=viewer_hdr)
     assert res_list.status_code == 200
     list_data = res_list.json()
     assert list_data["total"] >= 1

@@ -179,15 +179,17 @@ docker-compose -f docker/docker-compose.yml up -d --build
 
 ### Option B: Bare-Metal Setup (Development Mode)
 
+The project is validated on Python 3.11.x (the lock file was generated against Python 3.11.5). Use that version for all local setup and testing.
+
 #### 1. Backend & ML Setup
 ```bash
-# Create and activate virtual environment (Python 3.11.x)
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Create and activate a fresh virtual environment using the supported Python version
+py -3.11 -m venv .venv
+.venv\Scripts\activate  # On macOS/Linux: source .venv/bin/activate
 
-# Install exact declared dependencies (enforces scikit-learn 1.6.1 for ML artifacts)
+# Install the locked dependency set for a reproducible environment
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements-lock.txt
 
 # Run ML pipeline & artifact generator
 python -m ml.train_pipeline
@@ -199,10 +201,16 @@ uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 #### 2. Frontend React SPA Setup
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 *Access Frontend at [http://localhost:5173](http://localhost:5173).*
+
+For automated tests, run the backend from the project root with:
+```bash
+.venv\Scripts\activate
+python -m pytest -q
+```
 
 ---
 

@@ -1,4 +1,8 @@
 import os
+import tempfile
+import uuid
+from pathlib import Path
+
 import pytest
 
 # Ensure test environment variables are set before any backend modules load
@@ -8,6 +12,10 @@ os.environ.setdefault("SENTINEL_VIEWER_PASSWORD", "TestViewerPassword2026!")
 os.environ.setdefault("SECRET_KEY", "test_secret_key_minimum_32_characters_long_for_security_testing")
 os.environ.setdefault("APP_ENV", "development")
 os.environ.setdefault("OPERATING_MODE", "DEMO")
+
+# Use a unique SQLite database per test session so local runs do not mutate the repo-root database.
+database_path = (Path(tempfile.gettempdir()) / f"sentinelai-test-{uuid.uuid4()}.db").resolve()
+os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{database_path.as_posix()}")
 
 import asyncio
 

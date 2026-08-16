@@ -14,7 +14,7 @@
 #   shap==0.51.0  imbalanced-learn==0.14.2
 # ==============================================
 
-﻿aiosqlite==0.22.1
+aiosqlite==0.22.1
 alembic==1.15.1
 annotated-doc==0.0.5
 annotated-types==0.8.0
