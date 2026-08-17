@@ -6,8 +6,8 @@ This guide provides step-by-step instructions for installing and running Sentine
 
 ## Prerequisites
 Ensure the following software packages are installed:
-- **Python**: Version 3.11 or higher (`python --version`)
-- **Node.js**: Version 18 or 20 (`node -v`) & npm (`npm -v`)
+- **Python**: Version 3.11 (tested on Python 3.11.5; see `.python-version`)
+- **Node.js**: Version 18, 20, or 22 & npm
 - **Docker & Docker Compose** (Optional for containerized setup)
 - **Git** (`git --version`)
 
@@ -17,31 +17,32 @@ Ensure the following software packages are installed:
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/your-org/sentinelai.git
-cd sentinelai
+git clone https://github.com/ANURAG20042006/SENTINELAI.git
+cd SENTINELAI
 ```
 
 ### Step 2: Set Up Backend Virtual Environment
 ```bash
-# Create virtual environment
-python -m venv venv
+# Create virtual environment using Python 3.11
+py -3.11 -m venv .venv
 
 # Activate on Windows
-.\venv\Scripts\activate
+.\.venv\Scripts\activate
 
 # Activate on Linux / macOS
-source venv/bin/activate
+source .venv/bin/activate
 
-# Install Backend & ML Dependencies
-pip install -r backend/requirements.txt
+# Install locked dependencies for a 100% reproducible environment
+python -m pip install --upgrade pip
+python -m pip install -r requirements-lock.txt
 ```
 
 ### Step 3: Run ML Model Training Pipeline
-Initialize the preprocessor and train all 12 ML/DL models locally:
+Initialize the preprocessor and train all ML/DL models locally:
 ```bash
 python -m ml.train_pipeline
 ```
-*Trained model artifacts will be saved to `ml/artifacts/best_model.joblib`.*
+*Trained champion model artifacts will be saved to `ml/artifacts/best_model.joblib`.*
 
 ### Step 4: Start FastAPI Backend Application
 ```bash
@@ -53,10 +54,20 @@ uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 Open a new terminal window:
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 *Vite development server will launch at [http://localhost:5173](http://localhost:5173).*
+
+### Step 6: Automated Testing & Build Verification
+```bash
+# Run backend test suite (isolated SQLite database in tempdir)
+python -m pytest -q
+
+# Run frontend production build
+cd frontend
+npm run build
+```
 
 ---
 

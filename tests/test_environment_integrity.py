@@ -59,3 +59,22 @@ def test_ml_core_dependencies_importable():
             assert mod is not None, f"Module {import_name} is None"
         except ImportError as e:
             pytest.fail(f"Required ML dependency '{pkg_name}' ({import_name}) failed to import: {e}")
+
+
+def test_python_runtime_version():
+    """Verify runtime Python version is 3.11.x as specified by the project lockfile and .python-version."""
+    assert sys.version_info[:2] == (3, 11), (
+        f"Incompatible Python version: {sys.version}. SentinelAI requires Python 3.11.x for reproducible ML artifacts and dependencies."
+    )
+
+
+def test_test_database_isolation():
+    """Verify test runs use an isolated database and do not target the repo-root sentinelai.db."""
+    import os
+    db_url = os.environ.get("DATABASE_URL", "")
+    assert "sentinelai-test-" in db_url or "temp" in db_url.lower() or "test" in db_url.lower(), (
+        f"Database URL '{db_url}' is not properly isolated for testing."
+    )
+    assert not db_url.endswith("/./sentinelai.db") and not db_url.endswith("/sentinelai.db"), (
+        "Test suite must not execute against the production/development repository root database."
+    )

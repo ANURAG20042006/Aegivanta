@@ -201,15 +201,27 @@ uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 #### 2. Frontend React SPA Setup
 ```bash
 cd frontend
+# Reproducible dependency installation from package-lock.json
 npm ci
+
+# Start Vite React Dev Server
 npm run dev
+
+# Or build for production
+npm run build
 ```
 *Access Frontend at [http://localhost:5173](http://localhost:5173).*
 
-For automated tests, run the backend from the project root with:
+#### 3. Automated Testing & Verification
+Tests automatically run against an isolated session-scoped temporary SQLite database without mutating development databases:
 ```bash
+# Run the complete test suite (240+ tests)
 .venv\Scripts\activate
 python -m pytest -q
+
+# Run frontend production build verification
+cd frontend
+npm run build
 ```
 
 ---
