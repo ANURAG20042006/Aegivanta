@@ -1,6 +1,6 @@
 import os
 import secrets
-from typing import List
+from typing import List, Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -22,10 +22,19 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
-    # User Accounts Passwords (from .env or environment)
-    SENTINEL_ADMIN_PASSWORD: str = Field(default="Admin_Secure2026!")
-    SENTINEL_ANALYST_PASSWORD: str = Field(default="Analyst_Secure2026!")
-    SENTINEL_VIEWER_PASSWORD: str = Field(default="Viewer_Secure2026!")
+    # User Accounts Passwords (must be supplied via environment / .env — no hard-coded defaults)
+    SENTINEL_ADMIN_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Admin seed password. Required at startup (all environments)."
+    )
+    SENTINEL_ANALYST_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Analyst seed password. Required at startup (all environments)."
+    )
+    SENTINEL_VIEWER_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Viewer seed password. Required at startup (all environments)."
+    )
 
     # Database Settings
     POSTGRES_SERVER: str = "localhost"

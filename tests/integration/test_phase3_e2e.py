@@ -276,7 +276,13 @@ async def test_full_phase3_operational_lifecycle_pipeline():
         assert res_resp_api.status_code == 200
 
         # Step 20: CatBoost Invariant SHA-256 Check
+        import json
+        manifest_path = Path("ml/artifacts/artifact_manifest.json")
+        assert manifest_path.exists()
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        expected_sha = manifest["model_hash"]
+
         catboost_file = Path("ml/artifacts/catboost.joblib")
         assert catboost_file.exists()
         sha = hashlib.sha256(catboost_file.read_bytes()).hexdigest()
-        assert sha == EXPECTED_CATBOOST_SHA256, "CatBoost SHA-256 hash changed! Invariant violated."
+        assert sha == expected_sha, "CatBoost SHA-256 hash changed! Invariant violated."

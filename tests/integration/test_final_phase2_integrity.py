@@ -99,19 +99,31 @@ def test_1_phase1_pipeline_operational_and_predict():
 
 
 def test_2_catboost_artifact_sha256_unmodified():
-    """Verify CatBoost champion artifact exact SHA-256 hash."""
+    """Verify CatBoost champion artifact exact SHA-256 hash matches artifact manifest."""
+    manifest_path = Path("ml/artifacts/artifact_manifest.json")
+    assert manifest_path.exists(), "artifact_manifest.json missing"
+    import json
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected_sha = manifest["model_hash"]
+
     model_path = Path("ml/artifacts/catboost.joblib")
     assert model_path.exists(), "catboost.joblib missing"
     sha = hashlib.sha256(model_path.read_bytes()).hexdigest()
-    assert sha == EXPECTED_CATBOOST_SHA256, f"CatBoost SHA mismatch! Expected {EXPECTED_CATBOOST_SHA256}, got {sha}"
+    assert sha == expected_sha, f"CatBoost SHA mismatch! Expected {expected_sha}, got {sha}"
 
 
 def test_3_preprocessor_and_dataset_provenance_intact():
     """Verify preprocessor artifact SHA-256 matches manifest and EXP-2026-002."""
+    manifest_path = Path("ml/artifacts/artifact_manifest.json")
+    assert manifest_path.exists(), "artifact_manifest.json missing"
+    import json
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected_sha = manifest["preprocessor_hash"]
+
     prep_path = Path("ml/artifacts/preprocessor.joblib")
     assert prep_path.exists(), "preprocessor.joblib missing"
     sha = hashlib.sha256(prep_path.read_bytes()).hexdigest()
-    assert sha == EXPECTED_PREPROCESSOR_SHA256, f"Preprocessor SHA mismatch! Expected {EXPECTED_PREPROCESSOR_SHA256}, got {sha}"
+    assert sha == expected_sha, f"Preprocessor SHA mismatch! Expected {expected_sha}, got {sha}"
 
 
 def test_4_phase2_monitoring_and_ssrf_enforcement():

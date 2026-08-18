@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,18 +10,24 @@ from backend.app.schemas.user import UserResponse
 from backend.app.security import verify_password, hash_password, create_access_token
 from backend.app.core.exceptions import AuthenticationError, SentinelAIException
 from backend.app.core.dependencies import get_current_user
+from backend.app.core.rate_limit import login_rate_limiter, register_rate_limit
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/login", response_model=Token, summary="Authenticate User & Obtain JWT Token")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
     """Authenticates username and password credentials, returning a signed JWT access token."""
     username = form_data.username
     password = form_data.password
+
+    # Rate limiting: per-IP (10 rpm) and per-IP:username (5 rpm) — checked before DB query
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    login_rate_limiter.check(ip=client_ip, username=username)
 
     query = select(User).where(User.username == username)
     result = await db.execute(query)
@@ -66,7 +72,8 @@ async def login(
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, summary="Register New User")
 async def register(
     payload: RegisterRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    _rate: None = Depends(register_rate_limit)
 ):
     """Registers a new system user profile."""
     query = select(User).where((User.username == payload.username) | (User.email == payload.email))

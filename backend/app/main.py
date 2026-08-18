@@ -64,12 +64,12 @@ def get_default_users():
                     f"Security Error: Environment variable '{env_var}' is required in production to seed default accounts.\n"
                     f"Set {env_var} in your .env or environment variables."
                 )
-            test_defaults = {
-                "SENTINEL_ADMIN_PASSWORD": "TestAdminPassword2026!",
-                "SENTINEL_ANALYST_PASSWORD": "TestAnalystPassword2026!",
-                "SENTINEL_VIEWER_PASSWORD": "TestViewerPassword2026!"
-            }
-            return test_defaults.get(env_var, "TestDefaultPassword2026!")
+            # Non-production: still require an explicit password — no silent defaults.
+            raise RuntimeError(
+                f"Configuration Error: '{env_var}' is not set. "
+                f"Add it to your .env file. "
+                f"Example development values are in .env.example."
+            )
         return pwd
 
     return [

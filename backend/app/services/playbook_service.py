@@ -44,10 +44,10 @@ class PlaybookService:
                 f"simulated successfully. Zero destructive changes applied to perimeter infrastructure."
             )
         else:
-            status_result = "EXECUTED_SUCCESS"
+            status_result = "SIMULATED_EXECUTION"
             log_msg = (
-                f"[LIVE EXECUTION] Action '{action_type}' for target '{target_entity}' "
-                f"executed with parameters {parameters}."
+                f"[SIMULATED EXECUTION] Action '{action_type}' for target '{target_entity}' "
+                f"simulated with parameters {parameters}. Live external SOAR execution stubbed."
             )
 
         execution = PlaybookExecution(
@@ -70,7 +70,7 @@ class PlaybookService:
         timeline_ev = IncidentTimelineEvent(
             incident_id=incident_id,
             event_type="REMEDIATION",
-            title=f"Playbook: {playbook_name} ({'Dry Run' if is_dry_run else 'Live'})",
+            title=f"Playbook: {playbook_name} ({'Dry Run' if is_dry_run else 'Simulation'})",
             description=log_msg,
             actor=executed_by,
             metadata_payload={
@@ -85,21 +85,18 @@ class PlaybookService:
 
         # Broadcast WebSocket telemetry
         try:
-            from backend.app.api.v1.websocket import manager
-            await manager.broadcast({
-                "type": "PLAYBOOK_STATUS",
-                "data": {
-                    "execution_id": execution.id,
-                    "incident_id": incident_id,
-                    "playbook_name": playbook_name,
-                    "action_type": action_type,
-                    "is_dry_run": is_dry_run,
-                    "status": status_result,
-                    "timestamp": now.isoformat()
-                }
+            from backend.app.api.v1.websockets import manager
+            await manager.broadcast_event("PLAYBOOK_STATUS", {
+                "execution_id": execution.id,
+                "incident_id": incident_id,
+                "playbook_name": playbook_name,
+                "action_type": action_type,
+                "is_dry_run": is_dry_run,
+                "status": status_result,
+                "timestamp": now.isoformat()
             })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to broadcast playbook status to WebSocket: {e}")
 
         return {
             "execution_id": execution.id,

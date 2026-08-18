@@ -55,8 +55,8 @@ services:
         condition: service_healthy
     environment:
       - APP_NAME=SentinelAI
-      - APP_ENV=${APP_ENV:-development}
-      - OPERATING_MODE=${OPERATING_MODE:-DEMO}
+      - APP_ENV=${APP_ENV:?APP_ENV must be explicitly set (e.g. development or production)}
+      - OPERATING_MODE=${OPERATING_MODE:?OPERATING_MODE must be explicitly set (e.g. DEMO, LAB, or PRODUCTION)}
       - DEBUG=False
       - API_V1_STR=/api/v1
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable must be set}
@@ -66,11 +66,10 @@ services:
       - SENTINEL_ADMIN_PASSWORD=${SENTINEL_ADMIN_PASSWORD:?SENTINEL_ADMIN_PASSWORD must be set}
       - SENTINEL_ANALYST_PASSWORD=${SENTINEL_ANALYST_PASSWORD:?SENTINEL_ANALYST_PASSWORD must be set}
       - SENTINEL_VIEWER_PASSWORD=${SENTINEL_VIEWER_PASSWORD:?SENTINEL_VIEWER_PASSWORD must be set}
-    # Only expose backend port to frontend container via internal network
+    # Backend is internal-only: reachable only via Nginx on the sentinel_net network.
+    # Do NOT add a ports mapping here — that would bypass the Nginx security boundary.
     expose:
       - "8000"
-    ports:
-      - "8000:8000"
     volumes:
       - backend_logs:/app/logs
       - backend_reports:/app/reports

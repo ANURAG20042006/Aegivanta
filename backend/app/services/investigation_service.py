@@ -252,20 +252,17 @@ class InvestigationService:
 
         # Broadcast WebSocket telemetry
         try:
-            from backend.app.api.v1.websocket import manager
-            await manager.broadcast({
-                "type": "INVESTIGATION_UPDATE",
-                "data": {
-                    "investigation_id": investigation.id,
-                    "incident_id": incident_id,
-                    "attack_chain_stage": attack_stage,
-                    "confidence_score": confidence_score,
-                    "summary": summary_text,
-                    "recommended_actions": recommendations,
-                    "timestamp": now.isoformat()
-                }
+            from backend.app.api.v1.websockets import manager
+            await manager.broadcast_event("INVESTIGATION_UPDATE", {
+                "investigation_id": investigation.id,
+                "incident_id": incident_id,
+                "attack_chain_stage": attack_stage,
+                "confidence_score": confidence_score,
+                "summary": summary_text,
+                "recommended_actions": recommendations,
+                "timestamp": now.isoformat()
             })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to broadcast investigation update to WebSocket: {e}")
 
         return investigation

@@ -193,23 +193,20 @@ class AnomalyService:
 
         # Broadcast WebSocket telemetry
         try:
-            from backend.app.api.v1.websocket import manager
-            await manager.broadcast({
-                "type": "ANOMALY_DETECTED",
-                "data": {
-                    "anomaly_id": anomaly.id,
-                    "asset_id": asset_id,
-                    "metric_name": metric_name,
-                    "observed_value": observed_value,
-                    "direction": direction,
-                    "z_score": round(z_score, 2),
-                    "anomaly_score": round(anomaly_score, 1),
-                    "severity": severity,
-                    "explanation": explanation,
-                    "timestamp": now.isoformat()
-                }
+            from backend.app.api.v1.websockets import manager
+            await manager.broadcast_event("ANOMALY_DETECTED", {
+                "anomaly_id": anomaly.id,
+                "asset_id": asset_id,
+                "metric_name": metric_name,
+                "observed_value": observed_value,
+                "direction": direction,
+                "z_score": round(z_score, 2),
+                "anomaly_score": round(anomaly_score, 1),
+                "severity": severity,
+                "explanation": explanation,
+                "timestamp": now.isoformat()
             })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to broadcast anomaly detected to WebSocket: {e}")
 
         return anomaly

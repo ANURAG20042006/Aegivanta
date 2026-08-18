@@ -16,6 +16,7 @@ from backend.app.models.response_approval import ResponseApproval
 from backend.app.models.incident import Incident
 from backend.app.models.incident_timeline import IncidentTimelineEvent
 from backend.app.services.playbook_service import PlaybookService
+from backend.app.core.dependencies import normalize_role
 
 logger = logging.getLogger("SentinelAI")
 
@@ -78,7 +79,7 @@ class ResponseOrchestrator:
         db: AsyncSession = None
     ) -> Dict[str, Any]:
         """Approves and executes a requested SOAR response action."""
-        if approver_role != "admin":
+        if normalize_role(approver_role) != "admin":
             raise PermissionError("Only Admin users are authorized to approve and execute response actions.")
 
         res = await db.execute(select(ResponseApproval).where(ResponseApproval.id == approval_id))
@@ -107,7 +108,7 @@ class ResponseOrchestrator:
             db=db
         )
 
-        req.status = "COMPLETED" if exec_res.get("status") in ["SIMULATED_SUCCESS", "SUCCESS"] else "FAILED"
+        req.status = "COMPLETED" if exec_res.get("status") in ["SIMULATED_SUCCESS", "SIMULATED_EXECUTION", "SUCCESS"] else "FAILED"
         req.execution_id = exec_res.get("execution_id")
         req.execution_result = exec_res
         req.audit_id = exec_res.get("audit_id")
@@ -128,7 +129,7 @@ class ResponseOrchestrator:
         db: AsyncSession
     ) -> ResponseApproval:
         """Rejects a pending response action request."""
-        if approver_role not in ["admin", "analyst"]:
+        if normalize_role(approver_role) not in ["admin", "analyst"]:
             raise PermissionError("Viewer role cannot reject response requests.")
 
         res = await db.execute(select(ResponseApproval).where(ResponseApproval.id == approval_id))

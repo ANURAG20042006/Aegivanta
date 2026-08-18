@@ -82,6 +82,10 @@ async def init_db() -> None:
                     ("last_seen", "ALTER TABLE incidents ADD COLUMN last_seen TIMESTAMP"),
                     ("resolution", "ALTER TABLE incidents ADD COLUMN resolution TEXT")
                 ]
+                for col_name, sql in inc_migrations:
+                    if col_name not in inc_cols:
+                        sync_conn.execute(text(sql))
+
             if "playbook_executions" in table_names:
                 pb_cols = {col["name"] for col in inspector.get_columns("playbook_executions")}
                 pb_migrations = [
