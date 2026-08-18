@@ -72,7 +72,11 @@ jobs:
     name: Docker Configuration Validation
     runs-on: ubuntu-latest
     env:
+      APP_ENV: production
+      OPERATING_MODE: PRODUCTION
+      POSTGRES_USER: sentinel_admin
       POSTGRES_PASSWORD: "ci_postgres_password_test"
+      POSTGRES_DB: sentinelai_db
       SECRET_KEY: "ci_secret_key_minimum_32_characters_long"
       SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
       SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
@@ -83,3 +87,11 @@ jobs:
       - name: Validate Docker Compose Configuration
         run: |
           docker compose -f docker/docker-compose.yml config
+
+      - name: Verify Missing Required Variables Fail Closed
+        run: |
+          if env -u APP_ENV docker compose -f docker/docker-compose.yml config >/dev/null 2>&1; then
+            echo "ERROR: Docker Compose unexpectedly accepted missing APP_ENV"
+            exit 1
+          fi
+          echo "Verified: Docker Compose correctly fails closed when required environment variables are unset."
