@@ -71,6 +71,7 @@ async def predict_csv_file(
         details={
             "filename": file.filename,
             "total_records": results["total_records"],
+            "processed_records": results.get("processed_records", results["total_records"]),
             "malicious_count": results["malicious_count"]
         }
     )

@@ -278,7 +278,10 @@ class PredictService:
         elif isinstance(features, PacketFeatureVector):
             vector = features
         else:
-            vector = PacketFeatureVector()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid feature payload: expected dictionary or PacketFeatureVector."
+            )
 
         model_name = model_name or "Random Forest"
         attack_type, confidence_score, is_malicious, severity, probs, shap = self.infer_packet_threat(
@@ -518,24 +521,44 @@ class PredictService:
         file_content: bytes,
         model_name: Optional[str] = "Random Forest"
     ) -> Dict[str, Any]:
-        df = pd.read_csv(io.BytesIO(file_content))
+        try:
+            df = pd.read_csv(io.BytesIO(file_content))
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to parse CSV file: {e}"
+            )
+
         total_records = len(df)
+        if total_records == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded CSV file is empty."
+            )
+
+        # Standardize column headers (lowercase, strip, replace spaces/dots with underscores)
+        normalized_columns = {}
+        for col in df.columns:
+            clean_col = str(col).strip().lower().replace(" ", "_").replace(".", "_").replace("/", "_per_")
+            normalized_columns[col] = clean_col
+        df = df.rename(columns=normalized_columns)
+
         predictions: List[PredictionResult] = []
         malicious_count = 0
 
-        for i, row in df.head(50).iterrows():
-            row_dict = row.to_dict()
-            vector = PacketFeatureVector(
-                source_ip=str(row_dict.get("source_ip", f"192.168.1.{100 + i}")),
-                destination_ip=str(row_dict.get("destination_ip", "10.0.0.1")),
-                source_port=int(row_dict.get("source_port", 443)),
-                destination_port=int(row_dict.get("destination_port", 80)),
-                protocol=str(row_dict.get("protocol", "TCP")),
-                flow_duration=float(row_dict.get("flow_duration", 120500.0)),
-                flow_packets_s=float(row_dict.get("flow_packets_s", 150.0)),
-                packet_length_mean=float(row_dict.get("packet_length_mean", 512.0)),
-                syn_flag_count=float(row_dict.get("syn_flag_count", 0.0))
-            )
+        # Process up to 200 rows per batch
+        MAX_CSV_BATCH = 200
+        records_to_process = df.head(MAX_CSV_BATCH)
+
+        for i, row in records_to_process.iterrows():
+            row_dict = row.dropna().to_dict()
+            try:
+                vector = PacketFeatureVector(**row_dict)
+            except Exception as val_err:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"CSV row #{i + 1} validation failed: {val_err}"
+                )
             res = await self.predict_single_flow(db, vector, model_name)
             if res.is_malicious:
                 malicious_count += 1
@@ -543,6 +566,7 @@ class PredictService:
 
         return {
             "total_records": total_records,
+            "processed_records": len(predictions),
             "malicious_count": malicious_count,
             "predictions": [p.model_dump() for p in predictions]
         }

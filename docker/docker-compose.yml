@@ -66,6 +66,7 @@ services:
       - SENTINEL_ADMIN_PASSWORD=${SENTINEL_ADMIN_PASSWORD:?SENTINEL_ADMIN_PASSWORD must be set}
       - SENTINEL_ANALYST_PASSWORD=${SENTINEL_ANALYST_PASSWORD:?SENTINEL_ANALYST_PASSWORD must be set}
       - SENTINEL_VIEWER_PASSWORD=${SENTINEL_VIEWER_PASSWORD:?SENTINEL_VIEWER_PASSWORD must be set}
+      - CORS_ORIGINS=${CORS_ORIGINS:-["https://sentinelai.io"]}
     # Backend is internal-only: reachable only via Nginx on the sentinel_net network.
     # Do NOT add a ports mapping here — that would bypass the Nginx security boundary.
     expose:

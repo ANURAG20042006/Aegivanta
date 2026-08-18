@@ -1,8 +1,9 @@
 """
 backend/app/api/v1/websockets.py
 ================================
-Real-Time WebSocket Telemetry Stream with JWT Authentication,
-Role-Based Authorization, Heartbeat/Ping-Pong, and Connection Limits.
+Real-Time WebSocket Telemetry Stream with Database-Backed JWT Authentication,
+Active-User Verification, RBAC Authorization, Bi-Directional Heartbeat/Pong Detection,
+and Connection Rate Limits.
 """
 
 import asyncio
@@ -11,12 +12,14 @@ import random
 from typing import List, Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, status
-from jose import JWTError
+from sqlalchemy import select
 
 from backend.app.config import settings
 from backend.app.core.logging import logger
 from backend.app.security import decode_access_token
 from backend.app.core.dependencies import normalize_role
+from backend.app.database import AsyncSessionFactory
+from backend.app.models.user import User
 
 # ── Connection limits ────────────────────────────────────────────────────────
 MAX_CONNECTIONS: int = 50
@@ -84,12 +87,12 @@ async def _authenticate_websocket(
     token: Optional[str]
 ) -> Optional[dict]:
     """
-    Validates the JWT token supplied as a query parameter.
-    Returns the decoded payload on success, or closes the socket and returns
-    None on any authentication/authorization failure.
+    Validates the JWT token supplied as a query parameter against the database.
+    Verifies user existence, active status (rejects disabled/deleted accounts),
+    and normalized RBAC permissions before accept().
 
     Close codes used:
-        1008 Policy Violation — unauthenticated / unauthorized
+        1008 Policy Violation — unauthenticated / unauthorized / disabled user
         1013 Try Again Later  — server at connection capacity
     """
     # ── Connection cap ───────────────────────────────────────────────────────
@@ -124,45 +127,112 @@ async def _authenticate_websocket(
         logger.warning(f"WebSocket rejected: invalid/expired JWT — {exc}")
         return None
 
-    # ── Role-based authorization ─────────────────────────────────────────────
-    raw_role: str = payload.get("role", "")
-    canonical_role = normalize_role(raw_role)
-    if canonical_role not in ALLOWED_WS_ROLES:
+    # ── Database Verification (Active & Non-Deleted User) ────────────────────
+    username_or_id = payload.get("sub", "")
+    if not username_or_id:
         await websocket.close(
             code=status.WS_1008_POLICY_VIOLATION,
-            reason=f"Authorization denied: role '{raw_role}' is not permitted."
+            reason="Invalid token: missing subject identity."
         )
-        logger.warning(
-            f"WebSocket rejected: role '{raw_role}' → '{canonical_role}' not in {ALLOWED_WS_ROLES}."
+        return None
+
+    try:
+        async with AsyncSessionFactory() as db:
+            result = await db.execute(
+                select(User).where((User.username == username_or_id) | (User.id == username_or_id))
+            )
+            user = result.scalar_one_or_none()
+
+            if not user:
+                await websocket.close(
+                    code=status.WS_1008_POLICY_VIOLATION,
+                    reason="User account associated with token no longer exists."
+                )
+                logger.warning(f"WebSocket rejected: user '{username_or_id}' not found in database.")
+                return None
+
+            if not user.is_active:
+                await websocket.close(
+                    code=status.WS_1008_POLICY_VIOLATION,
+                    reason="User account is deactivated."
+                )
+                logger.warning(f"WebSocket rejected: user '{user.username}' is deactivated.")
+                return None
+
+            # Enforce canonical role permissions from database record
+            canonical_role = normalize_role(user.role)
+            if canonical_role not in ALLOWED_WS_ROLES:
+                await websocket.close(
+                    code=status.WS_1008_POLICY_VIOLATION,
+                    reason=f"Authorization denied: role '{user.role}' is not permitted."
+                )
+                logger.warning(
+                    f"WebSocket rejected: role '{user.role}' → '{canonical_role}' not in {ALLOWED_WS_ROLES}."
+                )
+                return None
+
+    except Exception as dbe:
+        logger.error(f"WebSocket DB authentication check error: {dbe}")
+        # If DB check fails during test run or transient error, fail closed
+        await websocket.close(
+            code=status.WS_1008_POLICY_VIOLATION,
+            reason="Authentication verification error."
         )
         return None
 
     return payload
 
 
-async def _heartbeat(websocket: WebSocket) -> None:
+async def _heartbeat(websocket: WebSocket, state: dict) -> None:
     """
     Sends WebSocket ping frames every PING_INTERVAL seconds.
-    Closes the connection if PING_MISS_LIMIT consecutive pongs are missed.
-    The FastAPI/Starlette WebSocket implementation raises WebSocketDisconnect
-    when the client is gone, which is caught in the parent handler.
+    Tracks client pong responses and closes connection if PING_MISS_LIMIT
+    consecutive pongs are missed.
     """
-    missed = 0
     while True:
         await asyncio.sleep(PING_INTERVAL)
-        try:
-            await websocket.send_json({"type": "PING"})
-            missed = 0
-        except Exception:
-            missed += 1
+        if not state.get("pong_received", True):
+            state["missed"] = state.get("missed", 0) + 1
             logger.warning(
-                f"WebSocket heartbeat: missed pong #{missed} "
+                f"WebSocket heartbeat: missed pong #{state['missed']} "
                 f"(limit={PING_MISS_LIMIT})."
             )
-            if missed >= PING_MISS_LIMIT:
-                logger.warning("WebSocket heartbeat: closing unresponsive connection.")
-                await websocket.close(code=1001, reason="Heartbeat timeout.")
+            if state["missed"] >= PING_MISS_LIMIT:
+                logger.warning("WebSocket heartbeat: closing unresponsive connection due to missed pongs.")
+                try:
+                    await websocket.close(code=1001, reason="Heartbeat timeout: missed pong responses.")
+                except Exception:
+                    pass
                 return
+        else:
+            state["pong_received"] = False
+
+        try:
+            await websocket.send_json({"type": "PING", "timestamp": asyncio.get_event_loop().time()})
+        except Exception:
+            state["missed"] = state.get("missed", 0) + 1
+            if state["missed"] >= PING_MISS_LIMIT:
+                return
+
+
+async def _client_listener(websocket: WebSocket, state: dict) -> None:
+    """Listens for incoming client messages, resetting heartbeat state on PONG frames."""
+    while True:
+        try:
+            data = await websocket.receive_text()
+            try:
+                msg = json.loads(data)
+                if isinstance(msg, dict) and msg.get("type") == "PONG":
+                    state["pong_received"] = True
+                    state["missed"] = 0
+            except Exception:
+                if data.strip().upper() == "PONG":
+                    state["pong_received"] = True
+                    state["missed"] = 0
+        except WebSocketDisconnect:
+            break
+        except Exception:
+            break
 
 
 @router.websocket("/ws/threats")
@@ -180,12 +250,11 @@ async def websocket_threat_stream(
 
     Authorization:
         Allowed roles: admin, analyst, viewer.
-        Disabled or deleted users are rejected.
+        Disabled or deleted users are verified against the DB and rejected.
 
-    Modes (controlled by OPERATING_MODE):
-        DEMO       — Synthetic threat telemetry labeled 'DEMO MODE'.
-        LAB        — Controlled benchmark flows labeled 'LAB MODE'.
-        PRODUCTION — Status heartbeat only; real capture engine required.
+    Heartbeat:
+        Bi-directional heartbeat: server sends PING every 30s; client responds
+        with PONG. Unresponsive clients are terminated after 2 missed pongs.
     """
     # Authenticate before accept()
     payload = await _authenticate_websocket(websocket, token)
@@ -194,8 +263,10 @@ async def websocket_threat_stream(
 
     await manager.connect(websocket)
 
-    # Start heartbeat task
-    heartbeat_task = asyncio.create_task(_heartbeat(websocket))
+    # Initialize bidirectional heartbeat state
+    heartbeat_state = {"pong_received": True, "missed": 0}
+    heartbeat_task = asyncio.create_task(_heartbeat(websocket, heartbeat_state))
+    listener_task = asyncio.create_task(_client_listener(websocket, heartbeat_state))
 
     try:
         while True:
@@ -261,4 +332,5 @@ async def websocket_threat_stream(
         logger.error(f"WebSocket stream error: {e}")
     finally:
         heartbeat_task.cancel()
+        listener_task.cancel()
         manager.disconnect(websocket)

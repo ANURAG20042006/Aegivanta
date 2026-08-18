@@ -1,7 +1,7 @@
 import os
 import secrets
-from typing import List, Optional
-from pydantic import Field
+from typing import List, Optional, Any
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _RUNTIME_DEV_SECRET = secrets.token_urlsafe(32)
@@ -59,11 +59,35 @@ class Settings(BaseSettings):
     SHAP_EXPLAINER_BACKGROUND_SAMPLES: int = 100
 
     # CORS Settings
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-    ]
+    CORS_ORIGINS: List[str] = Field(
+        default_factory=lambda: (
+            ["https://sentinelai.io"]
+            if os.environ.get("APP_ENV", "").lower() == "production"
+            or os.environ.get("OPERATING_MODE", "").upper() == "PRODUCTION"
+            else [
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://127.0.0.1:5173",
+            ]
+        ),
+        description="Allowed CORS origins list"
+    )
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            v_clean = v.strip()
+            if v_clean.startswith("[") and v_clean.endswith("]"):
+                import json
+                try:
+                    return json.loads(v_clean)
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v_clean.split(",") if origin.strip()]
+        elif isinstance(v, (list, tuple, set)):
+            return list(v)
+        return v
 
     # WebSockets Settings
     WEBSOCKET_BROADCAST_INTERVAL_MS: int = 1000
@@ -109,7 +133,7 @@ def validate_production_settings(custom_settings: "Settings" = None) -> None:
         return
 
     # 1. SECRET_KEY validation in production
-    secret_key = os.environ.get("SECRET_KEY", "") or target_settings.SECRET_KEY
+    secret_key = target_settings.SECRET_KEY if custom_settings else (os.environ.get("SECRET_KEY", "") or target_settings.SECRET_KEY)
     if not secret_key or len(secret_key) < 32:
         raise RuntimeError("Production requires a unique SECRET_KEY of at least 32 characters in environment variables.")
 
@@ -118,7 +142,7 @@ def validate_production_settings(custom_settings: "Settings" = None) -> None:
         raise RuntimeError("Production SECRET_KEY cannot be a known insecure or default string.")
 
     # 2. Database Password validation
-    pg_pass = os.environ.get("POSTGRES_PASSWORD", "") or target_settings.POSTGRES_PASSWORD
+    pg_pass = target_settings.POSTGRES_PASSWORD if custom_settings else (os.environ.get("POSTGRES_PASSWORD", "") or target_settings.POSTGRES_PASSWORD)
     if not pg_pass or len(pg_pass) < 8:
         raise RuntimeError("Production requires POSTGRES_PASSWORD of at least 8 characters.")
 

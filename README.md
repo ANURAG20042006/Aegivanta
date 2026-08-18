@@ -173,7 +173,7 @@ cd SENTINELAI
 # Spin up PostgreSQL 16, Redis 7, Uvicorn Backend & Nginx Gateway
 docker-compose -f docker/docker-compose.yml up -d --build
 ```
-*Access UI at [http://localhost](http://localhost) and API Docs at [http://localhost:8000/docs](http://localhost:8000/docs).*
+*Access UI at [http://localhost](http://localhost) and API Docs at [http://localhost/docs](http://localhost/docs).*
 
 ---
 

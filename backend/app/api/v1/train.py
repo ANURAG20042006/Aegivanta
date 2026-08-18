@@ -413,6 +413,16 @@ async def trigger_training_pipeline(
     Creates a persisted TrainingJob (QUEUED state) before returning job_id, status, and created_at.
     Dispatches background worker to execute retraining pipeline.
     """
+    # Guard against concurrent retraining jobs to prevent resource exhaustion
+    active_query = select(TrainingJob).where(TrainingJob.status.in_(["QUEUED", "RUNNING"])).limit(1)
+    active_res = await db.execute(active_query)
+    existing_active = active_res.scalar_one_or_none()
+    if existing_active:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Retraining job '{existing_active.id}' is already {existing_active.status}. Concurrent training execution is disallowed."
+        )
+
     job = TrainingJob(
         user_id=admin_user.id,
         status="QUEUED",
