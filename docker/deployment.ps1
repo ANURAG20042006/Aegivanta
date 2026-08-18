@@ -24,6 +24,6 @@ docker compose -f docker/docker-compose.yml up -d --build
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "    SENTINELAI PLATFORM SUCCESSFULLY DEPLOYED             " -ForegroundColor Green
-Write-Host "    Frontend Dashboard: http://localhost:80               " -ForegroundColor Yellow
-Write-Host "    Backend API Docs:   http://localhost:8000/docs        " -ForegroundColor Yellow
+Write-Host "    Frontend Dashboard: http://localhost                  " -ForegroundColor Yellow
+Write-Host "    Backend API Docs:   http://localhost/docs             " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan

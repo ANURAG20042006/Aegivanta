@@ -8,7 +8,22 @@ _RUNTIME_DEV_SECRET = secrets.token_urlsafe(32)
 
 
 class Settings(BaseSettings):
-    """System configuration settings loaded from environment variables."""
+    """
+    System configuration settings loaded from environment variables (.env).
+
+    ENVIRONMENT & SECURITY ARCHITECTURE:
+    -----------------------------------
+    1. Development Mode (Default for bare-metal & local test runs):
+       - APP_ENV = "development", OPERATING_MODE = "DEMO"
+       - Ephemeral runtime secrets and localhost CORS origins (5173, 3000) are permitted
+         to provide a frictionless, zero-configuration local developer experience (DX).
+    
+    2. Production Mode (Enforced in Docker / Production deployments):
+       - APP_ENV = "production", OPERATING_MODE = "PRODUCTION"
+       - Fail-closed security boundary: validate_production_settings() is executed on startup.
+       - Disallows default secrets, disallows localhost/wildcard CORS, and mandates
+         strong passwords and production domains (e.g. https://sentinelai.io).
+    """
 
     # General Application Settings
     APP_NAME: str = "SentinelAI"

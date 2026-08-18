@@ -185,22 +185,31 @@ async def _authenticate_websocket(
 
 async def _heartbeat(websocket: WebSocket, state: dict) -> None:
     """
-    Sends WebSocket ping frames every PING_INTERVAL seconds.
-    Tracks client pong responses and closes connection if PING_MISS_LIMIT
-    consecutive pongs are missed.
+    Application-Level JSON Heartbeat Worker:
+    Periodically sends application-level `{"type": "PING", "timestamp": ...}` frames
+    every PING_INTERVAL seconds (30s).
+    
+    Design Note:
+        Application-level JSON messaging is utilized rather than RFC 6455 opcode
+        0x9/0xA native control frames because standard browser JavaScript WebSocket
+        APIs (DOM WebSocket standard) handle native ping/pong transparently in the
+        browser networking stack and do not expose native control frame events to
+        frontend application code. Application-level JSON frames guarantee
+        deterministic bidirectional liveness verification across all frontend clients
+        and reverse proxies (e.g. Nginx, Cloudflare).
     """
     while True:
         await asyncio.sleep(PING_INTERVAL)
         if not state.get("pong_received", True):
             state["missed"] = state.get("missed", 0) + 1
             logger.warning(
-                f"WebSocket heartbeat: missed pong #{state['missed']} "
+                f"WebSocket heartbeat: missed application-level pong #{state['missed']} "
                 f"(limit={PING_MISS_LIMIT})."
             )
             if state["missed"] >= PING_MISS_LIMIT:
                 logger.warning("WebSocket heartbeat: closing unresponsive connection due to missed pongs.")
                 try:
-                    await websocket.close(code=1001, reason="Heartbeat timeout: missed pong responses.")
+                    await websocket.close(code=1001, reason="Heartbeat timeout: missed application-level pong responses.")
                 except Exception:
                     pass
                 return
@@ -216,7 +225,11 @@ async def _heartbeat(websocket: WebSocket, state: dict) -> None:
 
 
 async def _client_listener(websocket: WebSocket, state: dict) -> None:
-    """Listens for incoming client messages, resetting heartbeat state on PONG frames."""
+    """
+    Application-Level Client Frame Listener:
+    Listens for incoming client messages, resetting heartbeat state when receiving
+    application-level `{"type": "PONG"}` JSON frames or `"PONG"` text tokens.
+    """
     while True:
         try:
             data = await websocket.receive_text()
@@ -250,11 +263,12 @@ async def websocket_threat_stream(
 
     Authorization:
         Allowed roles: admin, analyst, viewer.
-        Disabled or deleted users are verified against the DB and rejected.
+        Disabled or deleted users are verified against the database and rejected.
 
-    Heartbeat:
-        Bi-directional heartbeat: server sends PING every 30s; client responds
-        with PONG. Unresponsive clients are terminated after 2 missed pongs.
+    Heartbeat & Liveness:
+        Bi-directional application-level JSON heartbeat: server sends
+        `{"type": "PING"}` every 30s; client responds with `{"type": "PONG"}`.
+        Unresponsive clients are terminated after 2 consecutive missed pongs (60s).
     """
     # Authenticate before accept()
     payload = await _authenticate_websocket(websocket, token)

@@ -138,8 +138,8 @@ docker compose -f docker/docker-compose.yml up --build -d
 ### 7.4 Verify service health
 ```bash
 docker compose -f docker/docker-compose.yml ps
-curl http://localhost:8000/health
-curl http://localhost:8000/ready
+curl http://localhost/health
+curl http://localhost/ready
 ```
 
 ### 7.5 View logs

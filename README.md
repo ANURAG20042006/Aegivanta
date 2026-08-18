@@ -45,8 +45,7 @@ SentinelAI includes a full-featured Dynamic SOC platform layer built on top of t
 | **Dynamic Risk Engine** | Transparent multi-factor operational risk scoring ([`risk_engine.py`](backend/app/services/risk_engine.py)) | Real-time 0–100 risk gauges & transparent factor breakdown | ✅ **Verified** |
 | **Incident Severity Policy** | Deterministic monotonic escalation policy: $\max(\text{Current}, \text{Alert}, \text{Risk})$ | Real-time severity badge elevation without accidental downgrade | ✅ **Verified** |
 | **Incident Detail View** | Incident state machine (`DETECTED` $\rightarrow$ `CLOSED`), analyst notes ([`incidents.py`](backend/app/api/v1/incidents.py)) | [`IncidentDetail.tsx`](frontend/src/pages/IncidentDetail.tsx) deep investigation view | ✅ **Verified** |
-| **Feature Flag Isolation** | `SOC_PHASE1_ENABLED` toggle in [`config.py`](backend/app/config.py) for pure ML fallback | Seamless fallback to legacy baseline if disabled | ✅ **Verified** |
-| **Phase 1 Test Suite** | 183 automated tests spanning API, correlation, risk engine, and ML | Full CI pytest suite with 0 failures | ✅ **Verified** |
+| **Phase 1 Test Suite** | 259 automated tests spanning API, correlation, risk engine, security hardening, and ML | Full CI pytest suite with 0 failures | ✅ **Verified** |
 
 ---
 
@@ -173,7 +172,7 @@ cd SENTINELAI
 # Spin up PostgreSQL 16, Redis 7, Uvicorn Backend & Nginx Gateway
 docker-compose -f docker/docker-compose.yml up -d --build
 ```
-*Access UI at [http://localhost](http://localhost) and API Docs at [http://localhost/docs](http://localhost/docs).*
+*Access UI at [http://localhost](http://localhost) and API Gateway Docs at [http://localhost/docs](http://localhost/docs) (served via Nginx reverse proxy; backend port 8000 remains internal).*
 
 ---
 
@@ -194,9 +193,10 @@ python -m pip install -r requirements-lock.txt
 # Run ML pipeline & artifact generator
 python -m ml.train_pipeline
 
-# Start FastAPI server
+# Start FastAPI server (development mode: direct access on port 8000)
 uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+*In bare-metal mode, access backend directly at [http://localhost:8000](http://localhost:8000) and Swagger docs at [http://localhost:8000/docs](http://localhost:8000/docs).*
 
 #### 2. Frontend React SPA Setup
 ```bash
@@ -215,7 +215,7 @@ npm run build
 #### 3. Automated Testing & Verification
 Tests automatically run against an isolated session-scoped temporary SQLite database without mutating development databases:
 ```bash
-# Run the complete test suite (240+ tests)
+# Run the complete test suite (259 automated tests)
 .venv\Scripts\activate
 python -m pytest -q
 
