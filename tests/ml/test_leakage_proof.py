@@ -6,7 +6,9 @@ from ml.dataset.generator import CICIDS2017DataGenerator
 from ml.dataset.preprocessor import CICIDS2017Preprocessor
 from ml.train_pipeline import run_leakage_free_cv, run_training_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
 
 
 def test_test_data_never_reaches_smote():
@@ -30,7 +32,7 @@ def test_test_data_never_reaches_smote():
 
 
 def test_preprocessing_not_fitted_on_test_data():
-    """Requirement 1 & 2 Proof: StandardScaler and SelectKBest are fitted ONLY on X_train."""
+    """Requirement 1 & 2 Proof: SimpleImputer, StandardScaler, and SelectKBest are fitted ONLY on X_train."""
     df = CICIDS2017DataGenerator.generate_synthetic_dataset(num_samples=500)
     preprocessor = CICIDS2017Preprocessor(n_features_to_select=15)
     
@@ -40,6 +42,7 @@ def test_preprocessing_not_fitted_on_test_data():
     )
 
     # Verify fitted parameters exist
+    assert hasattr(preprocessor.imputer, "statistics_")
     assert hasattr(preprocessor.scaler, "mean_")
     assert hasattr(preprocessor.feature_selector, "scores_")
     
@@ -48,16 +51,94 @@ def test_preprocessing_not_fitted_on_test_data():
     X_raw = cleaned.drop(columns=["Label"])
     y_raw = preprocessor.label_encoder.transform(cleaned["Label"].astype(str))
     
-    from sklearn.model_selection import train_test_split
     X_tr_manual, X_te_manual, y_tr_manual, y_te_manual = train_test_split(
         X_raw, y_raw, test_size=0.20, random_state=42, stratify=y_raw
     )
     
-    manual_scaler = StandardScaler()
-    manual_scaler.fit(X_tr_manual)
+    manual_imputer = SimpleImputer(strategy="median")
+    manual_imputer.fit(X_tr_manual)
     
-    # Verify scaler mean_ matches manual scaler fitted strictly on X_tr_manual
+    manual_scaler = StandardScaler()
+    manual_scaler.fit(manual_imputer.transform(X_tr_manual))
+    
+    # Verify imputer and scaler statistics match manual pipeline fitted strictly on X_tr_manual
+    np.testing.assert_array_almost_equal(preprocessor.imputer.statistics_, manual_imputer.statistics_)
     np.testing.assert_array_almost_equal(preprocessor.scaler.mean_, manual_scaler.mean_)
+
+
+def test_test_only_outlier_does_not_affect_fitted_imputer_or_scaler():
+    """
+    Proof: Extreme outliers or missing values in X_test cannot alter
+    preprocessor.imputer.statistics_ or preprocessor.scaler.mean_.
+    """
+    df = CICIDS2017DataGenerator.generate_synthetic_dataset(num_samples=500)
+    preprocessor = CICIDS2017Preprocessor(n_features_to_select=15)
+    
+    cleaned = preprocessor.clean_dataset(df)
+    X_raw = cleaned.drop(columns=["Label"])
+    y_raw = preprocessor.label_encoder.fit_transform(cleaned["Label"].astype(str))
+    
+    X_train_raw, X_test_raw, y_train, y_test = train_test_split(
+        X_raw, y_raw, test_size=0.20, random_state=42, stratify=y_raw
+    )
+    
+    # Preprocessor 1: Fit strictly on X_train_raw
+    prep1 = CICIDS2017Preprocessor(n_features_to_select=15)
+    prep1.fit_transform_train(X_train_raw, y_train, balance_data=False)
+    
+    # Preprocessor 2: Fit on same X_train_raw, then transform heavily corrupted X_test_raw
+    prep2 = CICIDS2017Preprocessor(n_features_to_select=15)
+    prep2.fit_transform_train(X_train_raw, y_train, balance_data=False)
+    
+    # Corrupt X_test with massive outliers and NaNs
+    X_test_corrupted = X_test_raw.copy()
+    X_test_corrupted.iloc[0, :] = 1e12  # trillion outlier
+    X_test_corrupted.iloc[1, :] = -1e12 # negative trillion outlier
+    X_test_corrupted.iloc[2, :] = np.nan # missing values
+    
+    _ = prep2.transform_test(X_test_corrupted)
+    
+    # Verify statistics remain 100% identical and unpolluted
+    np.testing.assert_array_almost_equal(prep1.imputer.statistics_, prep2.imputer.statistics_)
+    np.testing.assert_array_almost_equal(prep1.scaler.mean_, prep2.scaler.mean_)
+    np.testing.assert_array_almost_equal(prep1.scaler.var_, prep2.scaler.var_)
+    np.testing.assert_array_almost_equal(prep1.feature_selector.scores_, prep2.feature_selector.scores_)
+
+
+def test_preprocessor_fitted_statistics_come_only_from_training_rows():
+    """
+    Proof: All fitted statistics (imputer median, scaler mean/variance, feature selector F-scores)
+    are calculated exclusively from training rows and are identical to standalone training-only computation.
+    """
+    df = CICIDS2017DataGenerator.generate_synthetic_dataset(num_samples=400)
+    preprocessor = CICIDS2017Preprocessor(n_features_to_select=10)
+    
+    X_train_out, X_test_out, y_train_out, y_test_out = preprocessor.fit_transform_train_test(
+        df, target_column="Label", balance_data=False, test_size=0.25, random_state=123
+    )
+    
+    cleaned = preprocessor.clean_dataset(df)
+    X_raw = cleaned.drop(columns=["Label"])
+    y_raw = preprocessor.label_encoder.transform(cleaned["Label"].astype(str))
+    
+    X_tr_isolated, X_te_isolated, y_tr_isolated, y_te_isolated = train_test_split(
+        X_raw, y_raw, test_size=0.25, random_state=123, stratify=y_raw
+    )
+    
+    # Standalone reference calculations on training split
+    ref_imputer = SimpleImputer(strategy="median").fit(X_tr_isolated)
+    ref_imputed = ref_imputer.transform(X_tr_isolated)
+    
+    ref_scaler = StandardScaler().fit(ref_imputed)
+    ref_scaled = ref_scaler.transform(ref_imputed)
+    
+    ref_selector = SelectKBest(score_func=f_classif, k=10).fit(ref_scaled, y_tr_isolated)
+    
+    # Assert fitted preprocessor matches training reference exactly
+    np.testing.assert_array_almost_equal(preprocessor.imputer.statistics_, ref_imputer.statistics_)
+    np.testing.assert_array_almost_equal(preprocessor.scaler.mean_, ref_scaler.mean_)
+    np.testing.assert_array_almost_equal(preprocessor.scaler.var_, ref_scaler.var_)
+    np.testing.assert_array_almost_equal(preprocessor.feature_selector.scores_, ref_selector.scores_)
 
 
 def test_cv_folds_independently_fit_preprocessing():

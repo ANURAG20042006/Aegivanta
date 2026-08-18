@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple, List, Dict, Any, Optional
 from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.feature_selection import SelectKBest, f_classif
 try:
@@ -17,12 +18,13 @@ from ml.schema.feature_schema import CANONICAL_FEATURES, DEFAULT_FEATURE_SCHEMA
 class CICIDS2017Preprocessor:
     """
     Strict Leakage-Free Preprocessing Pipeline:
-    - Splitting occurs BEFORE fitting scaling, feature selection, or class balancing.
-    - StandardScaler & SelectKBest fit ONLY on X_train.
-    - SMOTE is applied ONLY on X_train folds/splits, NEVER on X_test.
+    - Splitting occurs BEFORE fitting imputation, scaling, feature selection, or class balancing.
+    - SimpleImputer, StandardScaler & SelectKBest fit ONLY on X_train.
+    - SMOTE is applied ONLY on X_train folds/splits, NEVER on validation or test sets.
     """
 
     def __init__(self, n_features_to_select: int = 30):
+        self.imputer = SimpleImputer(strategy="median")
         self.scaler = StandardScaler()
         self.label_encoder = LabelEncoder()
         self.feature_selector = SelectKBest(score_func=f_classif, k=n_features_to_select)
@@ -32,7 +34,11 @@ class CICIDS2017Preprocessor:
         self.is_fitted: bool = False
 
     def clean_dataset(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Handles missing values, infinite values, and strips duplicate whitespace in column names."""
+        """
+        Cleans column names, drops metadata columns, and replaces infinite values with NaN.
+        NOTE: Does NOT compute column medians or fill NaNs globally across the full dataset,
+        guaranteeing zero test-set leakage into imputation parameters.
+        """
         df = df.copy()
         df.columns = df.columns.str.strip()
 
@@ -42,46 +48,48 @@ class CICIDS2017Preprocessor:
             if col in df.columns:
                 df = df.drop(columns=[col])
 
-        # Replace infinite values with NaN
+        # Replace infinite values with NaN for downstream fitted imputer
         df = df.replace([np.inf, -np.inf], np.nan)
-
-        # Fill numerical NaNs with column median
-        num_cols = df.select_dtypes(include=[np.number]).columns
-        for col in num_cols:
-            if df[col].isnull().any():
-                df[col] = df[col].fillna(df[col].median())
-
-        df = df.fillna(0)
         return df
 
     def fit_transform_train(
         self,
-        X_train_raw: pd.DataFrame,
+        X_train_raw: Any,
         y_train_encoded: np.ndarray,
         balance_data: bool = True,
         random_state: int = 42
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """Fits scaler, feature selector, and SMOTE strictly on training raw features only."""
-        self.feature_names = list(X_train_raw.columns)
+        """
+        Fits imputer, scaler, feature selector, and SMOTE strictly on training raw features only.
+        """
+        if isinstance(X_train_raw, pd.DataFrame):
+            self.feature_names = list(X_train_raw.columns)
+            X_tr_values = X_train_raw.values
+        else:
+            X_tr_values = np.asarray(X_train_raw)
+            if not self.feature_names or len(self.feature_names) != X_tr_values.shape[1]:
+                self.feature_names = [f"feature_{i}" for i in range(X_tr_values.shape[1])]
 
-        # 1. Fit & transform scaler
-        X_train_scaled = self.scaler.fit_transform(X_train_raw)
+        # 1. Fit & transform SimpleImputer strictly on training split
+        X_train_imputed = self.imputer.fit_transform(X_tr_values)
 
-        # 2. Fit & transform feature selector
+        # 2. Fit & transform StandardScaler strictly on training imputed data
+        X_train_scaled = self.scaler.fit_transform(X_train_imputed)
+
+        # 3. Fit & transform SelectKBest strictly on training scaled data
         if self.n_features_to_select is None:
             actual_k = "all"
         else:
-            actual_k = min(self.n_features_to_select, X_train_raw.shape[1])
+            actual_k = min(self.n_features_to_select, X_tr_values.shape[1])
         self.feature_selector.k = actual_k
 
         X_train_selected = self.feature_selector.fit_transform(X_train_scaled, y_train_encoded)
         selected_indices = self.feature_selector.get_support(indices=True)
         self.selected_feature_names = [self.feature_names[i] for i in selected_indices]
 
-        # 3. Apply SMOTE class balancing
+        # 4. Apply SMOTE class balancing strictly on training selected data
         if balance_data and HAS_SMOTE:
             try:
-                # Determine min samples per class to set k_neighbors safely
                 unique_classes, counts = np.unique(y_train_encoded, return_counts=True)
                 min_class_samples = min(counts)
                 k_neighbors = min(5, max(1, min_class_samples - 1))
@@ -99,11 +107,22 @@ class CICIDS2017Preprocessor:
         self.is_fitted = True
         return X_train_final, y_train_final
 
-    def transform_test(self, X_test_raw: pd.DataFrame) -> np.ndarray:
-        """Transforms untouched test set using fitted scaler and selector."""
+    def transform_test(self, X_test_raw: Any) -> np.ndarray:
+        """
+        Transforms untouched test set using fitted imputer, scaler, and selector.
+        Never applies SMOTE.
+        """
         if not self.is_fitted:
             raise RuntimeError("Preprocessor must be fitted on training data first.")
-        X_test_scaled = self.scaler.transform(X_test_raw)
+
+        if isinstance(X_test_raw, pd.DataFrame):
+            X_te_values = X_test_raw.values
+        else:
+            X_te_values = np.asarray(X_test_raw)
+
+        # Transform sequentially through fitted pipeline components
+        X_test_imputed = self.imputer.transform(X_te_values)
+        X_test_scaled = self.scaler.transform(X_test_imputed)
         X_test_selected = self.feature_selector.transform(X_test_scaled)
         return X_test_selected
 
@@ -116,10 +135,10 @@ class CICIDS2017Preprocessor:
         random_state: int = 42
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
-        Leakage-Free Execution (Backward Compatible):
-        1. Clean dataset.
-        2. Split X, y into Train and Test splits FIRST.
-        3. Fit scaler & feature selector ONLY on X_train.
+        Leakage-Free Execution (Split-First):
+        1. Clean column names & convert +/-inf to NaN.
+        2. Split X, y into Train and Test splits FIRST before computing statistics.
+        3. Fit imputer, scaler & feature selector ONLY on X_train.
         4. Transform X_train and X_test independently using fitted parameters.
         5. Apply SMOTE ONLY on X_train.
         """
@@ -138,7 +157,7 @@ class CICIDS2017Preprocessor:
         X_train_raw, X_test_raw, y_train_encoded, y_test = train_test_split(
             X_raw, y_encoded, test_size=test_size, random_state=random_state, stratify=y_encoded
         )
-        self.X_train_raw = X_train_raw.values
+        self.X_train_raw = X_train_raw.values if isinstance(X_train_raw, pd.DataFrame) else X_train_raw
         self.y_train_encoded = y_train_encoded
 
         # STEP 2 & 3 & 4: Process using decoupled methods
@@ -170,14 +189,18 @@ class CICIDS2017Preprocessor:
         for feature in self.feature_names:
             # Map canonical or snake_case key
             snake_key = feature.lower().replace(" ", "_")
-            val = sample_dict.get(feature, sample_dict.get(snake_key, 0.0))
+            val = sample_dict.get(feature, sample_dict.get(snake_key, np.nan))
             try:
-                vector.append(float(val) if val is not None else 0.0)
+                vector.append(float(val) if val is not None else np.nan)
             except (ValueError, TypeError):
-                vector.append(0.0)
+                vector.append(np.nan)
 
-        arr = pd.DataFrame([vector], columns=self.feature_names)
-        arr = arr.replace([np.inf, -np.inf], np.nan).fillna(0.0)
-        scaled_arr = self.scaler.transform(arr)
+        arr = np.array([vector], dtype=float)
+        # Handle inf values in single inference vector
+        arr = np.where(np.isneginf(arr) | np.isposinf(arr), np.nan, arr)
+        
+        imputed_arr = self.imputer.transform(arr)
+        scaled_arr = self.scaler.transform(imputed_arr)
         selected_arr = self.feature_selector.transform(scaled_arr)
         return selected_arr
+

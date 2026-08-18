@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple, Any, Optional
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.impute import SimpleImputer
 try:
     from imblearn.over_sampling import SMOTE
     HAS_SMOTE = True
@@ -123,8 +124,11 @@ class ModelSelectorSuite:
                     y_tr_fold, y_val_fold = y_cv[train_idx], y_cv[val_idx]
 
                     if X_train_raw is not None:
+                        fold_imputer = SimpleImputer(strategy="median")
+                        X_tr_imputed = fold_imputer.fit_transform(X_tr_fold)
+
                         fold_scaler = StandardScaler()
-                        X_tr_scaled = fold_scaler.fit_transform(X_tr_fold)
+                        X_tr_scaled = fold_scaler.fit_transform(X_tr_imputed)
                         
                         actual_k = min(30, X_tr_fold.shape[1])
                         fold_selector = SelectKBest(score_func=f_classif, k=actual_k)
@@ -147,7 +151,8 @@ class ModelSelectorSuite:
 
                         model.fit(X_tr_final, y_tr_final)
 
-                        X_val_scaled = fold_scaler.transform(X_val_fold)
+                        X_val_imputed = fold_imputer.transform(X_val_fold)
+                        X_val_scaled = fold_scaler.transform(X_val_imputed)
                         X_val_selected = fold_selector.transform(X_val_scaled)
 
                         t0 = time.perf_counter()

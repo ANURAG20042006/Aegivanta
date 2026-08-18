@@ -1,7 +1,7 @@
 {
   "active_model": {
     "model_name": "CatBoost",
-    "auc": 0.9996,
+    "auc": 0.9981,
     "fpr": [
       0.0,
       0.1,

@@ -14,6 +14,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.impute import SimpleImputer
 try:
     from imblearn.over_sampling import SMOTE
     HAS_SMOTE = True
@@ -46,12 +47,13 @@ def run_leakage_free_cv(
     """
     Executes 100% Leakage-Free Stratified K-Fold Cross-Validation:
     Inside EVERY fold:
-      1. Fit StandardScaler on X_train_fold ONLY.
-      2. Fit SelectKBest on X_train_fold ONLY.
-      3. Apply SMOTE on X_train_fold ONLY.
-      4. Fit classifier on X_train_fold.
-      5. Transform X_val_fold using fitted transformers.
-      6. Evaluate model on X_val_fold.
+      1. Fit SimpleImputer on X_train_fold ONLY.
+      2. Fit StandardScaler on X_train_fold ONLY.
+      3. Fit SelectKBest on X_train_fold ONLY.
+      4. Apply SMOTE on X_train_fold ONLY.
+      5. Fit classifier on X_train_fold.
+      6. Transform X_val_fold using fitted fold transformers.
+      7. Evaluate model on X_val_fold.
     """
     preprocessor = CICIDS2017Preprocessor()
     cleaned = preprocessor.clean_dataset(df)
@@ -72,16 +74,20 @@ def run_leakage_free_cv(
         X_tr_raw, X_val_raw = X.iloc[train_idx], X.iloc[val_idx]
         y_tr_raw, y_val_raw = y_encoded[train_idx], y_encoded[val_idx]
         
-        # 1. Fit scaler on train fold ONLY
+        # 1. Fit imputer on train fold ONLY
+        fold_imputer = SimpleImputer(strategy="median")
+        X_tr_imputed = fold_imputer.fit_transform(X_tr_raw)
+
+        # 2. Fit scaler on train fold ONLY
         fold_scaler = StandardScaler()
-        X_tr_scaled = fold_scaler.fit_transform(X_tr_raw)
+        X_tr_scaled = fold_scaler.fit_transform(X_tr_imputed)
         
-        # 2. Fit feature selector on train fold ONLY
+        # 3. Fit feature selector on train fold ONLY
         actual_k = min(30, X_tr_raw.shape[1])
         fold_selector = SelectKBest(score_func=f_classif, k=actual_k)
         X_tr_selected = fold_selector.fit_transform(X_tr_scaled, y_tr_raw)
         
-        # 3. Apply SMOTE on train fold ONLY
+        # 4. Apply SMOTE on train fold ONLY (Never on validation fold)
         if HAS_SMOTE:
             try:
                 unique_classes, counts = np.unique(y_tr_raw, return_counts=True)
@@ -97,15 +103,16 @@ def run_leakage_free_cv(
         else:
             X_tr_final, y_tr_final = X_tr_selected, y_tr_raw
             
-        # 4. Fit classifier on train fold
+        # 5. Fit classifier on train fold
         fold_model = RandomForestClassifier(n_estimators=50, random_state=random_seed)
         fold_model.fit(X_tr_final, y_tr_final)
         
-        # 5. Transform val fold using fitted fold transformers
-        X_val_scaled = fold_scaler.transform(X_val_raw)
+        # 6. Transform val fold using fitted fold transformers
+        X_val_imputed = fold_imputer.transform(X_val_raw)
+        X_val_scaled = fold_scaler.transform(X_val_imputed)
         X_val_selected = fold_selector.transform(X_val_scaled)
         
-        # 6. Predict on val fold
+        # 7. Predict on val fold
         t0 = time.perf_counter()
         preds = fold_model.predict(X_val_selected)
         latency_ms = (time.perf_counter() - t0) * 1000.0 / max(len(X_val_selected), 1)
