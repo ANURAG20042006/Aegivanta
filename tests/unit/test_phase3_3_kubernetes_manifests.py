@@ -3,7 +3,8 @@ tests/unit/test_phase3_3_kubernetes_manifests.py
 ================================================
 Unit tests verifying production Kubernetes manifests for SentinelAI.
 Validates YAML structure, securityContext hardening, non-root execution,
-resource limits, health probes, HPA, PDB, NetworkPolicy, and secret separation.
+resource limits, health probes, HPA, PDB, NetworkPolicy, secret separation,
+Service/Ingress/Port alignment, and WebSocket upgrade configurations.
 """
 
 from pathlib import Path
@@ -137,3 +138,66 @@ def test_network_policy_rules():
     ]
     assert 6379 in egress_ports
     assert 5432 in egress_ports
+
+
+def test_service_selector_and_port_matching():
+    """Verify Service selectors match Deployment labels and container ports match."""
+    manifests = load_all_manifests()
+    api_svc = next(doc for name, doc in manifests if doc.get("kind") == "Service" and doc.get("metadata", {}).get("name") == "sentinelai-api")
+    api_dep = next(doc for name, doc in manifests if doc.get("kind") == "Deployment" and doc.get("metadata", {}).get("name") == "sentinelai-api")
+
+    svc_selector = api_svc["spec"]["selector"]
+    pod_labels = api_dep["spec"]["template"]["metadata"]["labels"]
+    for k, v in svc_selector.items():
+        assert pod_labels.get(k) == v, f"Selector {k}={v} does not match pod label"
+
+    svc_port = api_svc["spec"]["ports"][0]["port"]
+    container_port = api_dep["spec"]["template"]["spec"]["containers"][0]["ports"][0]["containerPort"]
+    assert svc_port == container_port == 8000
+
+
+def test_ingress_service_and_websocket_annotation_matching():
+    """Verify Ingress rules target sentinelai-api on port 8000 and include websocket annotations."""
+    manifests = load_all_manifests()
+    ingress = next(doc for name, doc in manifests if doc.get("kind") == "Ingress")
+
+    annotations = ingress["metadata"].get("annotations", {})
+    assert annotations.get("nginx.ingress.kubernetes.io/websocket-services") == "sentinelai-api"
+    assert annotations.get("nginx.ingress.kubernetes.io/ssl-redirect") == "true"
+
+    rule = ingress["spec"]["rules"][0]
+    backend = rule["http"]["paths"][0]["backend"]["service"]
+    assert backend["name"] == "sentinelai-api"
+    assert backend["port"]["number"] == 8000
+
+
+def test_serviceaccount_automount_token_disabled():
+    """Verify ServiceAccount explicitly disables automatic API credential mounting."""
+    manifests = load_all_manifests()
+    sa = next(doc for name, doc in manifests if doc.get("kind") == "ServiceAccount")
+    assert sa.get("automountServiceAccountToken") is False
+
+
+def test_secret_template_zero_plaintext_credentials():
+    """Verify secret-template contains only CHANGE_ME_* placeholder values."""
+    manifests = load_all_manifests()
+    secret = next(doc for name, doc in manifests if doc.get("kind") == "Secret")
+    data = secret.get("stringData", {})
+
+    for key, val in data.items():
+        assert "CHANGE_ME" in str(val), f"Secret {key} contains potentially non-template value"
+
+
+def test_secret_and_configmap_references_valid():
+    """Verify API and Worker deployments reference valid ConfigMap and Secret names."""
+    manifests = load_all_manifests()
+    deployments = [doc for name, doc in manifests if doc.get("kind") == "Deployment"]
+
+    for dep in deployments:
+        c = dep["spec"]["template"]["spec"]["containers"][0]
+        env_from = c.get("envFrom", [])
+        cm_names = [e["configMapRef"]["name"] for e in env_from if "configMapRef" in e]
+        sec_names = [e["secretRef"]["name"] for e in env_from if "secretRef" in e]
+
+        assert "sentinelai-config" in cm_names
+        assert "sentinelai-secrets" in sec_names
