@@ -18,6 +18,7 @@ from backend.app.config import settings
 from backend.app.services.distributed_stream_service import distributed_stream_engine, RedisStreamBackend
 from backend.app.services.predict_service import predict_service
 from backend.app.schemas.predict import PacketFeatureVector
+from backend.app.services.threat_intel_service import ThreatIntelService
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,22 +37,37 @@ class StreamWorkerDaemon:
         self.running = False
 
     async def process_telemetry_event(self, event_data: Dict[str, Any]):
-        """Processes a single telemetry event through the real ML inference pipeline."""
+        """Processes a single telemetry event through ML inference and Threat Intel enrichment."""
         features = event_data.get("features", event_data)
         try:
             vector = PacketFeatureVector(**features)
-            # Run real ML model prediction
+            # 1. Run real ML model prediction
             att_type, conf, is_mal, sev, probs, shap = predict_service.infer_packet_threat(
                 vector=vector,
                 model_name=settings.DEFAULT_MODEL_NAME
             )
-            logger.debug("Inference complete for event %s: %s (malicious=%s)",
-                         event_data.get("event_id"), att_type, is_mal)
+
+            # 2. Fast in-memory Threat Intelligence enrichment (< 0.01ms)
+            ioc_matches = ThreatIntelService.cache.fast_check(
+                source_ip=getattr(vector, "source_ip", None),
+                destination_ip=getattr(vector, "destination_ip", None),
+                domain=None
+            )
+            has_ioc_match = len(ioc_matches) > 0
+            if has_ioc_match:
+                ioc_sev = ioc_matches[0].get("severity", "HIGH")
+                if sev in ["LOW", "MEDIUM", "INFORMATIONAL"] and ioc_sev in ["HIGH", "CRITICAL"]:
+                    sev = ioc_sev
+
+            logger.debug("Inference complete for event %s: %s (malicious=%s, ti_match=%s)",
+                         event_data.get("event_id"), att_type, is_mal or has_ioc_match, has_ioc_match)
             return {
                 "attack_type": att_type,
                 "confidence": conf,
-                "is_malicious": is_mal,
-                "severity": sev
+                "is_malicious": is_mal or has_ioc_match,
+                "severity": sev,
+                "threat_intel_match": has_ioc_match,
+                "matched_iocs": ioc_matches
             }
         except Exception as exc:
             logger.error("Error processing telemetry event %s: %s", event_data.get("event_id"), exc)
