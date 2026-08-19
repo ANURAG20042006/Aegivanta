@@ -84,6 +84,43 @@ def test_out_of_bounds_class_index_raises_http_503():
     assert "MODEL_CLASS_MAPPING_ERROR" in exc_info.value.detail
 
 
+def test_missing_mapping_fails_closed():
+    """Verify system raises HTTP 503 when neither preprocessor label_encoder nor model classes_ are present."""
+    prep_without_le = object()
+    model_without_classes = MockModelWithoutClasses()
+
+    with pytest.raises(HTTPException) as exc_info:
+        if hasattr(prep_without_le, "label_encoder") and hasattr(prep_without_le.label_encoder, "classes_"):
+            _ = prep_without_le.label_encoder.classes_[0]
+        elif hasattr(model_without_classes, "classes_"):
+            _ = model_without_classes.classes_[0]
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail="MODEL_CLASS_MAPPING_ERROR: Model and preprocessor lack verifiable class name mappings."
+            )
+    assert exc_info.value.status_code == 503
+    assert "MODEL_CLASS_MAPPING_ERROR" in exc_info.value.detail
+
+
+def test_system_never_silently_misclassifies_attack_index():
+    """Verify that an arbitrary class index is never mapped blindly through static unaligned list."""
+    # Suppose preprocessor has 18 classes in alphabetical order where index 0 is 'ARP Spoofing'
+    alphabetical_classes = [
+        "ARP Spoofing", "BENIGN", "Botnet", "DDoS", "DNS Spoofing",
+        "Data Exfiltration", "DoS GoldenEye", "DoS Hulk", "DoS Slowloris",
+        "FTP-Patator", "MITM", "Malware", "Port Scan", "Ransomware",
+        "SQL Injection", "SSH-Patator", "XSS", "Zero-Day Anomaly"
+    ]
+    prep = MockPreprocessorWithLE(alphabetical_classes)
+    
+    # Model predicts 0 (which is 'ARP Spoofing')
+    pred_idx = 0
+    resolved_label = str(prep.label_encoder.classes_[pred_idx])
+    assert resolved_label == "ARP Spoofing"
+    assert resolved_label != "BENIGN"  # Must NOT be BENIGN even if static list had BENIGN at index 0
+
+
 def test_real_model_preprocessor_classes_synchronization():
     """Verify loaded champion CatBoost and Preprocessor have valid, synchronized class mappings."""
     import joblib

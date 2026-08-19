@@ -117,28 +117,34 @@ class IncidentCorrelationEngine:
             existing_incident.alert_count += 1
             existing_incident.last_seen = alert.timestamp
 
-            # Deterministic confidence aggregation: track highest observed confidence across alerts
-            if alert.confidence is not None:
-                if existing_incident.confidence_score is not None:
-                    existing_incident.confidence_score = max(existing_incident.confidence_score, alert.confidence)
-                else:
-                    existing_incident.confidence_score = alert.confidence
+            # Deterministic confidence aggregation: incorporate incoming alert's confidence
+            incoming_conf = float(alert.confidence) if alert.confidence is not None else 0.0
+            current_conf = float(existing_incident.confidence_score) if existing_incident.confidence_score is not None else 0.0
+            aggregated_confidence = max(current_conf, incoming_conf)
+            existing_incident.confidence_score = aggregated_confidence
 
-            # Apply explicit Incident Severity Policy
-            existing_incident.severity = cls.determine_incident_severity(
+            # Compute preliminary severity
+            preliminary_severity = cls.determine_incident_severity(
                 current_severity=existing_incident.severity,
                 incoming_alert_severity=alert.severity,
                 updated_risk_score=existing_incident.risk_score
             )
 
-            # Calculate updated risk score from real accumulated evidence
+            # Calculate updated risk score directly incorporating incoming alert confidence & severity
             updated_risk = RiskScoringEngine.calculate_risk_score(
-                severity=existing_incident.severity,
-                confidence=existing_incident.confidence_score,
+                severity=preliminary_severity,
+                confidence=aggregated_confidence,
                 criticality=asset_crit,
                 alert_count=existing_incident.alert_count
             )
             existing_incident.risk_score = updated_risk
+
+            # Finalize severity based on newly calculated risk score
+            existing_incident.severity = cls.determine_incident_severity(
+                current_severity=preliminary_severity,
+                incoming_alert_severity=alert.severity,
+                updated_risk_score=updated_risk
+            )
             
             alert.incident_id = existing_incident.id
             

@@ -100,9 +100,24 @@ def generate_source_zip():
     kb_size = round(zip_out.stat().st_size / 1024, 1)
     print(f"Generated sentinelai_source_only.zip: {count} files ({kb_size} KB)")
 
+def generate_whole_codebook():
+    whole_files = []
+    for root, dirs, files in os.walk(ROOT_DIR):
+        dirs[:] = [d for d in dirs if d not in {".git", ".venv", "node_modules", "__pycache__", "dist", ".gemini", "catboost_info", "results"}]
+        for file in sorted(files):
+            if file.endswith((".py", ".ts", ".tsx", ".sql", ".json", ".yaml", ".yml")):
+                fp = Path(root) / file
+                if not file.startswith("SENTINELAI_") and fp.stat().st_size < 500 * 1024:
+                    rel = fp.relative_to(ROOT_DIR).as_posix()
+                    whole_files.append(rel)
+    write_bundle(whole_files, "SENTINELAI_WHOLE_CODEBOOK.txt", "SENTINELAI — COMPLETE UPDATED CODEBOOK (PRODUCTION READY)")
+
 if __name__ == "__main__":
-    # 1. Compact Core Codebook (Guaranteed to be accepted by ChatGPT)
+    # 1. Compact Core Codebook (High-density architecture & services for LLMs)
     write_bundle(CORE_FILES, "SENTINELAI_CORE_CODEBOOK.txt", "SENTINELAI — CORE ARCHITECTURE & SERVICES (LIGHTWEIGHT BUNDLE)")
     
-    # 2. Source-only Zip
+    # 2. Complete Whole Codebook
+    generate_whole_codebook()
+    
+    # 3. Source-only Zip
     generate_source_zip()
