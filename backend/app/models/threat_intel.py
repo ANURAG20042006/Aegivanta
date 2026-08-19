@@ -31,6 +31,7 @@ class ThreatIndicator(Base):
     
     tags = Column(JSON, default=list)  # list of tags e.g. ["patator", "c2", "mirai"]
     is_active = Column(Boolean, default=True, index=True)
+    lifecycle_status = Column(String(30), default="ACTIVE", index=True)  # ACTIVE, EXPIRED, ARCHIVED, REVOKED
     hit_count = Column(Integer, default=0)
 
     created_at = Column(DateTime, default=datetime.utcnow)

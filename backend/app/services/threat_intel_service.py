@@ -51,7 +51,8 @@ def normalize_ioc(raw_value: str, ioc_type: str) -> Tuple[bool, str, str]:
 
     # 3. URL
     if ioc_type_lower in ["url", ""]:
-        if val.startswith("http://") or val.startswith("https://"):
+        val_lower = val.lower()
+        if val_lower.startswith("http://") or val_lower.startswith("https://"):
             parsed = urlparse(val)
             if parsed.hostname:
                 normalized_url = f"{parsed.scheme.lower()}://{parsed.hostname.lower()}{parsed.path}"
@@ -279,3 +280,96 @@ class ThreatIntelService:
             logger.error(f"Threat feed '{feed.feed_name}' ingestion failed: {exc}")
             await db.flush()
             return 0
+
+    @staticmethod
+    async def prune_expired_iocs(
+        db: AsyncSession,
+        max_age_days: int = 90,
+        min_confidence: float = 0.20,
+        purge_deleted: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Evaluates indicator TTLs, aging timestamps, and confidence scores.
+        Transitions expired indicators to EXPIRED/ARCHIVED status or purges them.
+        """
+        from datetime import timedelta
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        cutoff_date = now - timedelta(days=max_age_days)
+
+        # 1. Query active indicators eligible for expiration
+        query = select(ThreatIndicator).where(ThreatIndicator.is_active == True)
+        res = await db.execute(query)
+        active_indicators = res.scalars().all()
+
+        pruned_count = 0
+        archived_count = 0
+        purged_count = 0
+
+        for ind in active_indicators:
+            is_expired = False
+            reason = ""
+
+            # Rule A: Explicit expiration timestamp passed
+            if ind.expires_at and ind.expires_at < now:
+                is_expired = True
+                reason = "EXPIRED_TTL"
+            # Rule B: Stale indicator older than max_age_days without fresh sightings
+            elif ind.last_seen and ind.last_seen < cutoff_date:
+                is_expired = True
+                reason = "STALE_MAX_AGE"
+            # Rule C: Confidence score decayed below threshold
+            elif ind.confidence is not None and ind.confidence < min_confidence:
+                is_expired = True
+                reason = "LOW_CONFIDENCE"
+
+            if is_expired:
+                if purge_deleted:
+                    await db.delete(ind)
+                    purged_count += 1
+                else:
+                    ind.is_active = False
+                    ind.lifecycle_status = "ARCHIVED" if reason == "STALE_MAX_AGE" else "EXPIRED"
+                    archived_count += 1
+                pruned_count += 1
+
+        await db.flush()
+        logger.info(f"IOC Lifecycle Pruning complete: {pruned_count} pruned ({archived_count} archived, {purged_count} purged).")
+
+        return {
+            "total_evaluated": len(active_indicators),
+            "pruned_count": pruned_count,
+            "archived_count": archived_count,
+            "purged_count": purged_count,
+            "active_remaining": len(active_indicators) - pruned_count
+        }
+
+    @staticmethod
+    async def get_lifecycle_metrics(db: AsyncSession) -> Dict[str, Any]:
+        """Returns comprehensive threat indicator lifecycle distribution statistics."""
+        from sqlalchemy import func
+        
+        # Total counts by status
+        stmt_active = select(func.count(ThreatIndicator.id)).where(ThreatIndicator.is_active == True)
+        res_active = await db.execute(stmt_active)
+        active_count = res_active.scalar() or 0
+
+        stmt_total = select(func.count(ThreatIndicator.id))
+        res_total = await db.execute(stmt_total)
+        total_count = res_total.scalar() or 0
+
+        stmt_expired = select(func.count(ThreatIndicator.id)).where(ThreatIndicator.lifecycle_status == "EXPIRED")
+        res_expired = await db.execute(stmt_expired)
+        expired_count = res_expired.scalar() or 0
+
+        stmt_archived = select(func.count(ThreatIndicator.id)).where(ThreatIndicator.lifecycle_status == "ARCHIVED")
+        res_archived = await db.execute(stmt_archived)
+        archived_count = res_archived.scalar() or 0
+
+        return {
+            "total_indicators": total_count,
+            "active_indicators": active_count,
+            "expired_indicators": expired_count,
+            "archived_indicators": archived_count,
+            "healthy_ratio": round(active_count / max(total_count, 1), 4)
+        }
+

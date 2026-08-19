@@ -189,3 +189,40 @@ async def sync_feed_now(
         "status": feed.last_sync_status,
         "indicators_imported": imported
     }
+
+
+class IOCPruneRequest(BaseModel):
+    max_age_days: int = Field(default=90, ge=1, le=365, description="Max age in days before unobserved IOC is aged out")
+    min_confidence: float = Field(default=0.20, ge=0.0, le=1.0, description="Minimum confidence threshold")
+    purge_deleted: bool = Field(default=False, description="Whether to hard-delete instead of archiving")
+
+
+@router.post("/prune", summary="Trigger IOC Lifecycle Pruning & Expiration")
+async def prune_indicators(
+    payload: Optional[IOCPruneRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst"]))
+):
+    """
+    Evaluates IOC retention policies, aging timers, and confidence thresholds.
+    Prunes expired or stale threat indicators from the active matching repository.
+    """
+    req = payload or IOCPruneRequest()
+    result = await ThreatIntelService.prune_expired_iocs(
+        db=db,
+        max_age_days=req.max_age_days,
+        min_confidence=req.min_confidence,
+        purge_deleted=req.purge_deleted
+    )
+    await db.commit()
+    return result
+
+
+@router.get("/lifecycle-stats", summary="Get Threat Intelligence Indicator Lifecycle Metrics")
+async def get_lifecycle_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieves distribution statistics across active, expired, and archived threat indicators."""
+    return await ThreatIntelService.get_lifecycle_metrics(db)
+
