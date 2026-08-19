@@ -6,9 +6,11 @@ Tests liveness, readiness, authentication, valid threat ingestion, and malformed
 Returns exit code 0 (PASS), 1 (FAIL), or 2 (BLOCKED).
 """
 
+import os
 import sys
 import argparse
 import urllib.request
+import urllib.parse
 import urllib.error
 import json
 from typing import Dict, Any
@@ -51,8 +53,32 @@ def run_smoke_test(base_url: str) -> int:
         print(f"[FAIL] Readiness probe error: {e}")
         return 1
 
-    # 3. Test Ingestion of Valid Telemetry Flow (/api/v1/predict/single)
-    valid_payload = {
+    # 3. Authenticate and obtain JWT Access Token
+    auth_headers = {"User-Agent": "SentinelAI-SmokeTest"}
+    token = None
+    admin_password = os.environ.get("SENTINEL_ADMIN_PASSWORD", "SentinelAdminP@ssw0rd2026!")
+    try:
+        login_data = urllib.parse.urlencode({
+            "username": "admin",
+            "password": admin_password
+        }).encode("utf-8")
+        login_req = urllib.request.Request(
+            f"{base_url}/api/v1/auth/login",
+            data=login_data,
+            headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SentinelAI-SmokeTest"}
+        )
+        with urllib.request.urlopen(login_req, timeout=5) as login_resp:
+            if login_resp.status == 200:
+                auth_body = json.loads(login_resp.read().decode("utf-8"))
+                token = auth_body.get("access_token")
+                if token:
+                    auth_headers["Authorization"] = f"Bearer {token}"
+                    print("[PASS] Step 3: Authentication succeeded, JWT Bearer token obtained")
+    except Exception as e:
+        print(f"[NOTE] Unauthenticated or optional auth flow ({e})")
+
+    # 4. Test Ingestion of Valid Telemetry Flow (/api/v1/predict/single)
+    valid_features = {
         "source_ip": "192.168.1.100",
         "destination_ip": "10.0.0.1",
         "source_port": 54321,
@@ -63,34 +89,36 @@ def run_smoke_test(base_url: str) -> int:
         "packet_length_mean": 512.0
     }
     try:
-        data_bytes = json.dumps(valid_payload).encode("utf-8")
+        data_bytes = json.dumps({"features": valid_features, "model_name": "Random Forest"}).encode("utf-8")
+        predict_headers = {"Content-Type": "application/json", **auth_headers}
         req = urllib.request.Request(
             f"{base_url}/api/v1/predict/single",
             data=data_bytes,
-            headers={"Content-Type": "application/json", "User-Agent": "SentinelAI-SmokeTest"}
+            headers=predict_headers
         )
         with urllib.request.urlopen(req, timeout=10) as response:
             if response.status != 200:
                 print(f"[FAIL] Valid prediction returned status code {response.status}")
                 return 1
             res_json = json.loads(response.read().decode("utf-8"))
-            print(f"[PASS] Step 3: Valid flow inference returned HTTP 200 (attack_type={res_json.get('attack_type')}, model={res_json.get('model_used')})")
+            print(f"[PASS] Step 4: Valid flow inference returned HTTP 200 (attack_type={res_json.get('attack_type')}, model={res_json.get('model_used')})")
     except Exception as e:
         print(f"[FAIL] Valid flow prediction failed: {e}")
         return 1
 
-    # 4. Test Ingestion of Malformed Telemetry Flow (Negative Validation)
-    malformed_payload = {
+    # 5. Test Ingestion of Malformed Telemetry Flow (Negative Validation)
+    malformed_features = {
         "source_ip": "192.168.1.100",
         "destination_ip": "10.0.0.1",
         "flow_duration": -999.0  # Invalid duration -> must trigger HTTP 400
     }
     try:
-        data_bytes = json.dumps(malformed_payload).encode("utf-8")
+        data_bytes = json.dumps({"features": malformed_features, "model_name": "Random Forest"}).encode("utf-8")
+        neg_headers = {"Content-Type": "application/json", **auth_headers}
         req = urllib.request.Request(
             f"{base_url}/api/v1/predict/single",
             data=data_bytes,
-            headers={"Content-Type": "application/json", "User-Agent": "SentinelAI-SmokeTest"}
+            headers=neg_headers
         )
         try:
             with urllib.request.urlopen(req, timeout=5) as response:
@@ -98,7 +126,7 @@ def run_smoke_test(base_url: str) -> int:
                 return 1
         except urllib.error.HTTPError as http_err:
             if http_err.code == 400 or http_err.code == 422:
-                print(f"[PASS] Step 4: Malformed flow properly rejected with HTTP {http_err.code} validation error")
+                print(f"[PASS] Step 5: Malformed flow properly rejected with HTTP {http_err.code} validation error")
             else:
                 print(f"[FAIL] Malformed flow returned unexpected HTTP error: {http_err.code}")
                 return 1

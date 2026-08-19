@@ -90,3 +90,6 @@ SENTINELAI_*_CODEBOOK.txt
 SENTINELAI_*.txt
 SENTINELAI_*.md
 *.zip
+
+*.tar
+

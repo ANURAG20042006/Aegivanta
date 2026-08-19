@@ -17,9 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python Requirements
-COPY backend/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy Backend, ML Engine, and Application Source Code
 COPY backend /app/backend
@@ -27,8 +26,8 @@ COPY ml /app/ml
 
 # Create Directories for Logs, Reports, and Artifacts
 # Create non-root user for security
-RUN addgroup --system --gid 1001 sentinelai && \
-    adduser --system --uid 1001 --ingroup sentinelai sentinelai && \
+RUN addgroup --system --gid 10001 sentinelai && \
+    adduser --system --uid 10001 --ingroup sentinelai sentinelai && \
     mkdir -p /app/logs /app/reports /app/ml/artifacts && \
     chown -R sentinelai:sentinelai /app
 
