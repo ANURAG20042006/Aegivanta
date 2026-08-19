@@ -223,6 +223,8 @@ async def prometheus_metrics(db: AsyncSession = Depends(get_db)):
         db_ok = 0
     db_latency_ms = round((time.perf_counter() - t0) * 1000.0, 3)
 
+    from backend.app.services.pcap_service import PCAPTelemetryService
+
     lines = [
         "# HELP sentinel_uptime_seconds Application uptime in seconds",
         "# TYPE sentinel_uptime_seconds gauge",
@@ -255,6 +257,22 @@ async def prometheus_metrics(db: AsyncSession = Depends(get_db)):
         "# HELP sentinel_stream_dlq_depth Current depth of in-memory Dead Letter Queue",
         "# TYPE sentinel_stream_dlq_depth gauge",
         f"sentinel_stream_dlq_depth {stream_m['dlq_depth']}",
+        "",
+        "# HELP sentinel_pcap_files_processed_total Total PCAP binary files ingested and processed",
+        "# TYPE sentinel_pcap_files_processed_total counter",
+        f"sentinel_pcap_files_processed_total {PCAPTelemetryService.pcap_files_processed}",
+        "",
+        "# HELP sentinel_pcap_packets_parsed_total Total network packet frames parsed from PCAP",
+        "# TYPE sentinel_pcap_packets_parsed_total counter",
+        f"sentinel_pcap_packets_parsed_total {PCAPTelemetryService.pcap_packets_parsed}",
+        "",
+        "# HELP sentinel_pcap_flows_extracted_total Total 5-tuple bidirectional network flows extracted from PCAP",
+        "# TYPE sentinel_pcap_flows_extracted_total counter",
+        f"sentinel_pcap_flows_extracted_total {PCAPTelemetryService.pcap_flows_extracted}",
+        "",
+        "# HELP sentinel_pcap_parse_errors_total Total PCAP parsing or validation errors",
+        "# TYPE sentinel_pcap_parse_errors_total counter",
+        f"sentinel_pcap_parse_errors_total {PCAPTelemetryService.pcap_parse_errors}",
         ""
     ]
 

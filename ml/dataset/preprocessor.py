@@ -185,11 +185,18 @@ class CICIDS2017Preprocessor:
             vals = [float(v) for v in list(sample_dict.values())[:k]]
             return np.array([vals])
 
+        extra_dict = sample_dict.get("extra_features", {}) if isinstance(sample_dict.get("extra_features"), dict) else {}
         vector = []
         for feature in self.feature_names:
-            # Map canonical or snake_case key
+            # Map canonical or snake_case key across root and extra_features
             snake_key = feature.lower().replace(" ", "_")
-            val = sample_dict.get(feature, sample_dict.get(snake_key, np.nan))
+            val = sample_dict.get(
+                feature,
+                sample_dict.get(
+                    snake_key,
+                    extra_dict.get(feature, extra_dict.get(snake_key, np.nan))
+                )
+            )
             try:
                 vector.append(float(val) if val is not None else np.nan)
             except (ValueError, TypeError):

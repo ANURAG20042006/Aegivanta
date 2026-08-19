@@ -42,6 +42,7 @@ from backend.app.api.v1.campaigns import router as campaigns_router
 from backend.app.api.v1.response import router as response_router
 from backend.app.api.v1.attack_coverage import router as attack_coverage_router
 from backend.app.api.v1.soc_metrics import router as soc_metrics_router
+from backend.app.api.v1.telemetry import router as telemetry_router
 
 
 from dotenv import load_dotenv
@@ -268,4 +269,5 @@ app.include_router(campaigns_router, prefix=settings.API_V1_STR)
 app.include_router(response_router, prefix=settings.API_V1_STR)
 app.include_router(attack_coverage_router, prefix=settings.API_V1_STR)
 app.include_router(soc_metrics_router, prefix=settings.API_V1_STR)
+app.include_router(telemetry_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
