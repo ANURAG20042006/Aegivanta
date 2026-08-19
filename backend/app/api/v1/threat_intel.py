@@ -247,3 +247,24 @@ async def warm_up_cache(
     return {"status": "warmed", "cached_indicators": count}
 
 
+@router.get("/worker-status", summary="Get Threat Feed Sync Worker Status")
+async def get_worker_status(
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieves operational status and metrics for the background threat feed sync worker."""
+    from backend.app.services.threat_feed_worker import feed_sync_worker
+    return feed_sync_worker.get_status()
+
+
+@router.post("/sync-all", summary="Trigger Full Threat Feed Synchronization")
+async def trigger_sync_all(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst"]))
+):
+    """Triggers an immediate synchronization across all active threat intelligence feeds."""
+    from backend.app.services.threat_feed_worker import feed_sync_worker
+    result = await feed_sync_worker.sync_all_active_feeds(db)
+    return result
+
+
+
