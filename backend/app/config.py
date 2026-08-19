@@ -62,10 +62,20 @@ class Settings(BaseSettings):
         description="Async Database Connection URL"
     )
 
-    # Redis Settings
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Redis & Distributed Streaming Settings
+    REDIS_HOST: str = Field(default_factory=lambda: os.environ.get("REDIS_HOST", "localhost"))
+    REDIS_PORT: int = Field(default_factory=lambda: int(os.environ.get("REDIS_PORT", "6379")))
+    REDIS_DB: int = Field(default_factory=lambda: int(os.environ.get("REDIS_DB", "0")))
+    REDIS_PASSWORD: Optional[str] = Field(default_factory=lambda: os.environ.get("REDIS_PASSWORD", None))
+    REDIS_SSL: bool = Field(default_factory=lambda: os.environ.get("REDIS_SSL", "false").lower() in ["1", "true", "yes"])
+    REDIS_URL: str = Field(default_factory=lambda: os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
+    
+    STREAM_TELEMETRY_KEY: str = "sentinel:telemetry"
+    STREAM_CONSUMER_GROUP: str = "sentinel:telemetry:group"
+    STREAM_DLQ_KEY: str = "sentinel:telemetry:dlq"
+    STREAM_PUBSUB_CHANNEL: str = "sentinel:events"
+    STREAM_MAX_RETRIES: int = 3
+    STREAM_IDEMPOTENCY_TTL_SECONDS: int = 86400  # 24 hours TTL for cross-worker deduplication
 
     # ML Engine Settings
     MODEL_ARTIFACTS_DIR: str = "ml/artifacts"

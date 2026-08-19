@@ -47,7 +47,7 @@ def audit_item_1_pytest():
     res = subprocess.run([sys.executable, "-m", "pytest", "-q"], capture_output=True, text=True)
     out = res.stdout + res.stderr
     passed = (res.returncode == 0)
-    summary_lines = [l for l in out.split("\n") if "passed" in l]
+    summary_lines = [l for l in out.split("\n") if re.search(r"\d+\s+passed", l)]
     summary_line = summary_lines[-1] if summary_lines else out[-300:]
     status = "PASS" if passed else "FAIL"
     record_result(1, "Full PyTest Test Suite Execution", status, summary_line.strip())

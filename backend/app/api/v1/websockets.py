@@ -60,7 +60,8 @@ class ConnectionManager:
                 f"Remaining connections: {self.connection_count}"
             )
 
-    async def broadcast(self, message: str) -> None:
+    async def broadcast_local(self, message: str) -> None:
+        """Broadcasts a raw message strictly to locally connected clients on this instance."""
         for connection in list(self.active_connections):
             try:
                 await connection.send_text(message)
@@ -68,14 +69,33 @@ class ConnectionManager:
                 logger.error(f"Error broadcasting to WebSocket client: {e}")
                 self.disconnect(connection)
 
-    async def broadcast_event(self, event_type: str, data: dict) -> None:
-        """Broadcast a structured JSON event to all connected SOC clients."""
-        payload = json.dumps({
+    async def broadcast(self, message: str) -> None:
+        """Broadcasts message to local clients."""
+        await self.broadcast_local(message)
+
+    async def broadcast_event(self, event_type: str, data: dict, publish_to_redis: bool = True) -> None:
+        """
+        Broadcast a structured JSON event to local SOC clients and publish across the
+        distributed Redis Pub/Sub backplane so other API replicas forward to their clients.
+        """
+        event_dict = {
             "type": event_type,
             "data": data,
             "timestamp": asyncio.get_event_loop().time()
-        })
-        await self.broadcast(payload)
+        }
+        payload = json.dumps(event_dict)
+        await self.broadcast_local(payload)
+
+        if publish_to_redis:
+            try:
+                from backend.app.services.distributed_stream_service import distributed_stream_engine
+                await distributed_stream_engine.backend.publish_pubsub(
+                    settings.STREAM_PUBSUB_CHANNEL,
+                    event_dict
+                )
+                distributed_stream_engine.metrics["websocket_broadcast_total"] += 1
+            except Exception as pub_err:
+                logger.debug("Redis Pub/Sub broadcast notice: %s", pub_err)
 
 
 manager = ConnectionManager()
