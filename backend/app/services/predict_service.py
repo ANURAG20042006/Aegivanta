@@ -314,179 +314,151 @@ class PredictService:
 
         from backend.app.models.protected_asset import ProtectedAsset
         from backend.app.models.alert import Alert
+        from backend.app.models.security_event import SecurityEvent
+        from backend.app.models.incident_timeline import IncidentTimelineEvent
+        from backend.app.services.risk_engine import RiskScoringEngine
+        from backend.app.services.correlation_engine import IncidentCorrelationEngine
+        from backend.app.api.v1.websockets import manager
+        from sqlalchemy import or_, and_
+
         now_utc = datetime.now(timezone.utc)
         target_incident_id = None
 
-        if settings.SOC_PHASE1_ENABLED:
-            from backend.app.models.protected_asset import ProtectedAsset
-            from backend.app.models.alert import Alert
-            from backend.app.models.security_event import SecurityEvent
-            from backend.app.models.incident_timeline import IncidentTimelineEvent
-            from backend.app.services.risk_engine import RiskScoringEngine
-            from backend.app.services.correlation_engine import IncidentCorrelationEngine
-            from backend.app.api.v1.websockets import manager
-            from sqlalchemy import or_, and_
-
-            # 1. Resolve Target Protected Asset deterministically (active only)
-            asset = None
-            if vector.destination_ip:
-                asset_stmt = select(ProtectedAsset).where(
-                    and_(
-                        ProtectedAsset.status != "inactive",
-                        or_(
-                            ProtectedAsset.ip_address == vector.destination_ip,
-                            ProtectedAsset.hostname == vector.destination_ip
-                        )
+        # 1. Resolve Target Protected Asset deterministically (active only)
+        asset = None
+        if vector.destination_ip:
+            asset_stmt = select(ProtectedAsset).where(
+                and_(
+                    ProtectedAsset.status != "inactive",
+                    or_(
+                        ProtectedAsset.ip_address == vector.destination_ip,
+                        ProtectedAsset.hostname == vector.destination_ip
                     )
-                ).limit(1)
-                asset_res = await db.execute(asset_stmt)
-                asset = asset_res.scalar_one_or_none()
+                )
+            ).limit(1)
+            asset_res = await db.execute(asset_stmt)
+            asset = asset_res.scalar_one_or_none()
 
-            asset_crit = asset.criticality if asset else "medium"
+        asset_crit = asset.criticality if asset else "medium"
 
-            # 2. Calculate dynamic operational risk score
-            risk_score = RiskScoringEngine.calculate_risk_score(
-                severity=severity,
+        # 2. Calculate dynamic operational risk score
+        risk_score = RiskScoringEngine.calculate_risk_score(
+            severity=severity,
+            confidence=confidence_score,
+            criticality=asset_crit,
+            alert_count=1
+        )
+
+        if is_malicious:
+            # 3. Create First-Class Security Alert
+            alert = Alert(
+                asset_id=asset.id if asset else None,
+                title=f"Detected {severity} {attack_type} Attack",
+                description=f"Automated threat detection by {model_name} classified incoming packet flow as {attack_type}.",
+                severity=severity.lower(),
                 confidence=confidence_score,
-                criticality=asset_crit,
-                alert_count=1
+                risk_score=risk_score,
+                source=f"ML_ENGINE:{model_name}",
+                source_ip=vector.source_ip,
+                destination_ip=vector.destination_ip,
+                source_port=vector.source_port,
+                destination_port=vector.destination_port or 0,
+                protocol=vector.protocol or "TCP",
+                packet_length=int(vector.packet_length_mean) if vector.packet_length_mean is not None else (int(vector.min_packet_length) if vector.min_packet_length is not None else 0),
+                flow_duration=float(vector.flow_duration) if vector.flow_duration is not None else 0.0,
+                attack_type=attack_type,
+                status="new",
+                explanation=shap,
+                timestamp=now_utc
             )
+            db.add(alert)
+            await db.flush()
 
-            if is_malicious:
-                # 3. Create First-Class Security Alert
-                alert = Alert(
-                    asset_id=asset.id if asset else None,
-                    title=f"Detected {severity} {attack_type} Attack",
-                    description=f"Automated threat detection by {model_name} classified incoming packet flow as {attack_type}.",
-                    severity=severity.lower(),
-                    confidence=confidence_score,
-                    risk_score=risk_score,
-                    source=f"ML_ENGINE:{model_name}",
-                    source_ip=vector.source_ip,
-                    destination_ip=vector.destination_ip,
-                    source_port=vector.source_port,
-                    protocol=vector.protocol or "TCP",
-                    packet_length=int(vector.packet_length_mean) if vector.packet_length_mean is not None else (int(vector.min_packet_length) if vector.min_packet_length is not None else 0),
-                    flow_duration=float(vector.flow_duration) if vector.flow_duration is not None else 0.0,
-                    attack_type=attack_type,
-                    status="new",
-                    explanation=shap,
-                    timestamp=now_utc
-                )
-                db.add(alert)
-                await db.flush()
+            # 4. Correlate Alert into Incident & Append Chronological Timeline Event
+            incident, timeline_evt = await IncidentCorrelationEngine.process_alert(db, alert, asset)
+            target_incident_id = incident.id
 
-                # 4. Correlate Alert into Incident & Append Chronological Timeline Event
-                incident, timeline_evt = await IncidentCorrelationEngine.process_alert(db, alert, asset)
-                target_incident_id = incident.id
-
-                # 5. Record Security Event Ledger
-                sec_event = SecurityEvent(
-                    asset_id=asset.id if asset else None,
-                    source_ip=vector.source_ip,
-                    destination_ip=vector.destination_ip,
-                    source_port=vector.source_port,
-                    destination_port=vector.destination_port,
-                    protocol=vector.protocol,
-                    event_type="ALERT_TRIGGERED",
-                    severity=severity.lower(),
-                    model_prediction=attack_type,
-                    confidence=confidence_score,
-                    risk_score=risk_score,
-                    status="ACTIONABLE",
-                    metadata_payload={"alert_id": alert.alert_id, "incident_id": incident.id, "attack_type": attack_type}
-                )
-
-                # Phase 2 Enrichment: Threat Intel IOC Enrichment & Behavioral Anomaly Detection
-                try:
-                    from backend.app.services.threat_intel_service import ThreatIntelService
-                    ioc_res = await ThreatIntelService.enrich_telemetry(vector.source_ip, vector.destination_ip, None, db)
-                    if ioc_res.get("is_match"):
-                        sec_event.metadata_payload["ioc_enrichment"] = ioc_res
-                except Exception as tie:
-                    logger.debug("Threat intel enrichment skipped: %s", tie)
-
-                try:
-                    if asset and vector.flow_packets_s:
-                        from backend.app.services.anomaly_service import AnomalyService
-                        await AnomalyService.detect_anomaly(asset.id, "packet_rate", float(vector.flow_packets_s), db)
-                except Exception as ane:
-                    logger.debug("Anomaly detection check skipped: %s", ane)
-
-                try:
-                    from backend.app.services.investigation_service import InvestigationService
-                    await InvestigationService.analyze_incident(incident.id, db)
-                except Exception as ive:
-                    logger.debug("Automated investigation update skipped: %s", ive)
-
-                db.add(sec_event)
-
-                # Commit transaction first to ensure persistence
-                await db.commit()
-
-                # 6. Publish real-time event to WebSocket subscribers AFTER commit
-                try:
-                    await manager.broadcast_event("ALERT_TRIGGERED", {
-                        "alert_id": alert.alert_id,
-                        "incident_id": incident.id,
-                        "incident_code": incident.incident_code,
-                        "attack_type": attack_type,
-                        "severity": incident.severity,
-                        "confidence": confidence_score,
-                        "risk_score": incident.risk_score,
-                        "source_ip": vector.source_ip,
-                        "destination_ip": vector.destination_ip,
-                        "asset_name": asset.name if asset else None,
-                        "timestamp": now_utc.isoformat()
-                    })
-                except Exception as ws_err:
-                    logger.warning("WebSocket broadcast skipped: %s", ws_err)
-
-            else:
-                # Benign Flow: Do NOT create Security Incident or Alert.
-                target_incident_id = None
-                sec_event = SecurityEvent(
-                    asset_id=asset.id if asset else None,
-                    source_ip=vector.source_ip,
-                    destination_ip=vector.destination_ip,
-                    source_port=vector.source_port,
-                    destination_port=vector.destination_port,
-                    protocol=vector.protocol or "TCP",
-                    event_type="FLOW_INSPECTED_BENIGN",
-                    severity="low",
-                    model_prediction=attack_type,
-                    confidence=confidence_score,
-                    risk_score=0.0,
-                    status="PROCESSED"
-                )
-                db.add(sec_event)
-                await db.commit()
-
-        else:
-            # Baseline Fallback Path (When SOC Phase 1 is disabled)
-            incident = Incident(
+            # 5. Record Security Event Ledger
+            sec_event = SecurityEvent(
+                asset_id=asset.id if asset else None,
                 source_ip=vector.source_ip,
                 destination_ip=vector.destination_ip,
                 source_port=vector.source_port,
                 destination_port=vector.destination_port,
-                protocol=vector.protocol,
-                packet_length=int(vector.packet_length_mean),
-                flow_duration=vector.flow_duration,
-                attack_type=attack_type,
-                confidence_score=confidence_score,
-                is_malicious=is_malicious,
-                severity=severity,
-                model_name=model_name,
-                timestamp=now_utc,
-                first_seen=now_utc,
-                last_seen=now_utc,
-                feature_payload=vector.model_dump()
+                protocol=vector.protocol or "TCP",
+                event_type="ALERT_TRIGGERED",
+                severity=severity.lower(),
+                model_prediction=attack_type,
+                confidence=confidence_score,
+                risk_score=risk_score,
+                status="ACTIONABLE",
+                metadata_payload={"alert_id": alert.alert_id, "incident_id": incident.id, "attack_type": attack_type}
             )
-            db.add(incident)
-            await db.flush()
-            target_incident_id = incident.id
 
-        await db.commit()
+            # Phase 2 Enrichment: Threat Intel IOC Enrichment & Behavioral Anomaly Detection
+            try:
+                from backend.app.services.threat_intel_service import ThreatIntelService
+                ioc_res = await ThreatIntelService.enrich_telemetry(vector.source_ip, vector.destination_ip, None, db)
+                if ioc_res.get("is_match"):
+                    sec_event.metadata_payload["ioc_enrichment"] = ioc_res
+            except Exception as tie:
+                logger.debug("Threat intel enrichment skipped: %s", tie)
+
+            try:
+                if asset and vector.flow_packets_s:
+                    from backend.app.services.anomaly_service import AnomalyService
+                    await AnomalyService.detect_anomaly(asset.id, "packet_rate", float(vector.flow_packets_s), db)
+            except Exception as ane:
+                logger.debug("Anomaly detection check skipped: %s", ane)
+
+            try:
+                from backend.app.services.investigation_service import InvestigationService
+                await InvestigationService.analyze_incident(incident.id, db)
+            except Exception as ive:
+                logger.debug("Automated investigation update skipped: %s", ive)
+
+            db.add(sec_event)
+
+            # Commit transaction first to ensure persistence
+            await db.commit()
+
+            # 6. Publish real-time event to WebSocket subscribers AFTER commit
+            try:
+                await manager.broadcast_event("ALERT_TRIGGERED", {
+                    "alert_id": alert.alert_id,
+                    "incident_id": incident.id,
+                    "incident_code": incident.incident_code,
+                    "attack_type": attack_type,
+                    "severity": incident.severity,
+                    "confidence": confidence_score,
+                    "risk_score": incident.risk_score,
+                    "source_ip": vector.source_ip,
+                    "destination_ip": vector.destination_ip,
+                    "asset_name": asset.name if asset else None,
+                    "timestamp": now_utc.isoformat()
+                })
+            except Exception as ws_err:
+                logger.warning("WebSocket broadcast skipped: %s", ws_err)
+
+        else:
+            # Benign Flow: Do NOT create Security Incident or Alert.
+            target_incident_id = None
+            sec_event = SecurityEvent(
+                asset_id=asset.id if asset else None,
+                source_ip=vector.source_ip,
+                destination_ip=vector.destination_ip,
+                source_port=vector.source_port,
+                destination_port=vector.destination_port,
+                protocol=vector.protocol or "TCP",
+                event_type="FLOW_INSPECTED_BENIGN",
+                severity="low",
+                model_prediction=attack_type,
+                confidence=confidence_score,
+                risk_score=0.0,
+                status="PROCESSED"
+            )
+            db.add(sec_event)
+            await db.commit()
 
         return PredictionResult(
             incident_id=target_incident_id,
