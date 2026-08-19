@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sentinelai-ingress
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "sentinelai-api"
+spec:
+  tls:
+    - hosts:
+        - sentinelai.io
+        - api.sentinelai.io
+      secretName: sentinelai-tls-secret
+  rules:
+    - host: api.sentinelai.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sentinelai-api
+                port:
+                  number: 8000

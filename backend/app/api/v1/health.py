@@ -102,7 +102,18 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
     metadata = load_artifact_metadata(artifact_dir)
     schema_compatible, compat_errors = validate_artifact_compatibility(metadata)
 
-    is_ready = bool(db_healthy and artifact_integrity and schema_compatible and manifest_valid)
+    # 5. Redis Connectivity Check (Fail-Closed in Production)
+    from backend.app.services.distributed_stream_service import distributed_stream_engine
+    redis_connected = distributed_stream_engine.backend.is_connected()
+    is_production = (
+        settings.APP_ENV.lower() == "production" or
+        settings.OPERATING_MODE.upper() == "PRODUCTION"
+    )
+    redis_healthy = True
+    if is_production and not redis_connected:
+        redis_healthy = False
+
+    is_ready = bool(db_healthy and artifact_integrity and schema_compatible and manifest_valid and redis_healthy)
 
     if not is_ready:
         raise HTTPException(
@@ -111,6 +122,8 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
                 "ready": False,
                 "database_connected": db_healthy,
                 "database_error": db_error,
+                "redis_connected": redis_connected,
+                "redis_healthy": redis_healthy,
                 "artifact_integrity": artifact_integrity,
                 "schema_compatible": schema_compatible,
                 "schema_errors": compat_errors
@@ -121,6 +134,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
         "ready": True,
         "operating_mode": settings.OPERATING_MODE,
         "database_connected": db_healthy,
+        "redis_connected": redis_connected,
         "active_model": active_model_name or "CatBoost",
         "active_model_version": active_model_version or "catboost-v1.0",
         "artifact_integrity": artifact_integrity,

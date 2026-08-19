@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sentinelai-config
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: configuration
+data:
+  APP_NAME: "SentinelAI"
+  APP_ENV: "production"
+  OPERATING_MODE: "PRODUCTION"
+  DEBUG: "False"
+  API_V1_STR: "/api/v1"
+  LOG_LEVEL: "INFO"
+  REDIS_HOST: "sentinelai-redis"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_SSL: "false"
+  STREAM_TELEMETRY_KEY: "sentinel:telemetry"
+  STREAM_CONSUMER_GROUP: "sentinel:telemetry:group"
+  STREAM_DLQ_KEY: "sentinel:telemetry:dlq"
+  STREAM_PUBSUB_CHANNEL: "sentinel:events"
+  STREAM_MAX_RETRIES: "3"
+  STREAM_IDEMPOTENCY_TTL_SECONDS: "86400"
+  MODEL_ARTIFACTS_DIR: "ml/artifacts"
+  DEFAULT_MODEL_NAME: "CatBoost"
+  BATCH_SIZE: "128"
+  CORS_ORIGINS: '["https://sentinelai.io"]'

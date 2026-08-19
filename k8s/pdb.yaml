@@ -1,0 +1,29 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sentinelai-api-pdb
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sentinelai
+      app.kubernetes.io/component: api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sentinelai-worker-pdb
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: worker
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sentinelai
+      app.kubernetes.io/component: worker
