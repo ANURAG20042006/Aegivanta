@@ -380,3 +380,43 @@ def test_invalid_state_transitions():
     )
     assert res_illegal.status_code == 400
     assert "Invalid state transition" in res_illegal.text
+
+
+def test_all_production_models_live_inference():
+    """Verify live un-mocked ML threat prediction across all 5 champion & challenger models."""
+    analyst_hdr = get_auth_headers("analyst")
+    models_to_test = ["CatBoost", "LightGBM", "Random Forest", "Decision Tree", "XGBoost"]
+
+    flow_payload = {
+        "features": {
+            "source_ip": "198.51.100.77",
+            "destination_ip": "10.0.0.1",
+            "source_port": 54321,
+            "destination_port": 80,
+            "protocol": "TCP",
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
+        }
+    }
+
+    for model_name in models_to_test:
+        payload = dict(flow_payload)
+        payload["model_name"] = model_name
+
+        res = client.post("/api/v1/predict/single", json=payload, headers=analyst_hdr)
+        assert res.status_code == 200, f"Model {model_name} prediction failed: {res.text}"
+        data = res.json()
+        assert data["model_used"] == model_name
+        assert "attack_type" in data
+        assert "confidence_score" in data
+        assert data["confidence_available"] is True
+        assert "shap_explanation" in data
+
