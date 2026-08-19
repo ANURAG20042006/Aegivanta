@@ -120,6 +120,7 @@ async def create_indicator(
         is_active=True
     )
     db.add(indicator)
+    ThreatIntelService.cache.invalidate()
     await db.commit()
     await db.refresh(indicator)
 
@@ -225,4 +226,24 @@ async def get_lifecycle_stats(
 ):
     """Retrieves distribution statistics across active, expired, and archived threat indicators."""
     return await ThreatIntelService.get_lifecycle_metrics(db)
+
+
+@router.get("/cache-stats", summary="Get In-Memory Fast IOC Cache Metrics")
+async def get_cache_stats(
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieves in-memory threat intelligence lookup cache statistics and hit ratio."""
+    return ThreatIntelService.cache.get_stats()
+
+
+@router.post("/cache-warmup", summary="Trigger In-Memory IOC Cache Warm-Up")
+async def warm_up_cache(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst"]))
+):
+    """Explicitly warms up the in-memory fast IOC cache from the database."""
+    all_iocs = await db.execute(select(ThreatIndicator).where(ThreatIndicator.is_active == True))
+    count = ThreatIntelService.cache.warm_up(all_iocs.scalars().all())
+    return {"status": "warmed", "cached_indicators": count}
+
 

@@ -137,11 +137,142 @@ FEED_PROVIDERS: Dict[str, ThreatFeedProvider] = {
 
 
 # ==============================================================================
+# HIGH-PERFORMANCE IN-MEMORY IOC CACHE
+# ==============================================================================
+
+class FastIOCCache:
+    """
+    High-Performance In-Memory Threat Intelligence Indicator Cache.
+    Provides sub-millisecond O(1) exact matching and CIDR subnet evaluation
+    for distributed stream ingestion workers without database query overhead.
+    """
+
+    def __init__(self):
+        self._exact_iocs: Dict[str, Dict[str, Any]] = {}
+        self._cidr_networks: List[Tuple[Any, Dict[str, Any]]] = []
+        self._is_warmed: bool = False
+        self._last_warmed_at: Optional[datetime] = None
+        self._total_lookups: int = 0
+        self._total_hits: int = 0
+
+    def warm_up(self, indicators: List[ThreatIndicator]) -> int:
+        """Loads active indicators into memory structures."""
+        exact = {}
+        cidr = []
+        for ind in indicators:
+            if not ind.is_active or (ind.lifecycle_status and ind.lifecycle_status != "ACTIVE"):
+                continue
+            entry = {
+                "indicator_id": ind.id,
+                "ioc_type": ind.ioc_type,
+                "normalized_value": ind.normalized_value,
+                "threat_type": ind.threat_type,
+                "severity": ind.severity,
+                "confidence": ind.confidence,
+                "source": ind.source,
+                "tags": ind.tags or []
+            }
+            exact[ind.normalized_value] = entry
+            # Check if CIDR
+            raw = (ind.raw_value or "").strip()
+            if "/" in raw and ind.ioc_type in ["ipv4", "ipv6"]:
+                try:
+                    net = ipaddress.ip_network(raw, strict=False)
+                    cidr.append((net, entry))
+                except ValueError:
+                    pass
+
+        self._exact_iocs = exact
+        self._cidr_networks = cidr
+        self._is_warmed = True
+        self._last_warmed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        logger.info(f"FastIOCCache warmed with {len(exact)} exact IOCs and {len(cidr)} CIDR subnets.")
+        return len(exact)
+
+    def match_ip(self, ip_str: str) -> Optional[Dict[str, Any]]:
+        """O(1) exact match check followed by CIDR range evaluation."""
+        if not ip_str:
+            return None
+        self._total_lookups += 1
+        norm = ip_str.strip().lower()
+        if norm in self._exact_iocs:
+            self._total_hits += 1
+            return self._exact_iocs[norm]
+        # CIDR check
+        try:
+            ip_obj = ipaddress.ip_address(norm)
+            for net, entry in self._cidr_networks:
+                if ip_obj in net:
+                    self._total_hits += 1
+                    return entry
+        except ValueError:
+            pass
+        return None
+
+    def match_domain_or_hash(self, val: str) -> Optional[Dict[str, Any]]:
+        """O(1) exact match check for domains, URLs, and cryptographic hashes."""
+        if not val:
+            return None
+        self._total_lookups += 1
+        norm = val.strip().lower()
+        res = self._exact_iocs.get(norm)
+        if res:
+            self._total_hits += 1
+        return res
+
+    def fast_check(self, source_ip: str, destination_ip: Optional[str] = None, domain: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Synchronous, zero-database lookup for stream workers (< 0.01ms)."""
+        matches = []
+        if source_ip:
+            m = self.match_ip(source_ip)
+            if m and m not in matches:
+                matches.append(m)
+        if destination_ip:
+            m = self.match_ip(destination_ip)
+            if m and m not in matches:
+                matches.append(m)
+        if domain:
+            m = self.match_domain_or_hash(domain)
+            if m and m not in matches:
+                matches.append(m)
+        return matches
+
+    def invalidate(self):
+        """Invalidates cache forcing warm-up on next lookup."""
+        self._is_warmed = False
+
+    @property
+    def is_warmed(self) -> bool:
+        return self._is_warmed
+
+    @property
+    def size(self) -> int:
+        return len(self._exact_iocs)
+
+    def get_stats(self) -> Dict[str, Any]:
+        hit_ratio = round(self._total_hits / max(self._total_lookups, 1), 4)
+        return {
+            "is_warmed": self._is_warmed,
+            "cached_indicators": len(self._exact_iocs),
+            "cached_cidr_subnets": len(self._cidr_networks),
+            "last_warmed_at": self._last_warmed_at.isoformat() if self._last_warmed_at else None,
+            "total_lookups": self._total_lookups,
+            "total_hits": self._total_hits,
+            "hit_ratio": hit_ratio
+        }
+
+
+GLOBAL_IOC_CACHE = FastIOCCache()
+
+
+# ==============================================================================
 # CORE THREAT INTEL SERVICE
 # ==============================================================================
 
 class ThreatIntelService:
     """Core Threat Intelligence Ingestion & Non-Destructive Event Enrichment Service."""
+
+    cache: FastIOCCache = GLOBAL_IOC_CACHE
 
     @staticmethod
     async def enrich_telemetry(
@@ -172,10 +303,42 @@ class ThreatIntelService:
             if is_v:
                 candidates.append(norm_dom)
 
-        if not candidates:
-            return {"is_match": False, "matched_iocs": []}
+        # Warm cache if not initialized
+        if not GLOBAL_IOC_CACHE.is_warmed and db:
+            try:
+                all_iocs = await db.execute(select(ThreatIndicator).where(ThreatIndicator.is_active == True))
+                GLOBAL_IOC_CACHE.warm_up(all_iocs.scalars().all())
+            except Exception as e:
+                logger.debug(f"Cache warm up error: {e}")
 
-        # Query database for exact normalized matches
+        # Fast in-memory check
+        cached_matches = GLOBAL_IOC_CACHE.fast_check(source_ip, destination_ip, domain)
+        if cached_matches:
+            # Update hit counts asynchronously if DB session is available
+            if db:
+                matched_ids = [m["indicator_id"] for m in cached_matches]
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
+                try:
+                    stmt = (
+                        update(ThreatIndicator)
+                        .where(ThreatIndicator.id.in_(matched_ids))
+                        .values(hit_count=ThreatIndicator.hit_count + 1, last_seen=now)
+                    )
+                    await db.execute(stmt)
+                    await db.flush()
+                except Exception:
+                    pass
+
+            severities = [m["severity"] for m in cached_matches]
+            top_severity = "CRITICAL" if "CRITICAL" in severities else ("HIGH" if "HIGH" in severities else "MEDIUM")
+            return {
+                "is_match": True,
+                "match_count": len(cached_matches),
+                "top_severity": top_severity,
+                "matched_iocs": cached_matches
+            }
+
+        # Fallback database query
         query = select(ThreatIndicator).where(
             ThreatIndicator.normalized_value.in_(candidates),
             ThreatIndicator.is_active == True
@@ -271,6 +434,7 @@ class ThreatIntelService:
             feed.last_sync_status = "SUCCESS"
             feed.indicators_imported = (feed.indicators_imported or 0) + imported_count
             feed.last_error = None
+            GLOBAL_IOC_CACHE.invalidate()
             await db.flush()
             return imported_count
 
@@ -332,6 +496,7 @@ class ThreatIntelService:
                     archived_count += 1
                 pruned_count += 1
 
+        GLOBAL_IOC_CACHE.invalidate()
         await db.flush()
         logger.info(f"IOC Lifecycle Pruning complete: {pruned_count} pruned ({archived_count} archived, {purged_count} purged).")
 
