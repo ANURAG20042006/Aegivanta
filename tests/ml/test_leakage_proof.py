@@ -155,6 +155,8 @@ def test_cv_folds_independently_fit_preprocessing():
         assert 0.0 <= fold["Macro F1"] <= 1.0
 
 
+@pytest.mark.slow
+@pytest.mark.research
 def test_final_test_evaluated_only_after_model_selection(tmp_path):
     """Requirement 4 Proof: Training pipeline runs model selection and evaluates untouched test set once."""
     results = run_training_pipeline(

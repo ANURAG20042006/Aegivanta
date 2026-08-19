@@ -43,6 +43,10 @@ jobs:
         run: |
           python scripts/final_integrity_audit.py
 
+      - name: Validate Kubernetes Manifests Offline
+        run: |
+          python scripts/validate_k8s_manifests.py
+
       - name: Run PyTest Test Suite
         run: |
           python -m pytest -q

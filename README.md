@@ -31,6 +31,22 @@
 
 ---
 
+## 🚀 Phase 3.3 Upgrade: Production Kubernetes & Deployment Hardening
+
+SentinelAI includes production-grade Kubernetes manifests and container hardening under [`k8s/`](k8s/):
+
+| Component | Manifest & Specifications | Security & Operational Hardening | Validation Status |
+|---|---|---|:---:|
+| **API Server** | [`deployment-api.yaml`](k8s/deployment-api.yaml) (3 Replicas) | Non-root UID 10001, `allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, capabilities dropped, `/tmp` `emptyDir` | 🟢 **Verified Statically & Locally** |
+| **Stream Worker** | [`deployment-worker.yaml`](k8s/deployment-worker.yaml) (2 Replicas) | Dedicated stream consumer daemon (`backend.app.worker`), non-root UID 10001, graceful `SIGTERM` handling | 🟢 **Verified Statically & Locally** |
+| **Redis Broker** | [`redis.yaml`](k8s/redis.yaml) (StatefulSet) | Non-root UID 999, password-authenticated from Secret, internal-only ClusterIP, Redis Streams | 🟢 **Verified Statically & Locally** |
+| **Ingress & TLS** | [`ingress.yaml`](k8s/ingress.yaml) | TLS secret termination, WebSocket upgrades (`sentinelai-api:8000`), proxy buffer timeouts | 🟢 **Verified Statically** |
+| **Autoscaling** | [`hpa.yaml`](k8s/hpa.yaml) | Independent HPA for API (2–10 pods, 70% CPU) and Worker (2–8 pods, 75% CPU) | 🟢 **Verified Statically** |
+| **Disruption Safety**| [`pdb.yaml`](k8s/pdb.yaml) | PodDisruptionBudget ensuring `minAvailable: 1` during node maintenance | 🟢 **Verified Statically** |
+| **Micro-Segmentation**| [`networkpolicy.yaml`](k8s/networkpolicy.yaml) | Ingress on 8000; Egress restricted to DNS (53), Redis (6379), and PostgreSQL (5432) | 🟢 **Verified Statically** |
+
+---
+
 ## 🛡️ Phase 1 Upgrade: Advanced Dynamic SOC Platform
 
 SentinelAI includes a full-featured Dynamic SOC platform layer built on top of the real-time ML inference pipeline:

@@ -109,6 +109,8 @@ def test_phase_i_roc_curve_artifact():
 
 
 # J, K, L. Test-set isolation and fold-local SMOTE
+@pytest.mark.slow
+@pytest.mark.research
 def test_phase_j_k_l_split_first_and_fold_isolation(tmp_path):
     gen = CICIDS2017DataGenerator()
     df = gen.generate_synthetic_dataset(num_samples=1000, random_seed=42)

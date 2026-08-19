@@ -1,9 +1,7 @@
 # SENTINELAI — PHASE 3.3 PRODUCTION KUBERNETES DEPLOYMENT GUIDE
 ================================================================
 
-## 1. Prerequisites & Target Architecture
-
-SentinelAI Kubernetes infrastructure is architected for high-availability, microsegmented SOC operations with independent horizontal autoscaling for ingestion API endpoints and streaming ML workers.
+## 1. Deployment Topology & Verification Status
 
 ```mermaid
 graph TD
@@ -26,33 +24,39 @@ graph TD
     PubSub --> PodAPI2
 ```
 
+### Component Status Matrix:
+- **Static Manifest Validation**: `VERIFIED STATICALLY` (via `scripts/validate_k8s_manifests.py`)
+- **Container Hardening (Non-Root UID 10001, Cap Drop ALL)**: `VERIFIED STATICALLY & LOCALLY`
+- **Fail-Closed API Readiness Check**: `VERIFIED LOCALLY` (via `scripts/verify_api_readiness_behavior.py`)
+- **Worker Graceful Shutdown & XAUTOCLAIM Recovery**: `VERIFIED WITH SIMULATION` (via `scripts/verify_worker_shutdown_and_recovery.py`)
+- **Kubectl Server-Side Dry-Run**: `BLOCKED BY ENVIRONMENT` (kubectl CLI not installed on host)
+- **Live Ingress & TLS**: `BLOCKED BY ENVIRONMENT` (No live Ingress Controller present on host)
+- **Live HPA Metrics Scaling**: `BLOCKED BY ENVIRONMENT` (metrics-server not present on host)
+
 ---
 
-## 2. Deployment Procedure
+## 2. Deployment Commands
 
-### Step 1: Create Namespace & Security Context
+### Local Offline Manifest Validation
 ```bash
+python scripts/validate_k8s_manifests.py
+```
+
+### Live Kubernetes Cluster Deployment (when cluster is configured)
+```bash
+# 1. Namespace & ServiceAccount
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/serviceaccount.yaml
-```
 
-### Step 2: Inject Secrets & ConfigMap
-```bash
-# Apply ConfigMap
+# 2. ConfigMap & Secrets (replace placeholders with KMS/Vault values)
 kubectl apply -f k8s/configmap.yaml
-
-# Generate & apply Secret (replace placeholders with Vault/KMS values)
 kubectl apply -f k8s/secret-template.yaml
-```
 
-### Step 3: Deploy Redis Streaming Broker & Network Policy
-```bash
+# 3. Redis StatefulSet & NetworkPolicy
 kubectl apply -f k8s/redis.yaml
 kubectl apply -f k8s/networkpolicy.yaml
-```
 
-### Step 4: Deploy API, Workers, Autoscalers & Ingress
-```bash
+# 4. API, Workers, Autoscalers & Ingress
 kubectl apply -f k8s/deployment-api.yaml
 kubectl apply -f k8s/deployment-worker.yaml
 kubectl apply -f k8s/service-api.yaml
@@ -61,24 +65,12 @@ kubectl apply -f k8s/pdb.yaml
 kubectl apply -f k8s/ingress.yaml
 ```
 
----
-
-## 3. Verification & Health Monitoring
-
+### Live Cluster Health Inspection
 ```bash
-# Check rollout status
-kubectl rollout status deployment/sentinelai-api -n sentinelai
-kubectl rollout status deployment/sentinelai-worker -n sentinelai
-
-# Query Prometheus metrics endpoint
-kubectl exec -it deployment/sentinelai-api -n sentinelai -- curl -s http://localhost:8000/api/v1/metrics/prometheus
+python scripts/validate_phase3_3_cluster.py
 ```
 
----
-
-## 4. Rollback Procedure
-
-If a deployment update fails health probes or causes model regression:
+### Rollback Procedure
 ```bash
 kubectl rollout undo deployment/sentinelai-api -n sentinelai
 kubectl rollout undo deployment/sentinelai-worker -n sentinelai
