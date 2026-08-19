@@ -116,8 +116,22 @@ class IncidentCorrelationEngine:
             # 1. Correlate with existing active incident
             existing_incident.alert_count += 1
             existing_incident.last_seen = alert.timestamp
-            
-            # Calculate updated risk score
+
+            # Deterministic confidence aggregation: track highest observed confidence across alerts
+            if alert.confidence is not None:
+                if existing_incident.confidence_score is not None:
+                    existing_incident.confidence_score = max(existing_incident.confidence_score, alert.confidence)
+                else:
+                    existing_incident.confidence_score = alert.confidence
+
+            # Apply explicit Incident Severity Policy
+            existing_incident.severity = cls.determine_incident_severity(
+                current_severity=existing_incident.severity,
+                incoming_alert_severity=alert.severity,
+                updated_risk_score=existing_incident.risk_score
+            )
+
+            # Calculate updated risk score from real accumulated evidence
             updated_risk = RiskScoringEngine.calculate_risk_score(
                 severity=existing_incident.severity,
                 confidence=existing_incident.confidence_score,
@@ -125,13 +139,6 @@ class IncidentCorrelationEngine:
                 alert_count=existing_incident.alert_count
             )
             existing_incident.risk_score = updated_risk
-
-            # Apply explicit Incident Severity Policy
-            existing_incident.severity = cls.determine_incident_severity(
-                current_severity=existing_incident.severity,
-                incoming_alert_severity=alert.severity,
-                updated_risk_score=updated_risk
-            )
             
             alert.incident_id = existing_incident.id
             
@@ -155,9 +162,12 @@ class IncidentCorrelationEngine:
             logger.info("Correlated alert %s to active incident %s (Total alerts: %d)", alert.alert_id, existing_incident.incident_code, existing_incident.alert_count)
             
         else:
-            # 2. Create new incident from this alert
+            # 2. Create new incident from this alert with real telemetry & model metadata
             incident_code = f"INC-{uuid.uuid4().hex[:8].upper()}"
             title = f"Potential {alert.attack_type} Activity against {asset.name if asset else alert.destination_ip}"
+            
+            actual_model = alert.source.replace("ML_ENGINE:", "") if alert.source.startswith("ML_ENGINE:") else alert.source
+            actual_version = f"{actual_model.lower().replace(' ', '_')}-v1.0"
             
             new_incident = Incident(
                 incident_code=incident_code,
@@ -171,15 +181,16 @@ class IncidentCorrelationEngine:
                 source_ip=alert.source_ip,
                 destination_ip=alert.destination_ip,
                 source_port=alert.source_port or 0,
-                destination_port=alert.destination_port or 80,
-                protocol=alert.protocol,
-                packet_length=512,
-                flow_duration=0.0,
+                destination_port=alert.destination_port or 0,
+                protocol=alert.protocol or "TCP",
+                packet_length=alert.packet_length if (hasattr(alert, "packet_length") and alert.packet_length is not None) else 0,
+                flow_duration=alert.flow_duration if (hasattr(alert, "flow_duration") and alert.flow_duration is not None) else 0.0,
                 attack_type=alert.attack_type,
                 confidence_score=alert.confidence,
                 is_malicious=True,
                 severity=alert.severity.capitalize(),
-                model_name=alert.source,
+                model_name=actual_model,
+                model_version=actual_version,
                 timestamp=alert.timestamp,
                 first_seen=alert.timestamp,
                 last_seen=alert.timestamp

@@ -33,7 +33,7 @@ class PredictRequest(BaseModel):
 
 class PredictionResult(BaseModel):
     """Prediction output schema for a single inspected network flow."""
-    incident_id: str
+    incident_id: Optional[str] = None
     source_ip: str
     destination_ip: str
     source_port: int

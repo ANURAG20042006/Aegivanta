@@ -48,9 +48,9 @@ async def seed_demo_operational_data(db: AsyncSession) -> None:
             ip_address=ip,
             asset_type=a_type,
             criticality=crit,
-            owner="Security Operations",
             environment="production",
             description=desc,
+            tags={"owner": "Security Operations"},
             created_at=now
         )
         db.add(asset)

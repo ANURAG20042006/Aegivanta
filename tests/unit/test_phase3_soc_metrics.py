@@ -17,8 +17,12 @@ async def test_soc_overview_kpis():
         assert "mttd_minutes" in overview
         assert "mttr_minutes" in overview
         assert "alert_to_incident_ratio" in overview
-        assert overview["mttd_minutes"] >= 0.0
-        assert overview["mttr_minutes"] >= 0.0
+        assert "mttd_status" in overview
+        assert "mttr_status" in overview
+        if overview["mttd_minutes"] is not None:
+            assert overview["mttd_minutes"] >= 0.0
+        if overview["mttr_minutes"] is not None:
+            assert overview["mttr_minutes"] >= 0.0
         assert overview["alert_to_incident_ratio"] >= 0.0
 
 

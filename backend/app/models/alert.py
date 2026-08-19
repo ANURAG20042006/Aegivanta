@@ -35,6 +35,8 @@ class Alert(Base):
     source_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     destination_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     protocol: Mapped[str] = mapped_column(String(10), nullable=False, default="TCP")
+    packet_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
+    flow_duration: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=0.0)
     attack_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="new", index=True)

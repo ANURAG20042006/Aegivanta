@@ -9,12 +9,15 @@ export interface SOCOverviewData {
   time_window_days: number;
   sample_incidents_count: number;
   sample_alerts_count: number;
-  mttd_minutes: number;
-  mttr_minutes: number;
+  mttd_minutes: number | null;
+  mttd_status?: string;
+  mttr_minutes: number | null;
+  mttr_status?: string;
   open_incidents: number;
   resolved_incidents: number;
   alert_to_incident_ratio: number;
-  estimated_false_positive_rate_pct: number;
+  estimated_false_positive_rate_pct: number | null;
+  false_positive_status?: string;
   generated_at: string;
 }
 

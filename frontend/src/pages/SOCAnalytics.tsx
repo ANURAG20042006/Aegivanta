@@ -61,7 +61,13 @@ export const SOCAnalytics: React.FC = () => {
               Mean Time to Detect (MTTD)
             </div>
             <div className="text-3xl font-bold text-indigo-300">
-              {overview.mttd_minutes} <span className="text-xs font-normal text-slate-400">minutes</span>
+              {overview.mttd_minutes !== null ? (
+                <>
+                  {overview.mttd_minutes} <span className="text-xs font-normal text-slate-400">minutes</span>
+                </>
+              ) : (
+                <span className="text-lg font-mono text-slate-500">N/A (Insufficient Data)</span>
+              )}
             </div>
             <div className="text-xs text-slate-500">First telemetry detection to alert</div>
           </div>
@@ -72,7 +78,13 @@ export const SOCAnalytics: React.FC = () => {
               Mean Time to Respond (MTTR)
             </div>
             <div className="text-3xl font-bold text-emerald-300">
-              {overview.mttr_minutes} <span className="text-xs font-normal text-slate-400">minutes</span>
+              {overview.mttr_minutes !== null ? (
+                <>
+                  {overview.mttr_minutes} <span className="text-xs font-normal text-slate-400">minutes</span>
+                </>
+              ) : (
+                <span className="text-lg font-mono text-slate-500">N/A (Insufficient Data)</span>
+              )}
             </div>
             <div className="text-xs text-slate-500">Incident creation to containment</div>
           </div>
@@ -94,7 +106,11 @@ export const SOCAnalytics: React.FC = () => {
               False Positive Rate
             </div>
             <div className="text-3xl font-bold text-amber-300">
-              {overview.estimated_false_positive_rate_pct}%
+              {overview.estimated_false_positive_rate_pct !== null ? (
+                `${overview.estimated_false_positive_rate_pct}%`
+              ) : (
+                <span className="text-lg font-mono text-slate-500">N/A (Insufficient Data)</span>
+              )}
             </div>
             <div className="text-xs text-slate-500">Based on closed incident outcomes</div>
           </div>

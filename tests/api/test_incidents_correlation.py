@@ -32,14 +32,20 @@ def test_incident_detail_timeline_and_notes():
             "source_ip": "203.0.113.88",
             "destination_ip": "10.0.1.20",
             "source_port": 43210,
-            "destination_port": 443,
+            "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 850000.0,
-            "flow_packets_s": 4200.0,
-            "packet_length_mean": 1200.0,
-            "syn_flag_count": 1.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res = client.post(
         "/api/v1/predict/single",

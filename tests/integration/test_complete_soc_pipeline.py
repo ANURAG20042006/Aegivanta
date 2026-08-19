@@ -66,20 +66,14 @@ def test_16_step_complete_operational_pipeline(monkeypatch):
     analyst_hdr = get_auth_headers("analyst")
     viewer_hdr = get_auth_headers("viewer")
 
-    # Track WebSocket broadcast events
+    # Track WebSocket broadcast events (capture broadcast payloads for assertion)
     ws_broadcasts = []
     from backend.app.api.v1.websockets import manager
-    from backend.app.services.predict_service import predict_service
 
     async def mock_broadcast(event_type: str, data: dict):
         ws_broadcasts.append({"type": event_type, "data": data})
 
     monkeypatch.setattr(manager, "broadcast_event", mock_broadcast)
-    monkeypatch.setattr(
-        predict_service,
-        "infer_packet_threat",
-        lambda vector, model_name: ("DDoS", 0.95, True, "Critical", {"DDoS": 0.95}, {"explanation_available": True})
-    )
 
     uid = uuid.uuid4().hex[:6]
     asset_ip = f"10.50.{uuid.uuid4().int % 200}.{uuid.uuid4().int % 200}"
@@ -101,24 +95,59 @@ def test_16_step_complete_operational_pipeline(monkeypatch):
     asset_data = asset_res.json()
     asset_id = asset_data["id"]
 
-    # Step 2 & 3: Submit telemetry & run ML prediction
+    # Step 2: Validate BENIGN flow does NOT create an incident or alert
+    flow_benign = {
+        "features": {
+            "source_ip": "192.168.1.50",
+            "destination_ip": asset_ip,
+            "source_port": 50000,
+            "destination_port": 80,
+            "protocol": "TCP",
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
+        },
+        "model_name": "Decision Tree"
+    }
+    benign_res = client.post("/api/v1/predict/single", json=flow_benign, headers=analyst_hdr)
+    assert benign_res.status_code == 200
+    benign_data = benign_res.json()
+    assert benign_data["attack_type"] == "BENIGN"
+    assert benign_data["is_malicious"] is False
+    assert benign_data["incident_id"] is None
+
+    # Step 3: Submit REAL MALICIOUS telemetry flow (actual ML inference pipeline execution)
     flow_1 = {
         "features": {
             "source_ip": "198.51.100.44",
             "destination_ip": asset_ip,
             "source_port": 54321,
-            "destination_port": 443,
+            "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 950000.0,
-            "flow_packets_s": 5000.0,
-            "packet_length_mean": 1400.0,
-            "syn_flag_count": 1.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res_1 = client.post("/api/v1/predict/single", json=flow_1, headers=analyst_hdr)
     assert pred_res_1.status_code == 200
     pred_data_1 = pred_res_1.json()
+    assert pred_data_1["is_malicious"] is True
     incident_id_1 = pred_data_1["incident_id"]
     assert incident_id_1 is not None
 
@@ -130,6 +159,7 @@ def test_16_step_complete_operational_pipeline(monkeypatch):
     assert inc_1["asset"]["name"] == asset_payload["name"]
     assert inc_1["alert_count"] == 1
     assert inc_1["risk_score"] > 0.0
+    assert inc_1["model_name"] == "LightGBM"
     assert len(inc_1["alerts"]) == 1
     assert len(inc_1["timeline"]) >= 1
     assert any(evt["event_type"] == "DETECTION" for evt in inc_1["timeline"])
@@ -144,14 +174,20 @@ def test_16_step_complete_operational_pipeline(monkeypatch):
             "source_ip": "198.51.100.44",
             "destination_ip": asset_ip,
             "source_port": 54322,
-            "destination_port": 443,
+            "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 960000.0,
-            "flow_packets_s": 5100.0,
-            "packet_length_mean": 1420.0,
-            "syn_flag_count": 1.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res_2 = client.post("/api/v1/predict/single", json=flow_2, headers=analyst_hdr)
     assert pred_res_2.status_code == 200
@@ -180,14 +216,20 @@ def test_16_step_complete_operational_pipeline(monkeypatch):
             "source_ip": "198.51.100.44",
             "destination_ip": asset_ip,
             "source_port": 54323,
-            "destination_port": 443,
+            "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 970000.0,
-            "flow_packets_s": 5200.0,
-            "packet_length_mean": 1450.0,
-            "syn_flag_count": 1.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res_3 = client.post("/api/v1/predict/single", json=flow_3, headers=analyst_hdr)
     assert pred_res_3.status_code == 200
@@ -205,14 +247,20 @@ def test_edge_case_unknown_unmapped_asset():
             "source_ip": "185.220.101.5",
             "destination_ip": "192.0.2.199",  # Unregistered destination IP
             "source_port": 40100,
-            "destination_port": 8080,
+            "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 500000.0,
-            "flow_packets_s": 3500.0,
-            "packet_length_mean": 800.0,
-            "syn_flag_count": 1.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res = client.post("/api/v1/predict/single", json=flow, headers=analyst_hdr)
     assert pred_res.status_code == 200
@@ -243,10 +291,18 @@ def test_edge_case_websocket_failure_does_not_fail_db_transaction(monkeypatch):
             "source_port": 50000,
             "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 400000.0,
-            "packet_length_mean": 600.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res = client.post("/api/v1/predict/single", json=flow, headers=analyst_hdr)
     assert pred_res.status_code == 200
@@ -299,13 +355,22 @@ def test_invalid_state_transitions():
             "source_port": 34567,
             "destination_port": 80,
             "protocol": "TCP",
-            "flow_duration": 300000.0,
-            "packet_length_mean": 500.0
+            "flow_duration": 5000000.0,
+            "total_fwd_packets": 1000.0,
+            "total_backward_packets": 0.0,
+            "total_length_of_fwd_packets": 500000.0,
+            "flow_packets_s": 10000.0,
+            "packet_length_mean": 500.0,
+            "fwd_header_length": 40000.0,
+            "syn_flag_count": 1.0,
+            "min_packet_length": 40.0,
+            "max_packet_length": 1460.0
         },
-        "model_name": "Random Forest"
+        "model_name": "LightGBM"
     }
     pred_res = client.post("/api/v1/predict/single", json=flow, headers=analyst_hdr)
     inc_id = pred_res.json()["incident_id"]
+    assert inc_id is not None
 
     # Illegal transition: DETECTED -> RESOLVED directly without triaging/investigating
     res_illegal = client.patch(

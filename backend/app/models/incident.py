@@ -60,8 +60,8 @@ class Incident(Base):
     is_malicious: Mapped[bool] = mapped_column(Boolean, nullable=False, index=True)
     severity: Mapped[str] = mapped_column(String(15), nullable=False, default="Low")  # Low, Medium, High, Critical
     
-    model_name: Mapped[str] = mapped_column(String(50), nullable=False, default="Random Forest")
-    model_version: Mapped[str] = mapped_column(String(50), nullable=False, default="xgboost-v1.0")
+    model_name: Mapped[str] = mapped_column(String(50), nullable=False, default="CatBoost")
+    model_version: Mapped[str] = mapped_column(String(50), nullable=False, default="catboost-v1.0")
     
     analyst: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

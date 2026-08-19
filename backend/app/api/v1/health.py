@@ -156,3 +156,46 @@ async def get_system_metrics(db: AsyncSession = Depends(get_db)) -> Dict[str, An
         "active_model": "CatBoost",
         "telemetry_source": "RUNTIME_MEASURED"
     }
+
+
+@router.get("/health/ml", summary="ML Inference Subsystem Health Probe")
+@router.get("/ml/health", summary="ML Inference Subsystem Health Probe")
+async def ml_health_probe(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
+    """
+    Detailed ML Inference Health Check.
+    Returns verified status of champion model, preprocessor, and active registry model.
+    Fail-safe, non-leaking diagnostic output.
+    """
+    artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)
+    if not artifact_dir.is_absolute():
+        artifact_dir = Path(__file__).resolve().parents[4] / artifact_dir
+
+    catboost_exists = (artifact_dir / "catboost.joblib").exists() or (artifact_dir / "best_model.joblib").exists()
+    preprocessor_exists = (artifact_dir / "preprocessor.joblib").exists()
+
+    active_name = "CatBoost"
+    active_version = "catboost-v1.0"
+    try:
+        res = await db.execute(select(ModelRegistry).where(ModelRegistry.is_active == True))
+        active_rec = res.scalar_one_or_none()
+        if active_rec:
+            active_name = active_rec.model_name
+            active_version = active_rec.model_version
+    except Exception:
+        pass
+
+    if catboost_exists and preprocessor_exists:
+        ml_status = "AVAILABLE"
+    elif catboost_exists or preprocessor_exists:
+        ml_status = "DEGRADED"
+    else:
+        ml_status = "UNAVAILABLE"
+
+    return {
+        "status": ml_status,
+        "model": active_name,
+        "model_version": active_version,
+        "loaded": catboost_exists,
+        "preprocessor_loaded": preprocessor_exists,
+        "operating_mode": settings.OPERATING_MODE
+    }

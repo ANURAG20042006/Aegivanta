@@ -86,6 +86,16 @@ async def init_db() -> None:
                     if col_name not in inc_cols:
                         sync_conn.execute(text(sql))
 
+            if "alerts" in table_names:
+                alt_cols = {col["name"] for col in inspector.get_columns("alerts")}
+                alt_migrations = [
+                    ("packet_length", "ALTER TABLE alerts ADD COLUMN packet_length INTEGER DEFAULT 0"),
+                    ("flow_duration", "ALTER TABLE alerts ADD COLUMN flow_duration FLOAT DEFAULT 0.0")
+                ]
+                for col_name, sql in alt_migrations:
+                    if col_name not in alt_cols:
+                        sync_conn.execute(text(sql))
+
             if "playbook_executions" in table_names:
                 pb_cols = {col["name"] for col in inspector.get_columns("playbook_executions")}
                 pb_migrations = [

@@ -213,22 +213,46 @@ class PredictService:
                 preds_arr = model.predict(processed_matrix)
                 class_idx = int(preds_arr[0])
 
-            # Map predicted index to Attack Class Name
-            classes = getattr(preprocessor, "label_encoder", None)
-            if classes and hasattr(classes, "classes_") and class_idx < len(classes.classes_):
-                attack_type = str(classes.classes_[class_idx])
+            # Map predicted index to Attack Class Name fail-safely
+            classes_le = getattr(preprocessor, "label_encoder", None)
+            if classes_le and hasattr(classes_le, "classes_") and len(classes_le.classes_) > 0:
+                if class_idx < len(classes_le.classes_):
+                    attack_type = str(classes_le.classes_[class_idx])
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=f"MODEL_CLASS_MAPPING_ERROR: Predicted class index {class_idx} exceeds label encoder class count {len(classes_le.classes_)}."
+                    )
+            elif hasattr(model, "classes_") and len(model.classes_) > 0:
+                if class_idx < len(model.classes_):
+                    attack_type = str(model.classes_[class_idx])
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail=f"MODEL_CLASS_MAPPING_ERROR: Predicted class index {class_idx} exceeds model class count {len(model.classes_)}."
+                    )
             elif class_idx < len(ATTACK_CLASSES):
                 attack_type = ATTACK_CLASSES[class_idx]
             else:
-                attack_type = "BENIGN"
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail=f"MODEL_CLASS_MAPPING_ERROR: Unable to map class index {class_idx} to a valid attack class."
+                )
 
-            is_malicious = (attack_type != "BENIGN")
+            is_malicious = bool(attack_type != "BENIGN")
 
             # Map Probability Dictionary if supported by model architecture
             probabilities = None
-            if probs_arr is not None and hasattr(preprocessor, "label_encoder") and hasattr(preprocessor.label_encoder, "classes_"):
+            if probs_arr is not None:
                 probabilities = {}
-                for idx, name in enumerate(preprocessor.label_encoder.classes_):
+                if classes_le and hasattr(classes_le, "classes_"):
+                    class_labels = classes_le.classes_
+                elif hasattr(model, "classes_"):
+                    class_labels = model.classes_
+                else:
+                    class_labels = ATTACK_CLASSES[:len(probs_arr)]
+
+                for idx, name in enumerate(class_labels):
                     if idx < len(probs_arr):
                         probabilities[str(name)] = round(float(probs_arr[idx]), 4)
 
@@ -341,8 +365,9 @@ class PredictService:
                     source_ip=vector.source_ip,
                     destination_ip=vector.destination_ip,
                     source_port=vector.source_port,
-                    destination_port=vector.destination_port,
-                    protocol=vector.protocol,
+                    protocol=vector.protocol or "TCP",
+                    packet_length=int(vector.packet_length_mean) if vector.packet_length_mean is not None else (int(vector.min_packet_length) if vector.min_packet_length is not None else 0),
+                    flow_duration=float(vector.flow_duration) if vector.flow_duration is not None else 0.0,
                     attack_type=attack_type,
                     status="new",
                     explanation=shap,
@@ -418,51 +443,17 @@ class PredictService:
                     logger.warning("WebSocket broadcast skipped: %s", ws_err)
 
             else:
-                # Benign Flow: Record Incident for telemetry tracking and baseline stats
-                incident = Incident(
-                    asset_id=asset.id if asset else None,
-                    source_ip=vector.source_ip,
-                    destination_ip=vector.destination_ip,
-                    source_port=vector.source_port,
-                    destination_port=vector.destination_port,
-                    protocol=vector.protocol,
-                    packet_length=int(vector.packet_length_mean),
-                    flow_duration=vector.flow_duration,
-                    attack_type=attack_type,
-                    confidence_score=confidence_score,
-                    is_malicious=False,
-                    severity=severity,
-                    model_name=model_name,
-                    timestamp=now_utc,
-                    first_seen=now_utc,
-                    last_seen=now_utc,
-                    feature_payload=vector.model_dump()
-                )
-                db.add(incident)
-                await db.flush()
-                target_incident_id = incident.id
-
-                # Record root timeline event
-                timeline_evt = IncidentTimelineEvent(
-                    incident_id=incident.id,
-                    timestamp=now_utc,
-                    event_type="DETECTION",
-                    title=f"Telemetry Inspected: {attack_type}",
-                    description=f"Flow from {vector.source_ip} to {vector.destination_ip} evaluated as {attack_type} by {model_name}.",
-                    actor="ML_ENGINE",
-                    metadata_payload={"model": model_name, "is_malicious": False}
-                )
-                db.add(timeline_evt)
-
+                # Benign Flow: Do NOT create Security Incident or Alert.
+                target_incident_id = None
                 sec_event = SecurityEvent(
                     asset_id=asset.id if asset else None,
                     source_ip=vector.source_ip,
                     destination_ip=vector.destination_ip,
                     source_port=vector.source_port,
                     destination_port=vector.destination_port,
-                    protocol=vector.protocol,
+                    protocol=vector.protocol or "TCP",
                     event_type="FLOW_INSPECTED_BENIGN",
-                    severity="info",
+                    severity="low",
                     model_prediction=attack_type,
                     confidence=confidence_score,
                     risk_score=0.0,

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from backend.app.config import settings, validate_production_settings
 from backend.app.core.logging import logger
@@ -141,6 +141,7 @@ async def initialize_application() -> None:
                         if not exists:
                             logger.warning("Model artifact for '%s' missing at '%s'; registry seeding skipped.", m_name, art_path)
                             continue
+                        is_champ = (m_name == "CatBoost")
                         db.add(ModelRegistry(
                             model_name=m_name,
                             model_version=f"{m_name.lower().replace(' ', '_')}-v1.0",
@@ -150,7 +151,8 @@ async def initialize_application() -> None:
                             precision_score=item.get("cv_precision_mean"),
                             recall_score=item.get("cv_recall_mean"),
                             roc_auc=item.get("cv_roc_auc"),
-                            is_active=False,
+                            is_active=is_champ,
+                            status="ACTIVE" if is_champ else "BENCHMARK",
                             artifact_path=str(art_path).replace("\\", "/"),
                             artifact_type=art_type,
                             artifact_sha256=actual_sha256
@@ -159,8 +161,16 @@ async def initialize_application() -> None:
                 except Exception as e:
                     logger.warning("Unable to seed ModelRegistry from metadata.json: %s", e)
 
-        if not user_exists or not model_exists:
-            await db.commit()
+        # Ensure active model is always registered if empty
+        active_cnt = (await db.execute(select(func.count(ModelRegistry.id)).where(ModelRegistry.is_active == True))).scalar_one()
+        if active_cnt == 0:
+            cb_model = (await db.execute(select(ModelRegistry).where(ModelRegistry.model_name == "CatBoost"))).scalar_one_or_none()
+            if cb_model:
+                cb_model.is_active = True
+                cb_model.status = "ACTIVE"
+                db.add(cb_model)
+
+        await db.commit()
 
         # Seed rich operational dataset for demo/development environments
         if settings.OPERATING_MODE.upper() in ["DEMO", "LAB"] or settings.APP_ENV.lower() == "development":

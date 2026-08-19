@@ -223,8 +223,10 @@ async def test_full_phase3_operational_lifecycle_pipeline():
 
         # Step 15: SOC Effectiveness KPIs (MTTD / MTTR)
         soc_ov = await SOCMetricsService.get_soc_overview(lookback_days=30, db=db)
-        assert soc_ov["mttd_minutes"] >= 0.0
-        assert soc_ov["mttr_minutes"] >= 0.0
+        if soc_ov["mttd_minutes"] is not None:
+            assert soc_ov["mttd_minutes"] >= 0.0
+        if soc_ov["mttr_minutes"] is not None:
+            assert soc_ov["mttr_minutes"] >= 0.0
 
         # Step 16: SOAR Response Approval Submission
         approval_req = await ResponseOrchestrator.request_action(
