@@ -10,11 +10,13 @@ import sys
 import shutil
 import json
 import subprocess
+import argparse
 
 
-def validate_cluster_state():
+def validate_cluster_state(namespace: str = "sentinelai", timeout: int = 300) -> int:
     print("=================================================================")
     print("     SentinelAI Live Kubernetes Cluster Deployment Validator     ")
+    print(f"Target Namespace : {namespace} (Timeout: {timeout}s)")
     print("=================================================================")
 
     kubectl = shutil.which("kubectl")
@@ -33,22 +35,21 @@ def validate_cluster_state():
         print("=================================================================")
         return 2
 
-    ns = "sentinelai"
-    print(f"Inspecting namespace '{ns}' on active cluster...")
+    print(f"Inspecting namespace '{namespace}' on active cluster...")
 
     # Query Pods in JSON
     pods_res = subprocess.run(
-        [kubectl, "get", "pods", "-n", ns, "-o", "json"],
+        [kubectl, "get", "pods", "-n", namespace, "-o", "json"],
         capture_output=True, text=True
     )
     if pods_res.returncode != 0:
-        print(f"STATUS : FAILED -- Unable to query pods in namespace '{ns}': {pods_res.stderr.strip()}")
+        print(f"STATUS : FAILED -- Unable to query pods in namespace '{namespace}': {pods_res.stderr.strip()}")
         return 1
 
     try:
         pods_data = json.loads(pods_res.stdout)
         items = pods_data.get("items", [])
-        print(f"Discovered {len(items)} pod(s) in namespace '{ns}':")
+        print(f"Discovered {len(items)} pod(s) in namespace '{namespace}':")
 
         all_ready = True
         for pod in items:
@@ -59,16 +60,24 @@ def validate_cluster_state():
             ready = all(cs.get("ready", False) for cs in c_statuses) if c_statuses else False
             restarts = sum(cs.get("restartCount", 0) for cs in c_statuses)
 
-            print(f"  - Pod: {p_name:<35} | Phase: {phase:<10} | Ready: {str(ready):<6} | Restarts: {restarts}")
-            if not ready or phase != "Running":
+            # Check for crashloop or imagepull failures
+            waiting_reasons = [
+                cs.get("state", {}).get("waiting", {}).get("reason", "")
+                for cs in c_statuses
+            ]
+            has_error = any(r in ("CrashLoopBackOff", "ImagePullBackOff", "ErrImagePull") for r in waiting_reasons)
+
+            status_str = "ERROR" if has_error else ("Ready" if ready else "Unready")
+            print(f"  - Pod: {p_name:<35} | Phase: {phase:<10} | Status: {status_str:<8} | Restarts: {restarts}")
+            if not ready or phase != "Running" or has_error:
                 all_ready = False
 
         if not items:
-            print(f"  [WARN] Zero pods deployed in namespace '{ns}'. Run 'kubectl apply -f k8s/' first.")
+            print(f"  [WARN] Zero pods deployed in namespace '{namespace}'. Run 'kubectl apply -f k8s/' first.")
             return 1
 
         # Check Services & Endpoints
-        svc_res = subprocess.run([kubectl, "get", "endpoints", "-n", ns, "-o", "json"], capture_output=True, text=True)
+        svc_res = subprocess.run([kubectl, "get", "endpoints", "-n", namespace, "-o", "json"], capture_output=True, text=True)
         if svc_res.returncode == 0:
             svc_data = json.loads(svc_res.stdout)
             print("\nService Endpoints:")
@@ -79,12 +88,12 @@ def validate_cluster_state():
                 print(f"  - Endpoint: {ep_name:<30} | Ready Addresses: {addr_count}")
 
         # Check HPA Status
-        hpa_res = subprocess.run([kubectl, "get", "hpa", "-n", ns], capture_output=True, text=True)
+        hpa_res = subprocess.run([kubectl, "get", "hpa", "-n", namespace], capture_output=True, text=True)
         print("\nHorizontal Pod Autoscalers:")
         print(hpa_res.stdout if hpa_res.returncode == 0 else "  HPA query returned non-zero exit.")
 
         # Check PDB Status
-        pdb_res = subprocess.run([kubectl, "get", "pdb", "-n", ns], capture_output=True, text=True)
+        pdb_res = subprocess.run([kubectl, "get", "pdb", "-n", namespace], capture_output=True, text=True)
         print("\nPod Disruption Budgets:")
         print(pdb_res.stdout if pdb_res.returncode == 0 else "  PDB query returned non-zero exit.")
 
@@ -96,10 +105,19 @@ def validate_cluster_state():
             return 1
 
     except Exception as exc:
-        print(f"Error parsing cluster status: {exc}")
+        print(f"[FAIL] Error parsing cluster status: {exc}")
         return 1
 
 
+def main():
+    parser = argparse.ArgumentParser(description="SentinelAI Cluster Deployment Validator")
+    parser.add_argument("--namespace", default="sentinelai", help="Kubernetes namespace")
+    parser.add_argument("--timeout", type=int, default=300, help="Wait timeout in seconds")
+    args = parser.parse_args()
+
+    exit_code = validate_cluster_state(namespace=args.namespace, timeout=args.timeout)
+    sys.exit(exit_code)
+
+
 if __name__ == "__main__":
-    code = validate_cluster_state()
-    sys.exit(code)
+    main()

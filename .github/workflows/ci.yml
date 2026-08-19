@@ -99,3 +99,30 @@ jobs:
             exit 1
           fi
           echo "Verified: Docker Compose correctly fails closed when required environment variables are unset."
+
+  optional-live-k8s-validation:
+    name: Optional Live Kubernetes Server-Side Validation
+    runs-on: ubuntu-latest
+    if: ${{ vars.LIVE_K8S_VALIDATION == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Preflight Kubernetes Environment Check
+        run: |
+          python scripts/preflight_kubernetes.py || exit_code=$?
+          if [ "${exit_code:-0}" -eq 2 ]; then
+            echo "::notice ::Kubernetes environment unavailable -- skipping live cluster validation."
+            exit 0
+          elif [ "${exit_code:-0}" -ne 0 ]; then
+            echo "::error ::Kubernetes preflight failed with critical error."
+            exit 1
+          fi
+
+      - name: Run Server-Side Manifest Dry-Run Validation
+        run: |
+          python scripts/validate_k8s_live.py
