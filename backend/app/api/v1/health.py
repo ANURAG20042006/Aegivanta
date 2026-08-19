@@ -199,3 +199,64 @@ async def ml_health_probe(db: AsyncSession = Depends(get_db)) -> Dict[str, Any]:
         "preprocessor_loaded": preprocessor_exists,
         "operating_mode": settings.OPERATING_MODE
     }
+
+
+@router.get("/metrics/prometheus", summary="Prometheus Exposition Metrics Endpoint")
+async def prometheus_metrics(db: AsyncSession = Depends(get_db)):
+    """
+    Exposes standardized Prometheus metrics for scraper consumption.
+    Includes uptime, database health, streaming metrics, and memory utilization.
+    """
+    from fastapi.responses import PlainTextResponse
+    from backend.app.services.stream_service import stream_engine
+
+    uptime_sec = round(time.time() - _APP_START_TIME, 2)
+    stream_m = stream_engine.get_stream_metrics()
+
+    t0 = time.perf_counter()
+    db_ok = 1
+    try:
+        res = await db.execute(text("SELECT 1"))
+        if res.scalar() != 1:
+            db_ok = 0
+    except Exception:
+        db_ok = 0
+    db_latency_ms = round((time.perf_counter() - t0) * 1000.0, 3)
+
+    lines = [
+        "# HELP sentinel_uptime_seconds Application uptime in seconds",
+        "# TYPE sentinel_uptime_seconds gauge",
+        f"sentinel_uptime_seconds {uptime_sec}",
+        "",
+        "# HELP sentinel_database_healthy Database connectivity status (1 = healthy, 0 = unhealthy)",
+        "# TYPE sentinel_database_healthy gauge",
+        f"sentinel_database_healthy {db_ok}",
+        "",
+        "# HELP sentinel_database_latency_ms Database roundtrip latency in milliseconds",
+        "# TYPE sentinel_database_latency_ms gauge",
+        f"sentinel_database_latency_ms {db_latency_ms}",
+        "",
+        "# HELP sentinel_stream_ingested_total Total streaming telemetry events ingested",
+        "# TYPE sentinel_stream_ingested_total counter",
+        f"sentinel_stream_ingested_total {stream_m['total_ingested']}",
+        "",
+        "# HELP sentinel_stream_processed_total Total streaming telemetry events processed successfully",
+        "# TYPE sentinel_stream_processed_total counter",
+        f"sentinel_stream_processed_total {stream_m['total_processed']}",
+        "",
+        "# HELP sentinel_stream_duplicates_total Total duplicate telemetry events rejected by deduplication gate",
+        "# TYPE sentinel_stream_duplicates_total counter",
+        f"sentinel_stream_duplicates_total {stream_m['total_duplicates']}",
+        "",
+        "# HELP sentinel_stream_dlq_total Total events routed to Dead Letter Queue",
+        "# TYPE sentinel_stream_dlq_total counter",
+        f"sentinel_stream_dlq_total {stream_m['total_dlq']}",
+        "",
+        "# HELP sentinel_stream_dlq_depth Current depth of in-memory Dead Letter Queue",
+        "# TYPE sentinel_stream_dlq_depth gauge",
+        f"sentinel_stream_dlq_depth {stream_m['dlq_depth']}",
+        ""
+    ]
+
+    return PlainTextResponse("\n".join(lines), media_type="text/plain; version=0.0.4; charset=utf-8")
+

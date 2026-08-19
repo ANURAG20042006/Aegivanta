@@ -132,7 +132,6 @@ class PredictService:
         Executes actual machine learning model inference using loaded preprocessor & model artifacts.
         Fails closed on missing or corrupted artifacts. No hardcoded attack rules.
         """
-        model, preprocessor = cls._load_artifacts(model_name)
         raw_dict = vector.model_dump()
 
         # Step 3: Validate Feature Schema Contract (Fail-closed -> HTTP 400)
@@ -142,6 +141,46 @@ class PredictService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Feature schema validation failed: {schema_errors}"
             )
+
+        # Handle Ensemble Threat Detection Strategy
+        if model_name and model_name.strip().lower() in ["ensemble", "multi-model ensemble", "ensemble model"]:
+            from backend.app.services.ensemble_service import ensemble_detector
+            models_to_run = ["CatBoost", "LightGBM", "Random Forest", "Decision Tree", "XGBoost"]
+            predictions_map = {}
+            last_shap = None
+
+            for m in models_to_run:
+                try:
+                    att_t, conf, is_mal, sev, probs, shap = cls.infer_packet_threat(vector, model_name=m)
+                    predictions_map[m] = (att_t, conf or 0.5, probs or {att_t: 1.0})
+                    if shap:
+                        last_shap = shap
+                except Exception as m_err:
+                    logger.debug("Ensemble sub-model %s skipped or failed: %s", m, m_err)
+
+            if not predictions_map:
+                # Fallback to champion CatBoost
+                return cls.infer_packet_threat(vector, model_name="CatBoost")
+
+            ens_res = ensemble_detector.aggregate_predictions(predictions_map)
+            attack_type = ens_res["final_prediction"]
+            calibrated_conf = ens_res["calibrated_confidence"]
+            is_malicious = ens_res["is_malicious"]
+            severity = ens_res["severity"]
+            probabilities = {m: ens_res["individual_confidences"].get(m, 0.0) for m in models_to_run if m in ens_res["individual_confidences"]}
+
+            ens_shap = {
+                "summary": f"Multi-Model Ensemble Decision ({ens_res['model_agreement_pct']}% agreement across {len(predictions_map)} models).",
+                "features": last_shap.get("features", []) if last_shap else [],
+                "model_agreement_pct": ens_res["model_agreement_pct"],
+                "individual_predictions": ens_res["individual_predictions"],
+                "calibrated_confidence": calibrated_conf,
+                "raw_confidence": ens_res["raw_confidence"],
+                "ensemble_strategy": ens_res["ensemble_strategy"]
+            }
+            return attack_type, calibrated_conf, is_malicious, severity, probabilities, ens_shap
+
+        model, preprocessor = cls._load_artifacts(model_name)
 
         # Step 4: Model/Artifact Integrity & Compatibility Check
         artifact_dir = Path(settings.MODEL_ARTIFACTS_DIR)

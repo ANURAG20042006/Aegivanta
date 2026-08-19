@@ -12,7 +12,7 @@ Correlates incoming alerts into unified security incidents based on:
 
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any, List
 from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.core.logging import logger
@@ -26,10 +26,31 @@ from backend.app.services.risk_engine import RiskScoringEngine
 CORRELATION_WINDOW_SECONDS = 300  # 5 minutes
 
 
+# Authoritative MITRE ATT&CK Mapping Catalog
+MITRE_ATTACK_MAPPINGS = {
+    "Port Scan": {"tactic": "Discovery", "technique_id": "T1046", "technique_name": "Network Service Discovery"},
+    "SSH-Patator": {"tactic": "Credential Access", "technique_id": "T1110", "technique_name": "Brute Force"},
+    "FTP-Patator": {"tactic": "Credential Access", "technique_id": "T1110", "technique_name": "Brute Force"},
+    "Brute Force": {"tactic": "Credential Access", "technique_id": "T1110", "technique_name": "Brute Force"},
+    "SQL Injection": {"tactic": "Initial Access", "technique_id": "T1190", "technique_name": "Exploit Public-Facing Application"},
+    "XSS": {"tactic": "Initial Access", "technique_id": "T1190", "technique_name": "Exploit Public-Facing Application"},
+    "Malware": {"tactic": "Command and Control", "technique_id": "T1071", "technique_name": "Application Layer Protocol"},
+    "Botnet": {"tactic": "Command and Control", "technique_id": "T1071", "technique_name": "Application Layer Protocol"},
+    "Data Exfiltration": {"tactic": "Exfiltration", "technique_id": "T1041", "technique_name": "Exfiltration Over C2 Channel"},
+    "DDoS": {"tactic": "Impact", "technique_id": "T1498", "technique_name": "Network Denial of Service"},
+    "DoS Hulk": {"tactic": "Impact", "technique_id": "T1498", "technique_name": "Network Denial of Service"},
+    "DoS GoldenEye": {"tactic": "Impact", "technique_id": "T1498", "technique_name": "Network Denial of Service"},
+    "DoS Slowloris": {"tactic": "Impact", "technique_id": "T1498", "technique_name": "Network Denial of Service"},
+    "ARP Spoofing": {"tactic": "Defense Evasion", "technique_id": "T1557", "technique_name": "Adversary-in-the-Middle"},
+    "DNS Spoofing": {"tactic": "Defense Evasion", "technique_id": "T1557", "technique_name": "Adversary-in-the-Middle"},
+    "Ransomware": {"tactic": "Impact", "technique_id": "T1486", "technique_name": "Data Encrypted for Impact"}
+}
+
+
 class IncidentCorrelationEngine:
     """
     Correlates security alerts deterministically into managed incidents
-    and maintains chronological attack timelines.
+    and maintains chronological attack timelines with MITRE ATT&CK progression.
     """
 
     SEVERITY_HIERARCHY = {
@@ -40,6 +61,14 @@ class IncidentCorrelationEngine:
         "CRITICAL": 4
     }
     SEVERITY_NAMES = {0: "Info", 1: "Low", 2: "Medium", 3: "High", 4: "Critical"}
+
+    @classmethod
+    def get_mitre_mapping(cls, attack_type: str) -> Dict[str, str]:
+        """Resolves MITRE ATT&CK tactic and technique for a given attack classification."""
+        return MITRE_ATTACK_MAPPINGS.get(
+            attack_type,
+            {"tactic": "Impact", "technique_id": "T1498", "technique_name": "Network Denial of Service"}
+        )
 
     @classmethod
     def determine_incident_severity(
@@ -80,25 +109,29 @@ class IncidentCorrelationEngine:
         asset: Optional[ProtectedAsset] = None
     ) -> Tuple[Incident, IncidentTimelineEvent]:
         """
-        Ingests a new Alert, correlates with active incidents or creates a new incident,
-        appends a timeline event, updates asset risk, and persists state.
+        Correlates an incoming Alert with an existing active Incident or creates a new Incident.
+        Returns: (incident, timeline_event)
         """
-        now = datetime.now(timezone.utc)
         window_start = alert.timestamp - timedelta(seconds=CORRELATION_WINDOW_SECONDS)
+        asset_crit = asset.criticality if asset else "medium"
+        mitre_info = cls.get_mitre_mapping(alert.attack_type)
+
+        # Search for active incident matching correlation criteria
+        # Match criteria: Same destination_ip/asset OR same source_ip, within time window, NOT resolved/closed
+        active_statuses = ["DETECTED", "TRIAGED", "INVESTIGATING", "CONTAINED"]
         
-        # Search for active candidate incident within correlation time window
         stmt = (
             select(Incident)
             .where(
                 and_(
-                    Incident.status.in_(["DETECTED", "TRIAGED", "INVESTIGATING"]),
+                    Incident.status.in_(active_statuses),
                     Incident.last_seen >= window_start,
                     or_(
                         and_(Incident.asset_id.isnot(None), Incident.asset_id == alert.asset_id),
-                        Incident.destination_ip == alert.destination_ip
+                        and_(Incident.destination_ip.isnot(None), Incident.destination_ip == alert.destination_ip)
                     ),
                     or_(
-                        Incident.source_ip == alert.source_ip,
+                        and_(Incident.source_ip.isnot(None), Incident.source_ip == alert.source_ip),
                         Incident.attack_type == alert.attack_type
                     )
                 )
@@ -106,12 +139,9 @@ class IncidentCorrelationEngine:
             .order_by(Incident.last_seen.desc())
             .limit(1)
         )
-        
         result = await db.execute(stmt)
         existing_incident = result.scalar_one_or_none()
-        
-        asset_crit = asset.criticality if asset else "medium"
-        
+
         if existing_incident:
             # 1. Correlate with existing active incident
             existing_incident.alert_count += 1
@@ -154,13 +184,16 @@ class IncidentCorrelationEngine:
                 timestamp=alert.timestamp,
                 event_type="ALERT_CORRELATED",
                 title=f"Correlated Alert: {alert.alert_id}",
-                description=f"Correlated {alert.severity.upper()} {alert.attack_type} attack flow from {alert.source_ip} (Total alerts: {existing_incident.alert_count}, Incident Severity: {existing_incident.severity})",
+                description=f"Correlated {alert.severity.upper()} {alert.attack_type} attack flow from {alert.source_ip} (Total alerts: {existing_incident.alert_count}, Incident Severity: {existing_incident.severity}, MITRE: {mitre_info['tactic']} [{mitre_info['technique_id']}])",
                 actor="CORRELATION_ENGINE",
                 metadata_payload={
                     "alert_id": alert.alert_id,
                     "severity": alert.severity,
                     "confidence": alert.confidence,
-                    "risk_score": alert.risk_score
+                    "risk_score": alert.risk_score,
+                    "mitre_tactic": mitre_info["tactic"],
+                    "mitre_technique_id": mitre_info["technique_id"],
+                    "mitre_technique_name": mitre_info["technique_name"]
                 }
             )
             db.add(timeline_event)
@@ -180,7 +213,7 @@ class IncidentCorrelationEngine:
                 alert_id=alert.alert_id,
                 asset_id=alert.asset_id,
                 title=title,
-                description=f"Automated security incident initiated by ML threat detection ({alert.attack_type}) from {alert.source_ip}.",
+                description=f"Automated security incident initiated by ML threat detection ({alert.attack_type}) from {alert.source_ip}. MITRE Tactic: {mitre_info['tactic']} ({mitre_info['technique_id']}).",
                 status="DETECTED",
                 risk_score=alert.risk_score,
                 alert_count=1,
@@ -212,18 +245,23 @@ class IncidentCorrelationEngine:
                 timestamp=alert.timestamp,
                 event_type="DETECTION",
                 title=f"Incident Initiated: {incident_code}",
-                description=f"Initial {alert.severity.upper()} {alert.attack_type} threat detected by {alert.source}.",
+                description=f"Initial {alert.severity.upper()} {alert.attack_type} threat detected by {alert.source}. MITRE Tactic: {mitre_info['tactic']} [{mitre_info['technique_id']}].",
                 actor="CORRELATION_ENGINE",
                 metadata_payload={
                     "initial_alert_id": alert.alert_id,
                     "source_ip": alert.source_ip,
                     "destination_ip": alert.destination_ip,
-                    "confidence": alert.confidence
+                    "severity": alert.severity,
+                    "confidence": alert.confidence,
+                    "risk_score": alert.risk_score,
+                    "mitre_tactic": mitre_info["tactic"],
+                    "mitre_technique_id": mitre_info["technique_id"],
+                    "mitre_technique_name": mitre_info["technique_name"]
                 }
             )
             db.add(timeline_event)
             target_incident = new_incident
-            logger.info("Created new incident %s from alert %s", incident_code, alert.alert_id)
+            logger.info("Initiated new incident %s from alert %s", incident_code, alert.alert_id)
 
         # Update Asset risk score and last_seen timestamp if associated
         if asset:

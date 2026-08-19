@@ -32,6 +32,13 @@ class RequestTimingAndAuditMiddleware(BaseHTTPMiddleware):
             process_time = (time.time() - start_time) * 1000.0  # milliseconds
             response.headers["X-Process-Time-Ms"] = f"{process_time:.2f}"
             response.headers["X-Request-ID"] = request_id
+            
+            # Security Hardening Response Headers (Phase 2 Step 6)
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
             # Log request telemetry with correlation request_id
             logger.info(
