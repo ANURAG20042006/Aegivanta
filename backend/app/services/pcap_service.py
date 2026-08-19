@@ -295,27 +295,43 @@ class BidirectionalFlowAggregator:
         # Sort packets chronologically
         sorted_pkts = sorted(packets, key=lambda p: p.timestamp_float)
 
-        # Map 5-tuple key -> Flow session data
-        # Canonical flow key is the 5-tuple of the first observed packet in the flow
+        # Map canonical endpoint pair -> Initiator 5-tuple session key
+        canonical_map: Dict[Tuple, Tuple] = {}
         flow_sessions: Dict[Tuple, Dict[str, Any]] = {}
 
         for pkt in sorted_pkts:
-            fwd_key = (pkt.src_ip, pkt.dst_ip, pkt.src_port, pkt.dst_port, pkt.protocol)
-            bwd_key = (pkt.dst_ip, pkt.src_ip, pkt.dst_port, pkt.src_port, pkt.protocol)
+            endpoint_a = (pkt.src_ip, pkt.src_port)
+            endpoint_b = (pkt.dst_ip, pkt.dst_port)
+            canonical_endpoint_key = (
+                min(endpoint_a, endpoint_b),
+                max(endpoint_a, endpoint_b),
+                pkt.protocol
+            )
 
-            if fwd_key in flow_sessions:
-                session = flow_sessions[fwd_key]
-                session["fwd_packets"].append(pkt)
-                session["all_packets"].append(pkt)
-            elif bwd_key in flow_sessions:
-                session = flow_sessions[bwd_key]
-                session["bwd_packets"].append(pkt)
+            if canonical_endpoint_key in canonical_map:
+                initiator_key = canonical_map[canonical_endpoint_key]
+                session = flow_sessions[initiator_key]
+                # If packet travels in same direction as initiator -> FWD, else BWD
+                if (pkt.src_ip, pkt.dst_ip, pkt.src_port, pkt.dst_port) == (
+                    session["initiator_src_ip"],
+                    session["initiator_dst_ip"],
+                    session["initiator_src_port"],
+                    session["initiator_dst_port"]
+                ):
+                    session["fwd_packets"].append(pkt)
+                else:
+                    session["bwd_packets"].append(pkt)
                 session["all_packets"].append(pkt)
             else:
-                # Initialize new bidirectional flow session
-                flow_sessions[fwd_key] = {
-                    "key": fwd_key,
+                initiator_key = (pkt.src_ip, pkt.dst_ip, pkt.src_port, pkt.dst_port, pkt.protocol)
+                canonical_map[canonical_endpoint_key] = initiator_key
+                flow_sessions[initiator_key] = {
+                    "key": initiator_key,
                     "first_packet": pkt,
+                    "initiator_src_ip": pkt.src_ip,
+                    "initiator_dst_ip": pkt.dst_ip,
+                    "initiator_src_port": pkt.src_port,
+                    "initiator_dst_port": pkt.dst_port,
                     "fwd_packets": [pkt],
                     "bwd_packets": [],
                     "all_packets": [pkt]
@@ -323,7 +339,7 @@ class BidirectionalFlowAggregator:
 
         # Derive 30-feature vector for each completed flow
         flow_vectors: List[PacketFeatureVector] = []
-        for fwd_key, session in flow_sessions.items():
+        for initiator_key, session in flow_sessions.items():
             vector = cls._extract_flow_feature_vector(session)
             if vector:
                 flow_vectors.append(vector)
