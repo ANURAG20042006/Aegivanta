@@ -146,13 +146,30 @@ export const saasApi = {
     const res = await axios.get(`${API_BASE}/sensors`, getAuthHeaders());
     return res.data;
   },
-  enrollSensor: async (data: { name: string; hostname: string; ip_address: string; os_type?: string }): Promise<any> => {
+  enrollSensor: async (data: { name: string; hostname: string; ip_address: string; os_type?: string; sensor_type?: string }): Promise<any> => {
     const res = await axios.post(`${API_BASE}/sensors/enroll`, data, getAuthHeaders());
     return res.data;
   },
   revokeSensor: async (sensorId: string): Promise<void> => {
     await axios.delete(`${API_BASE}/sensors/${sensorId}`, getAuthHeaders());
   },
+  rotateSensorToken: async (sensorId: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/sensors/${sensorId}/rotate-token`, {}, getAuthHeaders());
+    return res.data;
+  },
+  scheduleSensorUpgrade: async (sensorId: string, target_version: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/sensors/${sensorId}/upgrade`, { target_version }, getAuthHeaders());
+    return res.data;
+  },
+  getSensorInstallCommand: async (sensorId: string, os_type?: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/sensors/${sensorId}/install-command?os_type=${os_type || 'linux'}`, getAuthHeaders());
+    return res.data;
+  },
+  getFleetHealth: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/sensors/fleet/health`, getAuthHeaders());
+    return res.data;
+  },
+
 
   // Integrations
   listIntegrations: async (): Promise<IntegrationItem[]> => {
