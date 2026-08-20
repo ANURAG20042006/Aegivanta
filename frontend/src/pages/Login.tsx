@@ -29,7 +29,9 @@ export const Login: React.FC = () => {
 
   const setQuickUsername = (user: string) => {
     setUsername(user);
-    setPassword('');
+    if (user === 'admin') setPassword('Admin_Secure2026!');
+    else if (user === 'analyst') setPassword('Analyst_Secure2026!');
+    else if (user === 'viewer') setPassword('Viewer_Secure2026!');
   };
 
   return (
@@ -101,27 +103,33 @@ export const Login: React.FC = () => {
         {showDemoAccounts && (
           <div className="pt-4 border-t border-slate-800">
             <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest text-center mb-2">
-              Select demo account username
+              One-Click Demo Accounts
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
+                type="button"
                 onClick={() => setQuickUsername('admin')}
-                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-cyan-400 hover:border-cyan-500/40"
+                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-cyan-400 hover:border-cyan-500/40 text-center cursor-pointer"
               >
                 admin
               </button>
               <button
+                type="button"
                 onClick={() => setQuickUsername('analyst')}
-                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-emerald-400 hover:border-emerald-500/40"
+                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-emerald-400 hover:border-emerald-500/40 text-center cursor-pointer"
               >
                 analyst
               </button>
               <button
+                type="button"
                 onClick={() => setQuickUsername('viewer')}
-                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-slate-400 hover:border-slate-700"
+                className="py-1.5 px-2 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-slate-400 hover:border-slate-700 text-center cursor-pointer"
               >
                 viewer
               </button>
+            </div>
+            <div className="text-[9px] font-mono text-slate-500 text-center mt-2">
+              Pass: <span className="text-slate-400 font-semibold">[Role]_Secure2026!</span>
             </div>
           </div>
         )}
