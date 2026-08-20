@@ -67,6 +67,7 @@ REQUIRED_PACKAGES = [
     ("matplotlib",       "matplotlib",        "__version__"),
     ("pytest",           "pytest",            "__version__"),
     ("httpx",            "httpx",             "__version__"),
+    ("fakeredis",        "fakeredis",         "__version__"),
 ]
 
 OPTIONAL_PACKAGES = [
