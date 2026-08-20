@@ -19,6 +19,7 @@ from backend.app.models.response_approval import ResponseApproval
 from backend.app.models.attack_coverage import AttackCoverageSnapshot
 from backend.app.models.job import BackgroundJob
 from backend.app.models.response import ResponsePolicy, ResponseActionRecord, IdempotencyRecord, ResponseAuditLog
+from backend.app.models.feedback import DetectionFeedback, VALID_FEEDBACK_VERDICTS
 
 __all__ = [
     "User",
@@ -50,5 +51,6 @@ __all__ = [
     "ResponsePolicy",
     "ResponseActionRecord",
     "IdempotencyRecord",
-    "ResponseAuditLog"
+    "ResponseAuditLog",
+    "DetectionFeedback"
 ]

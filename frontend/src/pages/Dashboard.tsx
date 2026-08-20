@@ -15,6 +15,7 @@ import { MitreMatrixWidget } from '../components/dashboard/MitreMatrixWidget';
 import { ThreatIntelPanel } from '../components/dashboard/ThreatIntelPanel';
 import { SOARCommandPanel } from '../components/dashboard/SOARCommandPanel';
 import { SystemHealthMatrix } from '../components/dashboard/SystemHealthMatrix';
+import { AdaptiveDetectionPanel } from '../components/dashboard/AdaptiveDetectionPanel';
 import { AttackDistributionChart } from '../components/charts/AttackDistributionChart';
 import { PacketTable } from '../components/tables/PacketTable';
 import { RemediationModal } from '../components/dashboard/RemediationModal';
@@ -130,7 +131,10 @@ export const Dashboard: React.FC = () => {
         <SystemHealthMatrix />
       </div>
 
-      {/* 7. Live Packet Inspection & Telemetry Grid */}
+      {/* 7. Phase 3.10 Adaptive ML Detection Intelligence & Model Governance */}
+      <AdaptiveDetectionPanel />
+
+      {/* 8. Live Packet Inspection & Telemetry Grid */}
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Activity className="w-4 h-4 text-cyan-400" />

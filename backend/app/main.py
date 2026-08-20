@@ -44,6 +44,7 @@ from backend.app.api.v1.attack_coverage import router as attack_coverage_router
 from backend.app.api.v1.soc_metrics import router as soc_metrics_router
 from backend.app.api.v1.telemetry import router as telemetry_router
 from backend.app.api.v1.dashboard import router as dashboard_router
+from backend.app.api.v1.adaptive_ml import router as adaptive_ml_router
 
 
 from dotenv import load_dotenv
@@ -272,4 +273,27 @@ app.include_router(attack_coverage_router, prefix=settings.API_V1_STR)
 app.include_router(soc_metrics_router, prefix=settings.API_V1_STR)
 app.include_router(telemetry_router, prefix=settings.API_V1_STR)
 app.include_router(dashboard_router, prefix=settings.API_V1_STR)
+app.include_router(adaptive_ml_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
+# ---------------------------------------------------------------------------
+# Phase 3.12: Prometheus /metrics endpoint
+# ---------------------------------------------------------------------------
+from fastapi.responses import Response as FastAPIResponse
+from backend.app.observability.metrics import get_metrics_response, PROMETHEUS_AVAILABLE
+from backend.app.observability.structured_logging import configure_structured_logging
+
+# Initialize structured JSON logging at startup
+configure_structured_logging(level="INFO", service_name="SentinelAI")
+
+
+@app.get(
+    "/metrics",
+    include_in_schema=False,
+    summary="Prometheus metrics endpoint",
+    description="Exposes Prometheus-format metrics for scraping. Restricted to internal monitoring."
+)
+async def prometheus_metrics():
+    """Prometheus /metrics scrape endpoint."""
+    content, content_type = get_metrics_response()
+    return FastAPIResponse(content=content, media_type=content_type)

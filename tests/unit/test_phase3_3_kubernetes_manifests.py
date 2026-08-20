@@ -108,14 +108,21 @@ def test_health_probes_configured_on_api():
 
 
 def test_hpa_and_pdb_configuration():
-    """Verify HPA scales both API and Worker, and PDB guarantees minAvailable >= 1."""
+    """Verify HPA scales both API and Worker roles, and PDB guarantees minAvailable >= 1.
+    Phase 3.11: HPAs are now per worker role (detection, response, threat-intel, hunting).
+    The legacy 'sentinelai-worker' generic HPA has been replaced with role-specific HPAs.
+    """
     manifests = load_all_manifests()
 
     hpas = [doc for name, doc in manifests if doc.get("kind") == "HorizontalPodAutoscaler"]
-    assert len(hpas) >= 2
+    assert len(hpas) >= 3, f"Expected >= 3 HPAs (API + worker roles), got {len(hpas)}"
     hpa_targets = {h["spec"]["scaleTargetRef"]["name"] for h in hpas}
     assert "sentinelai-api" in hpa_targets
-    assert "sentinelai-worker" in hpa_targets
+
+    # Phase 3.11: at least one worker role HPA must be present
+    worker_hpa_targets = {t for t in hpa_targets if "worker" in t}
+    assert len(worker_hpa_targets) >= 1, \
+        f"Expected at least 1 worker-role HPA, got: {hpa_targets}"
 
     pdbs = [doc for name, doc in manifests if doc.get("kind") == "PodDisruptionBudget"]
     assert len(pdbs) >= 2

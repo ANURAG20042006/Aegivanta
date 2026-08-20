@@ -47,5 +47,14 @@ class ModelRegistry(Base):
     promotion_reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     confusion_matrix: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     per_class_metrics: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    
+    # Phase 3.10 Model Governance & Monitoring
+    training_dataset: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default="CIC-IDS2017-Balanced")
+    features_list: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    approval_status: Mapped[str] = mapped_column(String(30), default="PENDING_REVIEW", nullable=False)
+    approved_by: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    approval_notes: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    performance_thresholds: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
 

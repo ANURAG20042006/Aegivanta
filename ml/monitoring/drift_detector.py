@@ -220,7 +220,22 @@ class AccumulatedWindowDriftDetector:
             correct = sum(1 for p, g in self.production_ground_truth_window if p == g)
             accuracy = correct / len(self.production_ground_truth_window)
             performance_metrics["accuracy"] = round(accuracy, 4)
-            if accuracy < 0.80:
+            
+            # Compute Precision, Recall, FPR for binary/multiclass ground-truth evaluation
+            tp = sum(1 for p, g in self.production_ground_truth_window if p == g and g != "BENIGN")
+            fp = sum(1 for p, g in self.production_ground_truth_window if p != "BENIGN" and g == "BENIGN")
+            fn = sum(1 for p, g in self.production_ground_truth_window if p == "BENIGN" and g != "BENIGN")
+            tn = sum(1 for p, g in self.production_ground_truth_window if p == "BENIGN" and g == "BENIGN")
+            
+            precision = tp / max(tp + fp, 1) if (tp + fp) > 0 else 1.0
+            recall = tp / max(tp + fn, 1) if (tp + fn) > 0 else 1.0
+            fpr = fp / max(fp + tn, 1) if (fp + tn) > 0 else 0.0
+            
+            performance_metrics["precision"] = round(precision, 4)
+            performance_metrics["recall"] = round(recall, 4)
+            performance_metrics["false_positive_rate"] = round(fpr, 4)
+
+            if accuracy < 0.80 or recall < 0.75 or fpr > 0.10:
                 concept_drift_detected = True
 
         # Status Mapping
@@ -266,5 +281,21 @@ class AccumulatedWindowDriftDetector:
                 "ks_pvalues": feature_ks_pvalues,
                 "prediction_distribution_change": prediction_dist_change,
                 "performance_metrics": performance_metrics
+            }
+        }
+
+    def get_current_drift_summary(self) -> Dict[str, Any]:
+        """Returns non-destructive summary of accumulated production window buffer."""
+        sample_count = len(self.production_feature_window)
+        return {
+            "reference_version": self.reference_version,
+            "baseline_hash": self.baseline_hash,
+            "accumulated_samples": sample_count,
+            "min_window_size": self.min_window_size,
+            "ready_for_evaluation": sample_count >= self.min_window_size,
+            "window_counter": self.window_counter,
+            "thresholds": {
+                "psi_threshold": self.psi_threshold,
+                "ks_alpha": self.ks_alpha
             }
         }

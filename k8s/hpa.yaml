@@ -1,3 +1,6 @@
+---
+# Phase 3.11 - HPA for all worker roles (independent horizontal scaling)
+# API HPA
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -26,22 +29,109 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
 ---
+# Detection Worker HPA (ML-heavy; scales most aggressively)
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: sentinelai-worker-hpa
+  name: sentinelai-detection-worker-hpa
   namespace: sentinelai
   labels:
     app.kubernetes.io/name: sentinelai
-    app.kubernetes.io/component: worker
+    app.kubernetes.io/component: detection-worker
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: sentinelai-worker
+    name: sentinelai-detection-worker
   minReplicas: 2
-  maxReplicas: 8
+  maxReplicas: 12
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 15
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+---
+# Response Worker HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentinelai-response-worker-hpa
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: response-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sentinelai-response-worker
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+# Threat Intel Worker HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentinelai-threat-intel-worker-hpa
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: threat-intel-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sentinelai-threat-intel-worker
+  minReplicas: 1
+  maxReplicas: 4
   metrics:
     - type: Resource
       resource:
@@ -49,9 +139,27 @@ spec:
         target:
           type: Utilization
           averageUtilization: 75
+---
+# Hunting Worker HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sentinelai-hunting-worker-hpa
+  namespace: sentinelai
+  labels:
+    app.kubernetes.io/name: sentinelai
+    app.kubernetes.io/component: hunting-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sentinelai-hunting-worker
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
     - type: Resource
       resource:
-        name: memory
+        name: cpu
         target:
           type: Utilization
-          averageUtilization: 80
+          averageUtilization: 75
