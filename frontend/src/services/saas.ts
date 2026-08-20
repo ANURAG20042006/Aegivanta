@@ -1,0 +1,179 @@
+import axios from 'axios';
+
+const API_BASE = '/api/v1';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  const activeTenantId = localStorage.getItem('active_tenant_id');
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(activeTenantId ? { 'X-Tenant-ID': activeTenantId } : {})
+    }
+  };
+};
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  billing_email: string;
+  plan_tier: string;
+  status: string;
+}
+
+export interface Member {
+  id: string;
+  user_id: string;
+  username?: string;
+  email?: string;
+  role: string;
+  status: string;
+}
+
+export interface Tenant {
+  id: string;
+  organization_id: string;
+  name: string;
+  slug: string;
+  environment_type: string;
+  is_active: boolean;
+}
+
+export interface ApiKeyItem {
+  id: string;
+  name: string;
+  key_prefix: string;
+  scopes: string[];
+  rate_limit_rpm: number;
+  is_active: boolean;
+  last_used_at?: string;
+  created_at: string;
+}
+
+export interface SubscriptionInfo {
+  organization_id: string;
+  plan_tier: string;
+  status: string;
+  seat_limit: number;
+  telemetry_limit_gb_monthly: number;
+  current_period_start: string;
+  current_period_end: string;
+  features: string[];
+}
+
+export interface SensorItem {
+  id: string;
+  name: string;
+  hostname: string;
+  ip_address: string;
+  os_type: string;
+  sensor_version: string;
+  status: string;
+  last_heartbeat: string;
+  created_at: string;
+}
+
+export interface IntegrationItem {
+  id: string;
+  organization_id: string;
+  integration_type: string;
+  name: string;
+  status: string;
+  config_json?: Record<string, any>;
+  last_sync_at?: string;
+  created_at: string;
+}
+
+export const saasApi = {
+  // Organizations
+  listMyOrganizations: async (): Promise<Organization[]> => {
+    const res = await axios.get(`${API_BASE}/organizations/me`, getAuthHeaders());
+    return res.data;
+  },
+  createOrganization: async (data: { name: string; slug: string; billing_email: string; plan_tier?: string }): Promise<Organization> => {
+    const res = await axios.post(`${API_BASE}/organizations`, data, getAuthHeaders());
+    return res.data;
+  },
+  listMembers: async (orgId: string): Promise<Member[]> => {
+    const res = await axios.get(`${API_BASE}/organizations/${orgId}/members`, getAuthHeaders());
+    return res.data;
+  },
+  inviteMember: async (orgId: string, data: { email: string; role: string }): Promise<Member> => {
+    const res = await axios.post(`${API_BASE}/organizations/${orgId}/members`, data, getAuthHeaders());
+    return res.data;
+  },
+
+  // Tenants
+  listTenants: async (): Promise<Tenant[]> => {
+    const res = await axios.get(`${API_BASE}/tenants`, getAuthHeaders());
+    return res.data;
+  },
+  createTenant: async (data: { name: string; slug: string; environment_type?: string }): Promise<Tenant> => {
+    const res = await axios.post(`${API_BASE}/tenants`, data, getAuthHeaders());
+    return res.data;
+  },
+
+  // Subscriptions & Billing
+  getCurrentSubscription: async (): Promise<SubscriptionInfo> => {
+    const res = await axios.get(`${API_BASE}/subscriptions/current`, getAuthHeaders());
+    return res.data;
+  },
+  getUsage: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/subscriptions/usage`, getAuthHeaders());
+    return res.data;
+  },
+  upgradePlan: async (new_plan_tier: string): Promise<SubscriptionInfo> => {
+    const res = await axios.post(`${API_BASE}/subscriptions/upgrade`, { new_plan_tier }, getAuthHeaders());
+    return res.data;
+  },
+
+  // API Keys
+  listApiKeys: async (): Promise<ApiKeyItem[]> => {
+    const res = await axios.get(`${API_BASE}/api-keys`, getAuthHeaders());
+    return res.data;
+  },
+  createApiKey: async (data: { name: string; scopes: string[]; rate_limit_rpm?: number }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/api-keys`, data, getAuthHeaders());
+    return res.data;
+  },
+  revokeApiKey: async (keyId: string): Promise<void> => {
+    await axios.delete(`${API_BASE}/api-keys/${keyId}`, getAuthHeaders());
+  },
+
+  // Sensors
+  listSensors: async (): Promise<SensorItem[]> => {
+    const res = await axios.get(`${API_BASE}/sensors`, getAuthHeaders());
+    return res.data;
+  },
+  enrollSensor: async (data: { name: string; hostname: string; ip_address: string; os_type?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/sensors/enroll`, data, getAuthHeaders());
+    return res.data;
+  },
+  revokeSensor: async (sensorId: string): Promise<void> => {
+    await axios.delete(`${API_BASE}/sensors/${sensorId}`, getAuthHeaders());
+  },
+
+  // Integrations
+  listIntegrations: async (): Promise<IntegrationItem[]> => {
+    const res = await axios.get(`${API_BASE}/integrations`, getAuthHeaders());
+    return res.data;
+  },
+  createIntegration: async (data: { integration_type: string; name: string; config: Record<string, any> }): Promise<IntegrationItem> => {
+    const res = await axios.post(`${API_BASE}/integrations`, data, getAuthHeaders());
+    return res.data;
+  },
+  testIntegration: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/integrations/${id}/test`, {}, getAuthHeaders());
+    return res.data;
+  },
+  deleteIntegration: async (id: string): Promise<void> => {
+    await axios.delete(`${API_BASE}/integrations/${id}`, getAuthHeaders());
+  },
+
+  // Onboarding
+  getOnboardingStatus: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/onboarding/status`, getAuthHeaders());
+    return res.data;
+  }
+};

@@ -21,6 +21,14 @@ from backend.app.models.job import BackgroundJob
 from backend.app.models.response import ResponsePolicy, ResponseActionRecord, IdempotencyRecord, ResponseAuditLog
 from backend.app.models.feedback import DetectionFeedback, VALID_FEEDBACK_VERDICTS
 
+from backend.app.models.tenant import Organization, Tenant, TenantMembership, TenantRole, TenantSettings
+from backend.app.models.subscription import Subscription, FeatureEntitlement, PlanTier
+from backend.app.models.api_key import ApiKey, ApiKeyScope
+from backend.app.models.usage import UsageRecord, UsageQuota
+from backend.app.models.integration import CustomerIntegration
+from backend.app.models.sensor import Sensor
+from backend.app.models.billing import BillingWebhookEvent, Invoice
+
 __all__ = [
     "User",
     "AuditLog",
@@ -52,5 +60,22 @@ __all__ = [
     "ResponseActionRecord",
     "IdempotencyRecord",
     "ResponseAuditLog",
-    "DetectionFeedback"
+    "DetectionFeedback",
+    "Organization",
+    "Tenant",
+    "TenantMembership",
+    "TenantRole",
+    "TenantSettings",
+    "Subscription",
+    "FeatureEntitlement",
+    "PlanTier",
+    "ApiKey",
+    "ApiKeyScope",
+    "UsageRecord",
+    "UsageQuota",
+    "CustomerIntegration",
+    "Sensor",
+    "BillingWebhookEvent",
+    "Invoice"
 ]
+

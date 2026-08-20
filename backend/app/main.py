@@ -45,6 +45,14 @@ from backend.app.api.v1.soc_metrics import router as soc_metrics_router
 from backend.app.api.v1.telemetry import router as telemetry_router
 from backend.app.api.v1.dashboard import router as dashboard_router
 from backend.app.api.v1.adaptive_ml import router as adaptive_ml_router
+from backend.app.api.v1.organizations import router as organizations_router
+from backend.app.api.v1.tenants import router as tenants_router
+from backend.app.api.v1.api_keys import router as api_keys_router
+from backend.app.api.v1.subscriptions import router as subscriptions_router
+from backend.app.api.v1.billing_webhooks import router as billing_webhooks_router
+from backend.app.api.v1.onboarding import router as onboarding_router
+from backend.app.api.v1.sensors import router as sensors_router
+from backend.app.api.v1.integrations import router as integrations_router
 
 
 from dotenv import load_dotenv
@@ -274,7 +282,16 @@ app.include_router(soc_metrics_router, prefix=settings.API_V1_STR)
 app.include_router(telemetry_router, prefix=settings.API_V1_STR)
 app.include_router(dashboard_router, prefix=settings.API_V1_STR)
 app.include_router(adaptive_ml_router, prefix=settings.API_V1_STR)
+app.include_router(organizations_router, prefix=settings.API_V1_STR)
+app.include_router(tenants_router, prefix=settings.API_V1_STR)
+app.include_router(api_keys_router, prefix=settings.API_V1_STR)
+app.include_router(subscriptions_router, prefix=settings.API_V1_STR)
+app.include_router(billing_webhooks_router, prefix=settings.API_V1_STR)
+app.include_router(onboarding_router, prefix=settings.API_V1_STR)
+app.include_router(sensors_router, prefix=settings.API_V1_STR)
+app.include_router(integrations_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 # ---------------------------------------------------------------------------
 # Phase 3.12: Prometheus /metrics endpoint

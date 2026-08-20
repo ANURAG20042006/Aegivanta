@@ -110,11 +110,17 @@ async def init_db() -> None:
                     if col_name not in pb_cols:
                         sync_conn.execute(text(sql))
 
-            # Performance & Scalability Composite Indexes (Phase 2 Step 8)
+            # Performance & Scalability Composite Indexes (Phase 2 & Phase 4)
             index_statements = [
                 "CREATE INDEX IF NOT EXISTS idx_alerts_src_dst_ts ON alerts (source_ip, destination_ip, timestamp)",
                 "CREATE INDEX IF NOT EXISTS idx_incidents_status_lastseen ON incidents (status, last_seen)",
-                "CREATE INDEX IF NOT EXISTS idx_sec_events_type_ts ON security_events (event_type, timestamp)"
+                "CREATE INDEX IF NOT EXISTS idx_sec_events_type_ts ON security_events (event_type, timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_org_slug ON organizations (slug)",
+                "CREATE INDEX IF NOT EXISTS idx_tenant_org ON tenants (organization_id)",
+                "CREATE INDEX IF NOT EXISTS idx_membership_user_org ON tenant_memberships (user_id, organization_id)",
+                "CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys (key_prefix)",
+                "CREATE INDEX IF NOT EXISTS idx_usage_tenant_ts ON usage_records (tenant_id, timestamp)",
+                "CREATE INDEX IF NOT EXISTS idx_sensors_tenant ON sensors (tenant_id)"
             ]
             for idx_sql in index_statements:
                 try:
@@ -124,3 +130,4 @@ async def init_db() -> None:
 
         await conn.run_sync(_safe_migrate)
         logger.info("Database tables successfully initialized.")
+

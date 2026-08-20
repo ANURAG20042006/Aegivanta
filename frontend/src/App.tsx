@@ -31,6 +31,15 @@ import { AttackCoverage } from './pages/AttackCoverage';
 import { SOCAnalytics } from './pages/SOCAnalytics';
 import { ResponseCenter } from './pages/ResponseCenter';
 
+// Phase 4 Enterprise SaaS Pages
+import { OrganizationsPage } from './pages/Organizations';
+import { BillingPage } from './pages/Billing';
+import { ApiKeysPage } from './pages/ApiKeys';
+import { IntegrationsPage } from './pages/Integrations';
+import { SensorsPage } from './pages/Sensors';
+import { OnboardingPage } from './pages/Onboarding';
+
+
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -68,7 +77,14 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/attack-coverage" element={<AttackCoverage />} />
               <Route path="/soc-analytics" element={<SOCAnalytics />} />
               <Route path="/response-center" element={<ResponseCenter />} />
+              <Route path="/organizations" element={<OrganizationsPage />} />
+              <Route path="/billing" element={<BillingPage />} />
+              <Route path="/api-keys" element={<ApiKeysPage />} />
+              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/sensors" element={<SensorsPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/guide" element={<GuidePage />} />
+
               <Route path="/prediction" element={<Prediction />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/history" element={<HistoryPage />} />
