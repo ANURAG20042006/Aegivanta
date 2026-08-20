@@ -26,37 +26,50 @@ class Settings(BaseSettings):
     """
 
     # General Application Settings
-    APP_NAME: str = "SentinelAI"
+    APP_NAME: str = "Aegivanta"
+    PROJECT_DESCRIPTION: str = "Enterprise AI-Powered Security Operations Platform"
     APP_ENV: str = Field(default="development", description="Application Environment: development, staging, production")
     OPERATING_MODE: str = Field(default="DEMO", description="Operating Mode: DEMO, LAB, or PRODUCTION")
     DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
-    PROJECT_VERSION: str = "1.0.0"
+    PROJECT_VERSION: str = "3.0.0"
     SECRET_KEY: str = Field(default_factory=lambda: os.environ.get("SECRET_KEY", _RUNTIME_DEV_SECRET))
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
     # User Accounts Passwords (must be supplied via environment / .env — no hard-coded defaults)
+    AEGIVANTA_ADMIN_PASSWORD: Optional[str] = Field(
+        default_factory=lambda: os.environ.get("AEGIVANTA_ADMIN_PASSWORD", os.environ.get("SENTINEL_ADMIN_PASSWORD")),
+        description="Admin seed password. Required at startup (all environments)."
+    )
     SENTINEL_ADMIN_PASSWORD: Optional[str] = Field(
         default=None,
-        description="Admin seed password. Required at startup (all environments)."
+        description="Legacy alias for Admin seed password."
+    )
+    AEGIVANTA_ANALYST_PASSWORD: Optional[str] = Field(
+        default_factory=lambda: os.environ.get("AEGIVANTA_ANALYST_PASSWORD", os.environ.get("SENTINEL_ANALYST_PASSWORD")),
+        description="Analyst seed password. Required at startup (all environments)."
     )
     SENTINEL_ANALYST_PASSWORD: Optional[str] = Field(
         default=None,
-        description="Analyst seed password. Required at startup (all environments)."
+        description="Legacy alias for Analyst seed password."
+    )
+    AEGIVANTA_VIEWER_PASSWORD: Optional[str] = Field(
+        default_factory=lambda: os.environ.get("AEGIVANTA_VIEWER_PASSWORD", os.environ.get("SENTINEL_VIEWER_PASSWORD")),
+        description="Viewer seed password. Required at startup (all environments)."
     )
     SENTINEL_VIEWER_PASSWORD: Optional[str] = Field(
         default=None,
-        description="Viewer seed password. Required at startup (all environments)."
+        description="Legacy alias for Viewer seed password."
     )
 
     # Database Settings
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str = Field(default_factory=lambda: os.environ.get("POSTGRES_USER", "sentinel_admin"))
+    POSTGRES_USER: str = Field(default_factory=lambda: os.environ.get("AEGIVANTA_POSTGRES_USER", os.environ.get("POSTGRES_USER", "sentinel_admin")))
     POSTGRES_PASSWORD: str = Field(default_factory=lambda: os.environ.get("POSTGRES_PASSWORD", ""))
-    POSTGRES_DB: str = Field(default_factory=lambda: os.environ.get("POSTGRES_DB", "sentinelai_db"))
+    POSTGRES_DB: str = Field(default_factory=lambda: os.environ.get("AEGIVANTA_POSTGRES_DB", os.environ.get("POSTGRES_DB", "sentinelai_db")))
     DATABASE_URL: str = Field(
         default="sqlite+aiosqlite:///./sentinelai.db",
         description="Async Database Connection URL"
@@ -70,10 +83,10 @@ class Settings(BaseSettings):
     REDIS_SSL: bool = Field(default_factory=lambda: os.environ.get("REDIS_SSL", "false").lower() in ["1", "true", "yes"])
     REDIS_URL: str = Field(default_factory=lambda: os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
     
-    STREAM_TELEMETRY_KEY: str = "sentinel:telemetry"
-    STREAM_CONSUMER_GROUP: str = "sentinel:telemetry:group"
-    STREAM_DLQ_KEY: str = "sentinel:telemetry:dlq"
-    STREAM_PUBSUB_CHANNEL: str = "sentinel:events"
+    STREAM_TELEMETRY_KEY: str = Field(default_factory=lambda: os.environ.get("STREAM_TELEMETRY_KEY", "aegivanta:telemetry"))
+    STREAM_CONSUMER_GROUP: str = Field(default_factory=lambda: os.environ.get("STREAM_CONSUMER_GROUP", "aegivanta:telemetry:group"))
+    STREAM_DLQ_KEY: str = Field(default_factory=lambda: os.environ.get("STREAM_DLQ_KEY", "aegivanta:telemetry:dlq"))
+    STREAM_PUBSUB_CHANNEL: str = Field(default_factory=lambda: os.environ.get("STREAM_PUBSUB_CHANNEL", "aegivanta:events"))
     STREAM_MAX_RETRIES: int = 3
     STREAM_IDEMPOTENCY_TTL_SECONDS: int = 86400  # 24 hours TTL for cross-worker deduplication
 
@@ -86,7 +99,7 @@ class Settings(BaseSettings):
     # CORS Settings
     CORS_ORIGINS: List[str] = Field(
         default_factory=lambda: (
-            ["https://sentinelai.io"]
+            ["https://aegivanta.io", "https://sentinelai.io"]
             if os.environ.get("APP_ENV", "").lower() == "production"
             or os.environ.get("OPERATING_MODE", "").upper() == "PRODUCTION"
             else [
@@ -125,7 +138,7 @@ class Settings(BaseSettings):
 
     # Logging Settings
     LOG_LEVEL: str = "INFO"
-    LOG_FILE_PATH: str = "logs/sentinelai.log"
+    LOG_FILE_PATH: str = "logs/aegivanta.log"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -172,17 +185,17 @@ def validate_production_settings(custom_settings: "Settings" = None) -> None:
         raise RuntimeError("Production requires POSTGRES_PASSWORD of at least 8 characters.")
 
     # 3. User Seed Passwords validation
-    admin_pass = os.environ.get("SENTINEL_ADMIN_PASSWORD", "")
+    admin_pass = os.environ.get("AEGIVANTA_ADMIN_PASSWORD", "") or os.environ.get("SENTINEL_ADMIN_PASSWORD", "")
     if not admin_pass or len(admin_pass) < 8:
-        raise RuntimeError("Production requires SENTINEL_ADMIN_PASSWORD of at least 8 characters in environment variables.")
+        raise RuntimeError("Production requires AEGIVANTA_ADMIN_PASSWORD (or SENTINEL_ADMIN_PASSWORD) of at least 8 characters in environment variables.")
 
-    analyst_pass = os.environ.get("SENTINEL_ANALYST_PASSWORD", "")
+    analyst_pass = os.environ.get("AEGIVANTA_ANALYST_PASSWORD", "") or os.environ.get("SENTINEL_ANALYST_PASSWORD", "")
     if not analyst_pass or len(analyst_pass) < 8:
-        raise RuntimeError("Production requires SENTINEL_ANALYST_PASSWORD of at least 8 characters in environment variables.")
+        raise RuntimeError("Production requires AEGIVANTA_ANALYST_PASSWORD (or SENTINEL_ANALYST_PASSWORD) of at least 8 characters in environment variables.")
 
-    viewer_pass = os.environ.get("SENTINEL_VIEWER_PASSWORD", "")
+    viewer_pass = os.environ.get("AEGIVANTA_VIEWER_PASSWORD", "") or os.environ.get("SENTINEL_VIEWER_PASSWORD", "")
     if not viewer_pass or len(viewer_pass) < 8:
-        raise RuntimeError("Production requires SENTINEL_VIEWER_PASSWORD of at least 8 characters in environment variables.")
+        raise RuntimeError("Production requires AEGIVANTA_VIEWER_PASSWORD (or SENTINEL_VIEWER_PASSWORD) of at least 8 characters in environment variables.")
 
     # 4. Debug Mode Check
     if target_settings.DEBUG:

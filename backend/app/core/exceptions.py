@@ -2,18 +2,22 @@ from typing import Any, Optional
 from fastapi import HTTPException, status
 
 
-class SentinelAIException(HTTPException):
-    """Base exception class for all custom application errors."""
+class AegivantaException(HTTPException):
+    """Base exception class for all custom Aegivanta application errors."""
     def __init__(
         self,
         status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail: Any = "An unexpected error occurred in SentinelAI engine.",
+        detail: Any = "An unexpected error occurred in Aegivanta engine.",
         headers: Optional[dict] = None
     ):
         super().__init__(status_code=status_code, detail=detail, headers=headers)
 
 
-class AuthenticationError(SentinelAIException):
+# Backward compatibility alias
+SentinelAIException = AegivantaException
+
+
+class AuthenticationError(AegivantaException):
     """Raised when authentication fails or token is invalid."""
     def __init__(self, detail: str = "Invalid credentials or expired authentication token."):
         super().__init__(

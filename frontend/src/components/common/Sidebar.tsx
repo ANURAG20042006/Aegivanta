@@ -48,7 +48,7 @@ export const navItems = [
   
   { path: '/users', label: 'Team members', section: 'Manage', icon: Users },
   { path: '/settings', label: 'Settings', section: 'Manage', icon: Settings },
-  { path: '/about', label: 'About SentinelAI', section: 'Manage', icon: Info },
+  { path: '/about', label: 'About Aegivanta', section: 'Manage', icon: Info },
 ];
 
 export const Sidebar: React.FC = () => {

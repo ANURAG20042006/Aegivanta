@@ -7,7 +7,7 @@ from backend.app.models.user import User
 from backend.app.models.audit_log import AuditLog
 from backend.app.schemas.user import UserResponse, UserCreate, UserUpdate
 from backend.app.security import hash_password
-from backend.app.core.exceptions import NotFoundError, SentinelAIException
+from backend.app.core.exceptions import NotFoundError, AegivantaException, SentinelAIException
 from backend.app.core.dependencies import require_role
 
 router = APIRouter(prefix="/users", tags=["Users Management"])

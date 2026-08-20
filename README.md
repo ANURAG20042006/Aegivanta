@@ -1,17 +1,17 @@
 <div align="center">
 
 ```
-  ███████╗███████╗███╗   ██╗████████╗██╗███╗   ██╗███████╗██╗      █████╗ ██╗
-  ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║████╗  ██║██╔════╝██║     ██╔══██╗██║
-  ███████╗█████╗  ██╔██╗ ██║   ██║   ██║██╔██╗ ██║█████╗  ██║     ███████║██║
-  ╚════██║██╔══╝  ██║╚██╗██║   ██║   ██║██║╚██╗██║██╔══╝  ██║     ██╔══██║██║
-  ███████║███████╗██║ ╚████║   ██║   ██║██║ ╚████║███████╗███████╗██║  ██║██║
-  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝
+   █████╗ ███████╗ ██████╗ ██╗██╗   ██╗ █████╗ ███╗   ██╗████████╗ █████╗ 
+  ██╔══██╗██╔════╝██╔════╝ ██║██║   ██║██╔══██╗████╗  ██║╚══██╔══╝██╔══██╗
+  ███████║█████╗  ██║  ███╗██║██║   ██║███████║██╔██╗ ██║   ██║   ███████║
+  ██╔══██║██╔══╝  ██║   ██║██║╚██╗ ██╔╝██╔══██║██║╚██╗██║   ██║   ██╔══██║
+  ██║  ██║███████╗╚██████╔╝██║ ╚████╔╝ ██║  ██║██║ ╚████║   ██║   ██║  ██║
+  ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝
 ```
 
-# SentinelAI – Intelligent Network Intrusion Detection & Threat Analytics Platform
+# Aegivanta – Enterprise AI-Powered Security Operations Platform
 
-**Research-Verified AI/ML Network Intrusion Detection & Security Operations Platform Prototype**
+**Next-Generation AI-Native Cybersecurity, Threat Detection & Autonomous SOC Platform**
 
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -27,7 +27,9 @@
 </div>
 
 > [!NOTE]
-> **SentinelAI** is an AI-powered Network Intrusion Detection System (NIDS) & Next-Gen Security Operations Center (SOC) platform. It pairs a research-verified 12-Model ML/DL intrusion detection engine (featuring champion CatBoost with real SHAP explainability) with an **Advanced Dynamic SOC Platform (Phase 1)** providing Protected Asset Management, Live Threat Alert Triage, Deterministic Incident Correlation, Chronological Attack Timelines, and Multi-Factor Operational Risk Scoring.
+> **Rebranding & Identity Notice**: *SentinelAI* was the previous product name. The platform is officially rebranded as **Aegivanta** — an Enterprise AI-Powered Security Operations Platform.
+> 
+> **Aegivanta** is an AI-native Network Intrusion Detection System (NIDS) & Next-Gen Security Operations Center (SOC) platform. It pairs a research-verified 12-Model ML/DL intrusion detection engine (featuring champion CatBoost with real SHAP explainability) with an **Advanced SOC Command Center** providing Protected Asset Management, Live Threat Alert Triage, Deterministic Incident Correlation, Attack Graph Analytics, Multi-Hop Lateral Movement Detection, Autonomous SOAR Response, and Multi-Factor Operational Risk Scoring.
 
 ---
 

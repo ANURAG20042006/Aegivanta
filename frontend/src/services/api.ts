@@ -10,7 +10,7 @@ const api = axios.create({
 // Request Interceptor to attach JWT Bearer Token & Request Correlation ID
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('sentinel_token');
+    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,6 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      localStorage.removeItem('aegivanta_token');
       localStorage.removeItem('sentinel_token');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';

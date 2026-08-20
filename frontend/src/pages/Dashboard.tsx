@@ -55,7 +55,7 @@ export const Dashboard: React.FC = () => {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl font-black text-slate-100 uppercase tracking-wider">
-                  SentinelAI SOC Command Center
+                  Aegivanta SOC Command Center
                 </h1>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                   isConnected 

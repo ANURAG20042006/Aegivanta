@@ -74,7 +74,7 @@ export const HistoryPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `sentinelai_incident_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `aegivanta_incident_report_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -85,7 +85,7 @@ export const HistoryPage: React.FC = () => {
       <div className="glass-panel p-6 rounded-2xl flex items-center justify-between">
         <div>
           <h1 className="text-xl font-mono font-bold text-white">Alert history</h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">Review traffic that SentinelAI has checked and any alerts it found.</p>
+          <p className="text-xs text-slate-400 font-mono mt-1">Review traffic that Aegivanta has checked and any alerts it found.</p>
         </div>
         <div className="flex items-center space-x-2 text-xs font-mono text-cyan-400">
           <Filter className="w-4 h-4" />

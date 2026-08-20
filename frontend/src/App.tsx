@@ -37,7 +37,7 @@ const ProtectedLayout: React.FC = () => {
   if (isLoading) {
     return (
       <div className="app-shell min-h-screen flex items-center justify-center font-mono text-cyan-400 text-xs">
-        <div className="animate-pulse">INITIALIZING SENTINELAI CORE...</div>
+        <div className="animate-pulse">INITIALIZING AEGIVANTA CORE...</div>
       </div>
     );
   }

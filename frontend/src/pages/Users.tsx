@@ -120,7 +120,7 @@ export const UsersPage: React.FC = () => {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold text-white">Add a team member</h2>
-                <p className="text-xs text-slate-400 mt-1">Choose what this person is allowed to do in SentinelAI.</p>
+                <p className="text-xs text-slate-400 mt-1">Choose what this person is allowed to do in Aegivanta.</p>
               </div>
               <button type="button" onClick={() => setIsModalOpen(false)} disabled={isSaving} className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-50" aria-label="Close dialog"><X className="w-5 h-5" /></button>
             </div>

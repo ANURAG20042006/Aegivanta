@@ -54,8 +54,8 @@ import secrets
 import json
 
 def get_default_users():
-    def _get_required_user_password(env_var: str) -> str:
-        pwd = os.environ.get(env_var)
+    def _get_required_user_password(primary_var: str, legacy_var: str) -> str:
+        pwd = os.environ.get(primary_var) or os.environ.get(legacy_var)
         if not pwd:
             is_prod = (
                 settings.APP_ENV.lower() == "production"
@@ -64,12 +64,12 @@ def get_default_users():
             )
             if is_prod:
                 raise RuntimeError(
-                    f"Security Error: Environment variable '{env_var}' is required in production to seed default accounts.\n"
-                    f"Set {env_var} in your .env or environment variables."
+                    f"Security Error: Environment variable '{primary_var}' (or '{legacy_var}') is required in production to seed default accounts.\n"
+                    f"Set {primary_var} in your .env or environment variables."
                 )
             # Non-production: still require an explicit password — no silent defaults.
             raise RuntimeError(
-                f"Configuration Error: '{env_var}' is not set. "
+                f"Configuration Error: '{primary_var}' is not set. "
                 f"Add it to your .env file. "
                 f"Example development values are in .env.example."
             )
@@ -78,22 +78,22 @@ def get_default_users():
     return [
         (
             "admin",
-            "admin@sentinelai.io",
-            _get_required_user_password("SENTINEL_ADMIN_PASSWORD"),
+            "admin@aegivanta.io",
+            _get_required_user_password("AEGIVANTA_ADMIN_PASSWORD", "SENTINEL_ADMIN_PASSWORD"),
             "System Administrator",
             "admin"
         ),
         (
             "analyst",
-            "analyst@sentinelai.io",
-            _get_required_user_password("SENTINEL_ANALYST_PASSWORD"),
+            "analyst@aegivanta.io",
+            _get_required_user_password("AEGIVANTA_ANALYST_PASSWORD", "SENTINEL_ANALYST_PASSWORD"),
             "Senior Security Analyst",
             "analyst"
         ),
         (
             "viewer",
-            "viewer@sentinelai.io",
-            _get_required_user_password("SENTINEL_VIEWER_PASSWORD"),
+            "viewer@aegivanta.io",
+            _get_required_user_password("AEGIVANTA_VIEWER_PASSWORD", "SENTINEL_VIEWER_PASSWORD"),
             "Security Operations Viewer",
             "viewer"
         ),
@@ -184,18 +184,18 @@ async def initialize_application() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown lifespan context manager."""
-    logger.info("Initializing SentinelAI Backend Application Lifespan...")
+    logger.info("Initializing Aegivanta Backend Application Lifespan...")
     validate_production_settings()
     await initialize_application()
 
     yield
-    logger.info("Shutting down SentinelAI Backend Application...")
+    logger.info("Shutting down Aegivanta Backend Application...")
 
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Enterprise Network Intrusion Detection & Threat Analytics API",
-    version="1.0.0",
+    description="Enterprise AI-Powered Security Operations Platform API",
+    version=settings.PROJECT_VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",

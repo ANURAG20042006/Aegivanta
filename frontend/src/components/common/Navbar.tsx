@@ -29,7 +29,7 @@ export const Navbar: React.FC = () => {
             <Shield className="w-5 h-5 text-cyan-400" />
           </div>
           <span className="font-mono text-lg font-bold bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent hidden sm:inline">
-            SENTINEL<span className="text-white">AI</span>
+            AEGIVANTA
           </span>
         </div>
 

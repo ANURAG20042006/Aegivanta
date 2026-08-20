@@ -8,7 +8,7 @@ from backend.app.models.audit_log import AuditLog
 from backend.app.schemas.auth import RegisterRequest, Token
 from backend.app.schemas.user import UserResponse
 from backend.app.security import verify_password, hash_password, create_access_token
-from backend.app.core.exceptions import AuthenticationError, SentinelAIException
+from backend.app.core.exceptions import AuthenticationError, AegivantaException, SentinelAIException
 from backend.app.core.dependencies import get_current_user
 from backend.app.core.rate_limit import login_rate_limiter, register_rate_limit
 

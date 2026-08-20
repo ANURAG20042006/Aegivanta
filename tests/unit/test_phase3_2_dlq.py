@@ -7,6 +7,7 @@ inspection, deletion, and DLQ event replay.
 
 import pytest
 import fakeredis.aioredis
+from backend.app.config import settings
 from backend.app.services.distributed_stream_service import RedisStreamBackend, DistributedStreamEngine
 
 
@@ -42,7 +43,7 @@ async def test_durable_dlq_persistence_and_retry_exhaustion():
     assert engine.metrics["dlq_total"] == 1
 
     # Verify message in DLQ
-    dlq_entries = await backend.list_dlq("sentinel:telemetry:dlq", count=10)
+    dlq_entries = await backend.list_dlq(settings.STREAM_DLQ_KEY, count=10)
     assert len(dlq_entries) == 1
     assert dlq_entries[0]["event_id"] == "bad-flow-001"
     assert "Simulated downstream failure" in dlq_entries[0]["failure_reason"]
@@ -60,7 +61,7 @@ async def test_dlq_event_replay():
 
     # 1. Insert failed event into DLQ
     dlq_id = await backend.push_to_dlq(
-        dlq_key="sentinel:telemetry:dlq",
+        dlq_key=settings.STREAM_DLQ_KEY,
         event_payload={"event_id": "replay-evt-101", "source_ip": "10.10.10.10", "total_fwd_packets": 5},
         reason="Initial parsing exception",
         attempts=3,
@@ -72,5 +73,5 @@ async def test_dlq_event_replay():
     assert replay_res["status"] == "REPLAYED"
 
     # 3. Verify event is removed from DLQ
-    remaining = await backend.list_dlq("sentinel:telemetry:dlq", count=10)
+    remaining = await backend.list_dlq(settings.STREAM_DLQ_KEY, count=10)
     assert len(remaining) == 0

@@ -77,7 +77,7 @@ export const Prediction: React.FC = () => {
       <div className="glass-panel p-6 rounded-2xl">
         <h1 className="text-xl font-mono font-bold text-white">Inspect network traffic</h1>
         <p className="text-xs text-slate-400 font-mono mt-1">
-          Upload a traffic file or enter one connection below. SentinelAI will look for activity that may be harmful.
+          Upload a traffic file or enter one connection below. Aegivanta will look for activity that may be harmful.
         </p>
 
         {/* Tab Controls */}

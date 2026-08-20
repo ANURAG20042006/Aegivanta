@@ -1,1 +1,1 @@
-"""SentinelAI API v1 Endpoints Package."""
+"""Aegivanta API v1 Endpoints Package."""

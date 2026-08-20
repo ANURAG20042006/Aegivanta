@@ -25,7 +25,7 @@ export const SentinelOrb: React.FC<SentinelOrbProps> = ({ threatCount = 0, statu
       className={`sentinel-orb-stage theme-${theme}`}
       onPointerMove={handlePointerMove}
       onPointerLeave={() => setRotation({ x: -8, y: 18 })}
-      aria-label="Interactive 3D SentinelAI status orb"
+      aria-label="Interactive 3D Aegivanta status orb"
     >
       <div className="sentinel-orb-grid" />
       <div className={`sentinel-orb ${isCritical ? 'is-critical' : ''}`} style={orbitStyle}>
@@ -34,7 +34,7 @@ export const SentinelOrb: React.FC<SentinelOrbProps> = ({ threatCount = 0, statu
         <div className="orb-ring orb-ring-inner" />
         <div className="orb-core">
           <ShieldCheck className="w-7 h-7" />
-          <span className="text-[9px] font-mono tracking-[0.24em]">SENTINEL</span>
+          <span className="text-[8px] font-mono tracking-[0.16em]">AEGIVANTA</span>
           <span className="text-[10px] font-mono font-bold">{isCritical ? 'THREAT' : 'SECURE'}</span>
         </div>
         <div className="orb-scanline" />

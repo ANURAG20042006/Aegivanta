@@ -50,7 +50,7 @@ export const SettingsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="glass-panel p-6 rounded-2xl">
         <h1 className="text-xl font-mono font-bold text-white">Settings</h1>
-        <p className="text-xs text-slate-400 font-mono mt-1">Adjust how SentinelAI looks, detects risk, and prepares reports.</p>
+        <p className="text-xs text-slate-400 font-mono mt-1">Adjust how Aegivanta looks, detects risk, and prepares reports.</p>
       </div>
 
       <div className="glass-panel p-6 rounded-xl space-y-6 max-w-2xl font-mono text-xs">

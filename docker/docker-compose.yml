@@ -4,29 +4,29 @@ services:
   # PostgreSQL Database Service
   postgres:
     image: postgres:16-alpine
-    container_name: sentinel_postgres
+    container_name: aegivanta_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-sentinel_admin}
+      POSTGRES_USER: ${POSTGRES_USER:-aegivanta_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}
-      POSTGRES_DB: ${POSTGRES_DB:-sentinelai_db}
+      POSTGRES_DB: ${POSTGRES_DB:-aegivanta_db}
     # Do NOT expose PostgreSQL port publicly in production — internal only
     expose:
       - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentinel_admin}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aegivanta_admin}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - sentinel_net
+      - aegivanta_net
 
   # Redis Caching & Streaming Service
   redis:
     image: redis:7-alpine
-    container_name: sentinel_redis
+    container_name: aegivanta_redis
     restart: unless-stopped
     # Do NOT expose Redis port publicly — internal only
     expose:
@@ -39,14 +39,14 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - sentinel_net
+      - aegivanta_net
 
   # FastAPI Backend Service
   backend:
     build:
       context: ..
       dockerfile: docker/Dockerfile.backend
-    container_name: sentinel_backend
+    container_name: aegivanta_backend
     restart: unless-stopped
     depends_on:
       postgres:
@@ -54,20 +54,23 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - APP_NAME=SentinelAI
+      - APP_NAME=Aegivanta
       - APP_ENV=${APP_ENV:?APP_ENV must be explicitly set (e.g. development or production)}
       - OPERATING_MODE=${OPERATING_MODE:?OPERATING_MODE must be explicitly set (e.g. DEMO, LAB, or PRODUCTION)}
       - DEBUG=False
       - API_V1_STR=/api/v1
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable must be set}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-sentinel_admin}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}@postgres:5432/${POSTGRES_DB:-sentinelai_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-aegivanta_admin}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable must be set}@postgres:5432/${POSTGRES_DB:-aegivanta_db}
       - REDIS_URL=redis://redis:6379/0
-      - LOG_FILE_PATH=logs/sentinelai.log
-      - SENTINEL_ADMIN_PASSWORD=${SENTINEL_ADMIN_PASSWORD:?SENTINEL_ADMIN_PASSWORD must be set}
-      - SENTINEL_ANALYST_PASSWORD=${SENTINEL_ANALYST_PASSWORD:?SENTINEL_ANALYST_PASSWORD must be set}
-      - SENTINEL_VIEWER_PASSWORD=${SENTINEL_VIEWER_PASSWORD:?SENTINEL_VIEWER_PASSWORD must be set}
-      - CORS_ORIGINS=${CORS_ORIGINS:-["https://sentinelai.io"]}
-    # Backend is internal-only: reachable only via Nginx on the sentinel_net network.
+      - LOG_FILE_PATH=logs/aegivanta.log
+      - AEGIVANTA_ADMIN_PASSWORD=${AEGIVANTA_ADMIN_PASSWORD:-${SENTINEL_ADMIN_PASSWORD:?Admin password must be set}}
+      - AEGIVANTA_ANALYST_PASSWORD=${AEGIVANTA_ANALYST_PASSWORD:-${SENTINEL_ANALYST_PASSWORD:?Analyst password must be set}}
+      - AEGIVANTA_VIEWER_PASSWORD=${AEGIVANTA_VIEWER_PASSWORD:-${SENTINEL_VIEWER_PASSWORD:?Viewer password must be set}}
+      - SENTINEL_ADMIN_PASSWORD=${AEGIVANTA_ADMIN_PASSWORD:-${SENTINEL_ADMIN_PASSWORD}}
+      - SENTINEL_ANALYST_PASSWORD=${AEGIVANTA_ANALYST_PASSWORD:-${SENTINEL_ANALYST_PASSWORD}}
+      - SENTINEL_VIEWER_PASSWORD=${AEGIVANTA_VIEWER_PASSWORD:-${SENTINEL_VIEWER_PASSWORD}}
+      - CORS_ORIGINS=${CORS_ORIGINS:-["https://aegivanta.io","https://sentinelai.io"]}
+    # Backend is internal-only: reachable only via Nginx on the aegivanta_net network.
     # Do NOT add a ports mapping here — that would bypass the Nginx security boundary.
     expose:
       - "8000"
@@ -82,14 +85,14 @@ services:
       start_period: 30s
       retries: 3
     networks:
-      - sentinel_net
+      - aegivanta_net
 
   # React Frontend Service (Nginx)
   frontend:
     build:
       context: ..
       dockerfile: docker/Dockerfile.frontend
-    container_name: sentinel_frontend
+    container_name: aegivanta_frontend
     restart: unless-stopped
     depends_on:
       backend:
@@ -97,7 +100,7 @@ services:
     ports:
       - "80:80"
     networks:
-      - sentinel_net
+      - aegivanta_net
 
 volumes:
   postgres_data:
@@ -107,5 +110,5 @@ volumes:
   ml_artifacts:
 
 networks:
-  sentinel_net:
+  aegivanta_net:
     driver: bridge

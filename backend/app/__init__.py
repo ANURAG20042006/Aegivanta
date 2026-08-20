@@ -1,1 +1,1 @@
-"""SentinelAI Backend Application Package."""
+"""Aegivanta Backend Application Package."""

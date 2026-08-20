@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: sentinelai
     app.kubernetes.io/component: configuration
 data:
-  APP_NAME: "SentinelAI"
+  APP_NAME: "Aegivanta"
   APP_ENV: "production"
   OPERATING_MODE: "PRODUCTION"
   DEBUG: "False"
@@ -20,13 +20,13 @@ data:
   REDIS_DB: "0"
   REDIS_SSL: "false"
   REDIS_URL: "redis://sentinelai-redis:6379/0"
-  STREAM_TELEMETRY_KEY: "sentinel:telemetry"
-  STREAM_CONSUMER_GROUP: "sentinel:telemetry:group"
-  STREAM_DLQ_KEY: "sentinel:telemetry:dlq"
-  STREAM_PUBSUB_CHANNEL: "sentinel:events"
+  STREAM_TELEMETRY_KEY: "aegivanta:telemetry"
+  STREAM_CONSUMER_GROUP: "aegivanta:telemetry:group"
+  STREAM_DLQ_KEY: "aegivanta:telemetry:dlq"
+  STREAM_PUBSUB_CHANNEL: "aegivanta:events"
   STREAM_MAX_RETRIES: "3"
   STREAM_IDEMPOTENCY_TTL_SECONDS: "86400"
   MODEL_ARTIFACTS_DIR: "ml/artifacts"
   DEFAULT_MODEL_NAME: "CatBoost"
   BATCH_SIZE: "128"
-  CORS_ORIGINS: '["https://sentinelai.io"]'
+  CORS_ORIGINS: '["https://aegivanta.io","https://sentinelai.io"]'

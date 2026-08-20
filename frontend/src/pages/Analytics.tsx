@@ -26,7 +26,7 @@ export const Analytics: React.FC = () => {
     setIsRetraining(true);
     try {
       await analyticsService.triggerTraining();
-      alert('Model refresh started. You can keep using SentinelAI while it runs.');
+      alert('Model refresh started. You can keep using Aegivanta while it runs.');
     } catch (err) {
       alert('We could not start the model refresh. Please try again.');
     } finally {

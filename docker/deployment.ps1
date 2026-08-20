@@ -1,7 +1,7 @@
-# SentinelAI Enterprise Production Deployment Script (Windows PowerShell)
+# Aegivanta Enterprise Production Deployment Script (Windows PowerShell)
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "    SentinelAI Enterprise Platform Deployment Automation  " -ForegroundColor Cyan
+Write-Host "    Aegivanta Enterprise Platform Deployment Automation   " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # Step 1: Check Docker
@@ -23,7 +23,7 @@ Write-Host "--> Launching Docker Compose Stack..." -ForegroundColor Green
 docker compose -f docker/docker-compose.yml up -d --build
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "    SENTINELAI PLATFORM SUCCESSFULLY DEPLOYED             " -ForegroundColor Green
+Write-Host "    AEGIVANTA PLATFORM SUCCESSFULLY DEPLOYED              " -ForegroundColor Green
 Write-Host "    Frontend Dashboard: http://localhost                  " -ForegroundColor Yellow
 Write-Host "    Backend API Docs:   http://localhost/docs             " -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan

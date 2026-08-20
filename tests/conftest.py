@@ -15,6 +15,9 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
 # Ensure test environment variables are set before any backend modules load
+os.environ.setdefault("AEGIVANTA_ADMIN_PASSWORD", "TestAdminPassword2026!")
+os.environ.setdefault("AEGIVANTA_ANALYST_PASSWORD", "TestAnalystPassword2026!")
+os.environ.setdefault("AEGIVANTA_VIEWER_PASSWORD", "TestViewerPassword2026!")
 os.environ.setdefault("SENTINEL_ADMIN_PASSWORD", "TestAdminPassword2026!")
 os.environ.setdefault("SENTINEL_ANALYST_PASSWORD", "TestAnalystPassword2026!")
 os.environ.setdefault("SENTINEL_VIEWER_PASSWORD", "TestViewerPassword2026!")

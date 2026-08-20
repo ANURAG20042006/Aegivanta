@@ -26,13 +26,13 @@ COPY ml /app/ml
 
 # Create Directories for Logs, Reports, and Artifacts
 # Create non-root user for security
-RUN addgroup --system --gid 10001 sentinelai && \
-    adduser --system --uid 10001 --ingroup sentinelai sentinelai && \
+RUN addgroup --system --gid 10001 aegivanta && \
+    adduser --system --uid 10001 --ingroup aegivanta aegivanta && \
     mkdir -p /app/logs /app/reports /app/ml/artifacts && \
-    chown -R sentinelai:sentinelai /app
+    chown -R aegivanta:aegivanta /app
 
 # Switch to non-root user
-USER sentinelai
+USER aegivanta
 
 # Expose FastAPI Port
 EXPOSE 8000

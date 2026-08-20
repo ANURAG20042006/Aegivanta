@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# SentinelAI Enterprise Production Deployment Script (Linux / macOS / Git Bash)
+# Aegivanta Enterprise Production Deployment Script (Linux / macOS / Git Bash)
 
 set -e
 
 echo "=========================================================="
-echo "    SentinelAI Enterprise Platform Deployment Automation  "
+echo "    Aegivanta Enterprise Platform Deployment Automation   "
 echo "=========================================================="
 
 # Step 1: Check Docker Installation
@@ -26,14 +26,14 @@ fi
 
 # Step 3: Build & Launch Docker Container Cluster
 echo "--> Building and starting Docker Compose services..."
-docker-compose -f docker/docker-compose.yml up -d --build
+docker compose -f docker/docker-compose.yml up -d --build
 
 # Step 4: Health Check Verification
 echo "--> Waiting for services to reach HEALTHY state..."
 sleep 10
 
 echo "=========================================================="
-echo "    SENTINELAI PLATFORM SUCCESSFULLY DEPLOYED             "
+echo "    AEGIVANTA PLATFORM SUCCESSFULLY DEPLOYED              "
 echo "=========================================================="
 echo "    Frontend Interface:  http://localhost                 "
 echo "    FastAPI REST Docs:   http://localhost/docs            "

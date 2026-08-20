@@ -488,7 +488,7 @@ export const AssetsPage: React.FC = () => {
                     required
                     value={formData.hostname}
                     onChange={(e) => setFormData({ ...formData, hostname: e.target.value })}
-                    placeholder="api.sentinelai.internal"
+                    placeholder="api.aegivanta.internal"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono"
                   />
                 </div>

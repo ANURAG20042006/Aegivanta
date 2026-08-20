@@ -23,7 +23,7 @@ export const GuidePage: React.FC = () => {
       icon: ShieldCheck,
       color: 'from-blue-500 to-cyan-500',
       badge: 'Step 1: Access',
-      description: 'SentinelAI uses Role-Based Access Control (RBAC). Choose a role to experience the platform:',
+      description: 'Aegivanta uses Role-Based Access Control (RBAC). Choose a role to experience the platform:',
       details: [
         '👑 Admin: Full control over system settings, user management, and AI model retraining.',
         '🔬 Analyst: Inspect traffic, analyze threat trends, execute remediation playbooks, and export PDF reports.',
@@ -95,10 +95,10 @@ export const GuidePage: React.FC = () => {
             <span>User Friendly Quick Start Guide</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-wide font-mono">
-            How To Use SentinelAI
+            How To Use Aegivanta
           </h1>
           <p className="text-sm text-slate-300 max-w-3xl leading-relaxed font-sans">
-            Welcome to SentinelAI – the intelligent Network Intrusion Detection & Threat Analytics Platform. 
+            Welcome to Aegivanta – the intelligent Network Intrusion Detection & Threat Analytics Platform. 
             This friendly guide walks you through navigating the platform, inspecting network traffic, understanding AI predictions, and executing 1-click threat containment.
           </p>
 

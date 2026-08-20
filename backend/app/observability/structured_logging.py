@@ -30,10 +30,10 @@ from typing import Any, Dict, Optional
 # ---------------------------------------------------------------------------
 _request_id_var: ContextVar[str] = ContextVar("request_id", default="")
 _trace_id_var:   ContextVar[str] = ContextVar("trace_id",   default="")
-_service_var:    ContextVar[str] = ContextVar("service",     default="SentinelAI")
+_service_var:    ContextVar[str] = ContextVar("service",     default="Aegivanta")
 
 
-def set_request_context(request_id: str = "", trace_id: str = "", service: str = "SentinelAI") -> None:
+def set_request_context(request_id: str = "", trace_id: str = "", service: str = "Aegivanta") -> None:
     """Sets request-scoped context variables for structured log enrichment."""
     _request_id_var.set(request_id or str(uuid.uuid4()))
     _trace_id_var.set(trace_id or "")

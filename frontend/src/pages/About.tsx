@@ -5,8 +5,8 @@ export const AboutPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="glass-panel p-6 rounded-2xl">
-        <h1 className="text-xl font-mono font-bold text-white">About SentinelAI</h1>
-        <p className="text-xs text-slate-400 font-mono mt-1">Learn how SentinelAI checks network traffic and turns it into clear, useful alerts.</p>
+        <h1 className="text-xl font-mono font-bold text-white">About Aegivanta</h1>
+        <p className="text-xs text-slate-400 font-mono mt-1">Learn how Aegivanta checks network traffic and turns it into clear, useful alerts.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

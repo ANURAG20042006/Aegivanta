@@ -1,4 +1,4 @@
-name: SentinelAI CI Pipeline
+name: Aegivanta CI Pipeline
 
 on:
   push:
@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SECRET_KEY: "ci-test-secret-key-32-chars-long-minimum!"
+      AEGIVANTA_ADMIN_PASSWORD: "TestAdminPassword2026!"
+      AEGIVANTA_ANALYST_PASSWORD: "TestAnalystPassword2026!"
+      AEGIVANTA_VIEWER_PASSWORD: "TestViewerPassword2026!"
       SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
       SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
       SENTINEL_VIEWER_PASSWORD: "TestViewerPassword2026!"
@@ -85,10 +88,13 @@ jobs:
     env:
       APP_ENV: production
       OPERATING_MODE: PRODUCTION
-      POSTGRES_USER: sentinel_admin
+      POSTGRES_USER: aegivanta_admin
       POSTGRES_PASSWORD: "ci_postgres_password_test"
-      POSTGRES_DB: sentinelai_db
+      POSTGRES_DB: aegivanta_db
       SECRET_KEY: "ci_secret_key_minimum_32_characters_long"
+      AEGIVANTA_ADMIN_PASSWORD: "TestAdminPassword2026!"
+      AEGIVANTA_ANALYST_PASSWORD: "TestAnalystPassword2026!"
+      AEGIVANTA_VIEWER_PASSWORD: "TestViewerPassword2026!"
       SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
       SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
       SENTINEL_VIEWER_PASSWORD: "TestViewerPassword2026!"

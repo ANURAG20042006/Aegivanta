@@ -13,7 +13,7 @@ export const reportService = {
   downloadFile: async (downloadUrl: string): Promise<void> => {
     // Use fetch here so the auth header is explicit and binary responses are never
     // coerced by Axios into a JSON error payload.
-    const token = localStorage.getItem('sentinel_token');
+    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
     const response = await fetch(downloadUrl, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
@@ -31,7 +31,7 @@ export const reportService = {
     const blob = await response.blob();
     const contentDisposition = response.headers.get('content-disposition') || '';
     const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
-    const fallbackName = decodeURIComponent(downloadUrl.split('/').pop() || 'sentinelai-report');
+    const fallbackName = decodeURIComponent(downloadUrl.split('/').pop() || 'aegivanta-report');
     const filename = filenameMatch?.[1] || fallbackName;
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
