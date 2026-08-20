@@ -285,6 +285,7 @@ class RedisStreamBackend(EventStreamBackend):
             self._client = aioredis.from_url(
                 self.redis_url,
                 decode_responses=True,
+                protocol=2,
                 socket_timeout=5.0,
                 socket_connect_timeout=5.0
             )

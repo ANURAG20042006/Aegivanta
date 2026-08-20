@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy import func, select
@@ -100,6 +100,103 @@ async def list_incidents(
         for incident in result.scalars().all()
     ]
     return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+
+# ==============================================================================
+# PHASE 3.6 INCIDENT CORRELATION, INVESTIGATION & LIFECYCLE ENDPOINTS
+# ==============================================================================
+
+from backend.app.services.detection_correlation_service import correlation_engine
+from backend.app.services.incident_service import IncidentService
+from backend.app.services.investigation_timeline_service import InvestigationTimelineService
+from backend.app.services.mitre_coverage_service import MitreCoverageService
+
+
+class CorrelateBatchRequest(BaseModel):
+    events: Optional[List[Dict[str, Any]]] = None
+    window_minutes: int = 15
+
+
+class IncidentAssignRequest(BaseModel):
+    analyst_username: str
+
+
+class IncidentResolveRequest(BaseModel):
+    resolution_notes: str
+    remediation_action: Optional[str] = None
+
+
+@router.post("/correlate", summary="Trigger Detection Correlation & Incident Formation")
+async def correlate_events(
+    payload: Optional[CorrelateBatchRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """
+    Evaluates detection rules, correlates events across temporal windows,
+    and aggregates into incidents with deduplication.
+    """
+    req = payload or CorrelateBatchRequest()
+    raw_events = req.events
+
+    if raw_events is None:
+        # Load from recent alerts
+        res_alerts = await db.execute(select(Alert).order_by(desc(Alert.timestamp)).limit(50))
+        raw_events = [
+            {
+                "id": a.id,
+                "source_ip": a.source_ip,
+                "destination_ip": a.destination_ip,
+                "source_port": a.source_port,
+                "destination_port": a.destination_port,
+                "protocol": a.protocol,
+                "is_malicious": a.is_malicious,
+                "attack_type": a.attack_type,
+                "confidence": a.confidence_score,
+                "severity": a.severity,
+                "timestamp": a.timestamp.isoformat()
+            }
+            for a in res_alerts.scalars().all()
+        ]
+
+    bundles = correlation_engine.correlate_batch(raw_events, window_minutes=req.window_minutes)
+    results = []
+    for b in bundles:
+        inc, is_new = await IncidentService.create_or_update_from_correlation(b, db)
+        results.append({
+            "correlation_id": b["correlation_id"],
+            "incident_id": inc.id,
+            "incident_code": inc.incident_code,
+            "is_new": is_new,
+            "severity": inc.severity,
+            "risk_score": inc.risk_score,
+            "status": inc.status,
+            "alert_count": inc.alert_count
+        })
+
+    return {
+        "total_events_processed": len(raw_events),
+        "total_correlated_bundles": len(bundles),
+        "incidents": results
+    }
+
+
+@router.get("/mitre-coverage", summary="Get MITRE ATT&CK Matrix Detection Coverage Analytics")
+async def get_mitre_coverage(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Returns real MITRE ATT&CK matrix detection coverage statistics."""
+    return await MitreCoverageService.get_coverage_analytics(db=db)
+
+
+@router.get("/statistics", summary="Get Aggregated Incident Operations Statistics")
+async def get_incident_statistics(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Returns operational incident distributions across severity, status, and attack types."""
+    return await IncidentService.get_statistics(db=db)
 
 
 @router.get("/{incident_id}", summary="Get Incident Details with Timeline & Correlated Alerts")
@@ -411,3 +508,251 @@ async def remediate_incident(
         "current_status": incident.status,
         "executed_by": current_user.username
     }
+
+
+# ==============================================================================
+# PHASE 3.6 INCIDENT CORRELATION, INVESTIGATION & LIFECYCLE ENDPOINTS
+# ==============================================================================
+
+from backend.app.services.detection_correlation_service import correlation_engine
+from backend.app.services.incident_service import IncidentService
+from backend.app.services.investigation_timeline_service import InvestigationTimelineService
+from backend.app.services.mitre_coverage_service import MitreCoverageService
+
+
+class CorrelateBatchRequest(BaseModel):
+    events: Optional[List[Dict[str, Any]]] = None
+    window_minutes: int = 15
+
+
+class IncidentAssignRequest(BaseModel):
+    analyst_username: str
+
+
+class IncidentResolveRequest(BaseModel):
+    resolution_notes: str
+    remediation_action: Optional[str] = None
+
+
+@router.post("/correlate", summary="Trigger Detection Correlation & Incident Formation")
+async def correlate_events(
+    payload: Optional[CorrelateBatchRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """
+    Evaluates detection rules, correlates events across temporal windows,
+    and aggregates into incidents with deduplication.
+    """
+    req = payload or CorrelateBatchRequest()
+    raw_events = req.events
+
+    if raw_events is None:
+        # Load from recent alerts
+        res_alerts = await db.execute(select(Alert).order_by(desc(Alert.timestamp)).limit(50))
+        raw_events = [
+            {
+                "id": a.id,
+                "source_ip": a.source_ip,
+                "destination_ip": a.destination_ip,
+                "source_port": a.source_port,
+                "destination_port": a.destination_port,
+                "protocol": a.protocol,
+                "is_malicious": a.is_malicious,
+                "attack_type": a.attack_type,
+                "confidence": a.confidence_score,
+                "severity": a.severity,
+                "timestamp": a.timestamp.isoformat()
+            }
+            for a in res_alerts.scalars().all()
+        ]
+
+    bundles = correlation_engine.correlate_batch(raw_events, window_minutes=req.window_minutes)
+    results = []
+    for b in bundles:
+        inc, is_new = await IncidentService.create_or_update_from_correlation(b, db)
+        results.append({
+            "correlation_id": b["correlation_id"],
+            "incident_id": inc.id,
+            "incident_code": inc.incident_code,
+            "is_new": is_new,
+            "severity": inc.severity,
+            "risk_score": inc.risk_score,
+            "status": inc.status,
+            "alert_count": inc.alert_count
+        })
+
+    return {
+        "total_events_processed": len(raw_events),
+        "total_correlated_bundles": len(bundles),
+        "incidents": results
+    }
+
+
+@router.get("/mitre-coverage", summary="Get MITRE ATT&CK Matrix Detection Coverage Analytics")
+async def get_mitre_coverage(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Returns real MITRE ATT&CK matrix detection coverage statistics."""
+    return await MitreCoverageService.get_coverage_analytics(db=db)
+
+
+@router.get("/statistics", summary="Get Aggregated Incident Operations Statistics")
+async def get_incident_statistics(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Returns operational incident distributions across severity, status, and attack types."""
+    return await IncidentService.get_statistics(db=db)
+
+
+@router.get("/{incident_id}/timeline", summary="Get Automated Investigation Timeline")
+async def get_incident_investigation_timeline(
+    incident_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Retrieves chronological investigation timeline and structured attack progression summary."""
+    try:
+        return await InvestigationTimelineService.get_incident_timeline(incident_id, db)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get("/{incident_id}/risk", summary="Get Explainable Incident Risk Breakdown")
+async def get_incident_risk_breakdown(
+    incident_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Returns explainable components and dimensional weights of an incident's risk score."""
+    query = select(Incident).where(
+        (Incident.id == incident_id) | (Incident.incident_code == incident_id)
+    )
+    inc = (await db.execute(query)).scalar_one_or_none()
+    if not inc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+
+    payload = inc.feature_payload or {}
+    risk_comps = payload.get("risk_components") or {
+        "base_severity_contribution": inc.risk_score * 0.35,
+        "confidence_contribution": (inc.confidence_score or 0.85) * 15.0,
+        "total_normalized_score": inc.risk_score,
+        "classification_band": inc.severity
+    }
+
+    return {
+        "incident_id": inc.id,
+        "incident_code": inc.incident_code,
+        "risk_score": inc.risk_score,
+        "severity": inc.severity,
+        "components": risk_comps
+    }
+
+
+@router.get("/{incident_id}/evidence", summary="Get Raw Incident Evidence & Forensic Payloads")
+async def get_incident_evidence(
+    incident_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "viewer"]))
+):
+    """Retrieves underlying forensic evidence payloads supporting an incident."""
+    query = select(Incident).where(
+        (Incident.id == incident_id) | (Incident.incident_code == incident_id)
+    )
+    inc = (await db.execute(query)).scalar_one_or_none()
+    if not inc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incident not found.")
+
+    return {
+        "incident_id": inc.id,
+        "incident_code": inc.incident_code,
+        "source_ip": inc.source_ip,
+        "destination_ip": inc.destination_ip,
+        "source_port": inc.source_port,
+        "destination_port": inc.destination_port,
+        "protocol": inc.protocol,
+        "attack_type": inc.attack_type,
+        "confidence_score": inc.confidence_score,
+        "feature_payload": inc.feature_payload,
+        "first_seen": inc.first_seen.isoformat() if inc.first_seen else None,
+        "last_seen": inc.last_seen.isoformat() if inc.last_seen else None
+    }
+
+
+@router.post("/{incident_id}/assign", summary="Assign Incident to Security Analyst")
+async def assign_incident(
+    incident_id: str,
+    payload: IncidentAssignRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "soc_analyst"]))
+):
+    """Assigns an incident to a designated security analyst."""
+    try:
+        inc = await IncidentService.assign_analyst(incident_id, payload.analyst_username, db)
+        return {
+            "status": "SUCCESS",
+            "incident_id": inc.id,
+            "incident_code": inc.incident_code,
+            "assigned_analyst": inc.analyst
+        }
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/{incident_id}/status", summary="Transition Incident Lifecycle Status")
+async def transition_incident_status(
+    incident_id: str,
+    payload: IncidentStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "soc_analyst"]))
+):
+    """Transitions an incident along its lifecycle state with validation."""
+    try:
+        inc = await IncidentService.update_status(
+            incident_id=incident_id,
+            new_status=payload.status,
+            notes=payload.notes,
+            analyst=current_user.username,
+            db=db
+        )
+        return {
+            "status": "SUCCESS",
+            "incident_id": inc.id,
+            "incident_code": inc.incident_code,
+            "current_status": inc.status
+        }
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/{incident_id}/resolve", summary="Resolve Security Incident")
+async def resolve_incident_endpoint(
+    incident_id: str,
+    payload: IncidentResolveRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "analyst", "soc_analyst"]))
+):
+    """Resolves an incident with resolution justification and containment details."""
+    try:
+        inc = await IncidentService.resolve_incident(
+            incident_id=incident_id,
+            resolution_notes=payload.resolution_notes,
+            remediation_action=payload.remediation_action,
+            analyst=current_user.username,
+            db=db
+        )
+        return {
+            "status": "SUCCESS",
+            "incident_id": inc.id,
+            "incident_code": inc.incident_code,
+            "status": inc.status,
+            "resolution": inc.resolution,
+            "remediation_action": inc.remediation_action
+        }
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
