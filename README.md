@@ -256,20 +256,26 @@ Default user accounts are initialized on startup. Passwords can be configured in
 
 ---
 
-## 📚 Complete Project Documentation
+## 📚 Complete Enterprise Documentation Suite
 
-- 🛡️ [`docs/SOC_OPERATIONS.md`](docs/SOC_OPERATIONS.md) – Phase 1 SOC Operations Manual & Incident Correlation Policies
-- 📋 [`docs/PHASE_1_WALKTHROUGH.md`](docs/PHASE_1_WALKTHROUGH.md) – Phase 1 Upgrade & Architecture Walkthrough
-- 🏗️ [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) – System Topology & Data Flow
-- 💾 [`docs/DATABASE_DESIGN.md`](docs/DATABASE_DESIGN.md) – Entity-Relationship Database Schemas
-- 📐 [`docs/UML_DIAGRAMS.md`](docs/UML_DIAGRAMS.md) – Class, Sequence, & Activity Diagrams
-- 🛠️ [`docs/INSTALLATION.md`](docs/INSTALLATION.md) – Local Setup Guide
-- 🚀 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) – Nginx & SSL/TLS Deployment Guide
-- 📖 [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) – REST API & WebSockets Contract
-- 👤 [`docs/USER_MANUAL.md`](docs/USER_MANUAL.md) – Security Operations Manual
-- 🎓 [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) – Academic Thesis Document
-- 🎤 [`docs/PRESENTATION_NOTES.md`](docs/PRESENTATION_NOTES.md) – Viva Defense Script & Q&A
-- 🏆 [`docs/PROJECT_EVALUATION_REPORT.md`](docs/PROJECT_EVALUATION_REPORT.md) – Comprehensive Evaluation & Review Report
+### 🚀 Guides & Operations
+- 📖 [`docs/guides/CUSTOMER_QUICKSTART.md`](docs/guides/CUSTOMER_QUICKSTART.md) — 5-Minute Quickstart Guide for SOC Operators
+- 👑 [`docs/guides/ADMIN_GUIDE.md`](docs/guides/ADMIN_GUIDE.md) — SOC Administrator & User Governance Manual
+- 🔬 [`docs/guides/ANALYST_GUIDE.md`](docs/guides/ANALYST_GUIDE.md) — Tier 1/2/3 Security Analyst Operational Guide
+- 🚀 [`docs/guides/DEPLOYMENT.md`](docs/guides/DEPLOYMENT.md) — Production Docker & Kubernetes Deployment Guide
+- ⚙️ [`docs/guides/OPERATIONS.md`](docs/guides/OPERATIONS.md) — Operations Runbook & Model Governance Procedures
+- 🔧 [`docs/guides/TROUBLESHOOTING.md`](docs/guides/TROUBLESHOOTING.md) — Diagnostics & Incident Resolution Manual
+- 🤝 [`docs/guides/CONTRIBUTING.md`](docs/guides/CONTRIBUTING.md) — Developer & Contributor Standards
+
+### 🏗️ Architecture, API & Security
+- 🏗️ [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) — System Topology, Microservices & Data Flows
+- 📖 [`docs/api/API.md`](docs/api/API.md) — REST API Endpoints & Real-time WebSocket Contracts
+- 🛡️ [`docs/security/SECURITY.md`](docs/security/SECURITY.md) — Enterprise Security Hardening & RBAC Specifications
+- 🎯 [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md) — STRIDE Threat Model & MITRE ATT&CK Matrix
+
+### 📊 Audits & Reports
+- 🏆 [`docs/reports/AEGIVANTA_FINAL_PRODUCT_AUDIT.md`](docs/reports/AEGIVANTA_FINAL_PRODUCT_AUDIT.md) — Final Multi-Dimensional Product Audit
+- 📋 [`docs/reports/AEGIVANTA_REPOSITORY_AUDIT.md`](docs/reports/AEGIVANTA_REPOSITORY_AUDIT.md) — Repository File Classification & Inventory
 
 ---
 
@@ -278,5 +284,5 @@ Default user accounts are initialized on startup. Passwords can be configured in
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 <div align="center">
-  <sub>Built with ❤️ by Senior Engineering Team. SentinelAI © 2026</sub>
+  <sub>Built with ❤️ for Enterprise SOC Operations. Aegivanta © 2026</sub>
 </div>
