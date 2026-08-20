@@ -66,6 +66,11 @@ from backend.app.api.v1.alert_intelligence import router as alert_intelligence_r
 from backend.app.api.v1.incident_workflow import router as incident_workflow_router
 from backend.app.api.v1.investigation_search import router as investigation_search_router
 from backend.app.api.v1.security_value import router as security_value_router
+from backend.app.api.v1.autonomous_response import router as autonomous_response_router
+from backend.app.api.v1.security_validation import router as security_validation_router
+from backend.app.api.v1.security_simulations import router as security_simulations_router
+from backend.app.api.v1.security_intelligence import router as security_intelligence_router
+
 
 
 
@@ -320,7 +325,12 @@ app.include_router(alert_intelligence_router, prefix=settings.API_V1_STR)
 app.include_router(incident_workflow_router, prefix=settings.API_V1_STR)
 app.include_router(investigation_search_router, prefix=settings.API_V1_STR)
 app.include_router(security_value_router, prefix=settings.API_V1_STR)
+app.include_router(autonomous_response_router, prefix=settings.API_V1_STR)
+app.include_router(security_validation_router, prefix=settings.API_V1_STR)
+app.include_router(security_simulations_router, prefix=settings.API_V1_STR)
+app.include_router(security_intelligence_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

@@ -48,9 +48,14 @@ export const navItems = [
   { path: '/alert-queue', label: 'Alert Queue', section: 'Production Intel', icon: Layers },
   { path: '/security-value', label: 'Security ROI & Value', section: 'Production Intel', icon: ShieldCheck },
   { path: '/telemetry-cost', label: 'Telemetry Costs', section: 'Production Intel', icon: BarChart3 },
-  { path: '/benchmarks', label: 'ML Benchmarks', section: 'Production Intel', icon: Zap },
+  { path: '/benchmarking', label: 'ML Benchmarks', section: 'Production Intel', icon: Zap },
+
+  { path: '/security-automation', label: 'Autonomous Response', section: 'Autonomous Ops', icon: Zap },
+  { path: '/response-approvals', label: 'Response Approvals', section: 'Autonomous Ops', icon: ShieldCheck },
+  { path: '/security-validation', label: 'Continuous Validation', section: 'Autonomous Ops', icon: ShieldCheck },
 
   { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
+
 
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },

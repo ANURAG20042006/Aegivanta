@@ -305,8 +305,67 @@ export const saasApi = {
   getProductAnalytics: async (): Promise<any> => {
     const res = await axios.get(`${API_BASE}/analytics/product`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 17 Autonomous Threat Response & Continuous Validation APIs
+  getAutonomousPolicy: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/autonomous-response/policy`, getAuthHeaders());
+    return res.data;
+  },
+  updateAutonomousPolicy: async (data: any): Promise<any> => {
+    const res = await axios.put(`${API_BASE}/autonomous-response/policy`, data, getAuthHeaders());
+    return res.data;
+  },
+  simulateResponse: async (data: { incident_id: string; action_type: string; target_entity: string; parameters?: any }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/autonomous-response/simulate`, data, getAuthHeaders());
+    return res.data;
+  },
+  executeResponse: async (data: { incident_id: string; action_type: string; target_entity: string; bypass_approval?: boolean }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/autonomous-response/execute`, data, getAuthHeaders());
+    return res.data;
+  },
+  rollbackResponse: async (actionId: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/autonomous-response/${actionId}/rollback`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getSecurityValidation: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/validation`, getAuthHeaders());
+    return res.data;
+  },
+  runSecurityValidation: async (): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/security/validation/run`, {}, getAuthHeaders());
+    return res.data;
+  },
+  listSimulations: async (limit: number = 20): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/security/simulations?limit=${limit}`, getAuthHeaders());
+    return res.data;
+  },
+  runSimulation: async (attack_technique: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/security/simulations`, { attack_technique }, getAuthHeaders());
+    return res.data;
+  },
+  getSimulationDetails: async (id: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/simulations/${id}`, getAuthHeaders());
+    return res.data;
+  },
+  getCoverageGaps: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/detection/coverage/gaps`, getAuthHeaders());
+    return res.data;
+  },
+  getAttackPaths: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/security/attack-paths`, getAuthHeaders());
+    return res.data;
+  },
+  getAssetRisks: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/assets/risk`, getAuthHeaders());
+    return res.data;
+  },
+  getControlEffectiveness: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/security/control-effectiveness`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

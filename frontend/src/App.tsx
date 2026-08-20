@@ -52,6 +52,12 @@ import { SecurityValue } from './pages/SecurityValue';
 import { TelemetryCost } from './pages/TelemetryCost';
 import { Benchmarking } from './pages/Benchmarking';
 
+// Phase 17 Autonomous Response & Continuous Security Validation Pages
+import { SecurityAutomation } from './pages/SecurityAutomation';
+import { ResponseApprovals } from './pages/ResponseApprovals';
+import { SecurityValidation } from './pages/SecurityValidation';
+
+
 
 
 
@@ -99,7 +105,11 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/alert-queue" element={<AlertQueue />} />
               <Route path="/security-value" element={<SecurityValue />} />
               <Route path="/telemetry-cost" element={<TelemetryCost />} />
-              <Route path="/benchmarks" element={<Benchmarking />} />
+              <Route path="/benchmarking" element={<Benchmarking />} />
+
+              <Route path="/security-automation" element={<SecurityAutomation />} />
+              <Route path="/response-approvals" element={<ResponseApprovals />} />
+              <Route path="/security-validation" element={<SecurityValidation />} />
 
 
               <Route path="/organizations" element={<OrganizationsPage />} />

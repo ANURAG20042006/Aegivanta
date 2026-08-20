@@ -34,6 +34,11 @@ from backend.app.models.detection_rule import DetectionRule
 from backend.app.models.detection_quality import DetectionQualitySnapshot, DetectionEvaluation, DetectionBenchmark
 from backend.app.models.alert_intelligence import AlertFingerprint, AlertGroup, AlertPriorityScore
 from backend.app.models.security_insights import SecurityScoreHistory, SecurityImprovementRecommendation
+from backend.app.models.autonomous_response import AutonomousResponsePolicy, ResponsePolicyRule, ResponseBlastRadius, ResponseRollback
+from backend.app.models.security_validation import SecurityValidationRun, SecurityValidationCheck
+from backend.app.models.security_simulation import SecuritySimulation, SecuritySimulationEvent
+from backend.app.models.security_intelligence import DetectionCoverageGap, AssetRiskScore, SecurityControlEffectiveness
+
 
 __all__ = [
     "User",

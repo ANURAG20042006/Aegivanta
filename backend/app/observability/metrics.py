@@ -408,8 +408,77 @@ aegivanta_telemetry_bytes_total = _make(
 )
 
 # ===========================================================================
+# Phase 17: Autonomous Response & Continuous Security Validation Metrics
+# ===========================================================================
+aegivanta_autonomous_actions_total = _make(
+    "counter",
+    "aegivanta_autonomous_actions_total",
+    "Total autonomous remediation actions executed",
+    ["action_type"]
+)
+
+aegivanta_autonomous_actions_denied_total = _make(
+    "counter",
+    "aegivanta_autonomous_actions_denied_total",
+    "Total autonomous response actions rejected by policy",
+    ["action_type"]
+)
+
+aegivanta_autonomous_actions_approved_total = _make(
+    "counter",
+    "aegivanta_autonomous_actions_approved_total",
+    "Total autonomous actions approved by security administrators",
+    ["action_type"]
+)
+
+aegivanta_autonomous_action_latency_seconds = _make(
+    "histogram",
+    "aegivanta_autonomous_action_latency_seconds",
+    "Latency of autonomous response evaluation and dispatch",
+    [],
+    _LATENCY_BUCKETS
+)
+
+aegivanta_security_validation_total = _make(
+    "counter",
+    "aegivanta_security_validation_total",
+    "Total continuous security defense verification runs",
+    ["status"]
+)
+
+aegivanta_security_validation_failures_total = _make(
+    "counter",
+    "aegivanta_security_validation_failures_total",
+    "Total security control check failures",
+    ["category"]
+)
+
+aegivanta_detection_coverage_gaps = _make(
+    "gauge",
+    "aegivanta_detection_coverage_gaps",
+    "Total active ATT&CK detection coverage gaps",
+    []
+)
+
+aegivanta_asset_risk_score = _make(
+    "histogram",
+    "aegivanta_asset_risk_score",
+    "Distribution of protected asset risk scores (0-100)",
+    [],
+    [0, 20, 40, 60, 80, 100]
+)
+
+aegivanta_response_rollbacks_total = _make(
+    "counter",
+    "aegivanta_response_rollbacks_total",
+    "Total executed response action rollbacks",
+    ["action_type"]
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 def record_api_request(method: str, endpoint: str, status_code: int, duration_s: float) -> None:
