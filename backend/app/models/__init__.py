@@ -10,7 +10,7 @@ from backend.app.models.security_event import SecurityEvent
 from backend.app.models.monitoring import MonitoringCheck, MonitoringHistory
 from backend.app.models.threat_intel import ThreatIndicator, ThreatFeed
 from backend.app.models.behavioral import BehavioralBaseline, AnomalyEvent
-from backend.app.models.investigation import Investigation, InvestigationEvidence
+from backend.app.models.investigation import Investigation, InvestigationEvidence, InvestigationCase, InvestigationNote, InvestigationTimeline
 from backend.app.models.playbook import PlaybookExecution
 from backend.app.models.hunting import HuntingQuery, HuntingExecution
 from backend.app.models.predictive import RiskForecast, AlertVolumeForecast

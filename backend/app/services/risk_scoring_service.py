@@ -46,6 +46,30 @@ class RiskScoringService:
         return "LOW"
 
     @classmethod
+    def calculate_risk_score(
+        cls,
+        base_severity: str = "MEDIUM",
+        confidence: float = 0.85,
+        matched_iocs_count: int = 0,
+        has_lateral_movement: bool = False,
+        crown_jewel_impact: float = 0.0,
+        **kwargs
+    ) -> Dict[str, Any]:
+        final_score, band, components = cls.calculate_incident_risk(
+            severity=base_severity,
+            confidence=confidence,
+            ioc_match_count=matched_iocs_count,
+            hop_count=2 if has_lateral_movement else 1,
+            crown_jewel_index=crown_jewel_impact,
+            **kwargs
+        )
+        return {
+            "risk_score": final_score,
+            "risk_level": band,
+            "components": components
+        }
+
+    @classmethod
     def calculate_incident_risk(
         cls,
         severity: str = "MEDIUM",

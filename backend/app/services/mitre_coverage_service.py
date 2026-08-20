@@ -46,6 +46,17 @@ MITRE_ENTERPRISE_CATALOG = {
 class MitreCoverageService:
     """Computes evidence-backed MITRE ATT&CK coverage analytics."""
 
+    @classmethod
+    def get_coverage_summary(cls) -> Dict[str, Any]:
+        """Synchronous summary of MITRE catalog techniques."""
+        return {
+            "total_catalog_techniques": len(MITRE_ENTERPRISE_CATALOG),
+            "catalog": [
+                {"technique_id": k, "name": v["name"], "tactic": v["tactic"]}
+                for k, v in MITRE_ENTERPRISE_CATALOG.items()
+            ]
+        }
+
     @staticmethod
     async def get_coverage_analytics(db: Optional[AsyncSession] = None) -> Dict[str, Any]:
         """
