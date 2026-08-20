@@ -15,6 +15,13 @@ jobs:
       SENTINEL_ADMIN_PASSWORD: "TestAdminPassword2026!"
       SENTINEL_ANALYST_PASSWORD: "TestAnalystPassword2026!"
       SENTINEL_VIEWER_PASSWORD: "TestViewerPassword2026!"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      VECLIB_MAXIMUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      MPLBACKEND: "Agg"
     steps:
       - uses: actions/checkout@v4
 

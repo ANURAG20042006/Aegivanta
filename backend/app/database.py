@@ -13,7 +13,9 @@ class Base(DeclarativeBase):
 # Determine async engine args based on database driver
 engine_kwargs = {}
 if "sqlite" in settings.DATABASE_URL:
+    from sqlalchemy.pool import NullPool
     engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": 60.0}
+    engine_kwargs["poolclass"] = NullPool
 else:
     engine_kwargs.update({
         "pool_size": 20,

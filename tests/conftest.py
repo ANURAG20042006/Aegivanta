@@ -5,6 +5,15 @@ from pathlib import Path
 
 import pytest
 
+# Set threading and backend environment variables to prevent OpenMP crashes and GUI initialization on Linux
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
+
 # Ensure test environment variables are set before any backend modules load
 os.environ.setdefault("SENTINEL_ADMIN_PASSWORD", "TestAdminPassword2026!")
 os.environ.setdefault("SENTINEL_ANALYST_PASSWORD", "TestAnalystPassword2026!")
@@ -23,12 +32,11 @@ import asyncio
 def setup_test_env():
     """Session fixture ensuring environment variables are set and database tables are initialized."""
     async def _init():
-        from backend.app.database import async_engine
         from backend.app.main import initialize_application
         await initialize_application()
-        await async_engine.dispose()
 
     try:
         asyncio.run(_init())
     except Exception as e:
         print(f"Warning initializing database in tests: {e}")
+
