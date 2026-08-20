@@ -35,11 +35,13 @@ export const navItems = [
   { path: '/investigations', label: 'Investigations', section: 'Intelligence', icon: SearchCode },
   { path: '/analytics', label: 'Model insights', section: 'Intelligence', icon: BarChart3 },
 
+  { path: '/copilot', label: 'AI Security Copilot', section: 'Advanced SOC', icon: Sparkles },
   { path: '/threat-hunting', label: 'Threat Hunting', section: 'Advanced SOC', icon: Search },
   { path: '/predictive-analytics', label: 'Predictive Risk', section: 'Advanced SOC', icon: TrendingUp },
   { path: '/threat-graph', label: 'Threat Graph', section: 'Advanced SOC', icon: Network },
   { path: '/attack-coverage', label: 'ATT&CK Matrix', section: 'Advanced SOC', icon: Target },
   { path: '/soc-analytics', label: 'SOC Analytics', section: 'Advanced SOC', icon: Activity },
+
 
   { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },

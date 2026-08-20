@@ -229,6 +229,29 @@ export const saasApi = {
   listSecurityEvents: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/security/events`, getAuthHeaders());
     return res.data;
+  },
+
+  // AI Security Copilot & Detection Content
+  queryCopilot: async (query: string, incident_id?: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/copilot/query`, { query, incident_id }, getAuthHeaders());
+    return res.data;
+  },
+  explainIncident: async (incidentId: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/copilot/incidents/${incidentId}/explain`, getAuthHeaders());
+    return res.data;
+  },
+  listDetectionRules: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/detection-rules`, getAuthHeaders());
+    return res.data;
+  },
+  createDetectionRule: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/detection-rules`, data, getAuthHeaders());
+    return res.data;
+  },
+  testDetectionRule: async (data: { rule_dsl: any; sample_events: any[] }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/detection-rules/test`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
