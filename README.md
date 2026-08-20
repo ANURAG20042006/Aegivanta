@@ -33,6 +33,23 @@
 
 ---
 
+## 🏢 Phase 4 Upgrade: Enterprise Multi-Tenant SaaS & Commercial Platform (v4.0.0)
+
+Aegivanta (SentinelAI) v4.0 is fully commercialized into an Enterprise Multi-Tenant Cybersecurity SaaS Platform:
+
+| Phase 4 SaaS Feature | Specifications & Security Architecture | Commercial Capabilities |
+|---|---|---|
+| **Multi-Tenancy & Isolation** | `Organization`, `Tenant`, `TenantMembership`, `TenantSettings` with `TenantContext` ContextVar | Zero cross-tenant data leakage, isolated workspaces, custom data retention |
+| **Subscription Engine** | Free, Professional, Business, and Enterprise plans with `SubscriptionService` | Tier quotas (seats, telemetry volume, sensors), feature entitlements |
+| **Customer API Keys** | 192-bit cryptographic entropy, SHA-256 hashed storage, scoped permissions | Machine-to-machine telemetry ingestion, SIEM integration, one-time secret display |
+| **Usage Metering & Rate Limiting** | Non-blocking telemetry buffer, sliding-window `TenantRateLimiter` | HTTP 429 Retry-After enforcement, monthly rollup usage tracking |
+| **Billing Abstraction & Webhooks** | `BillingProvider` abstraction, HMAC-SHA256 signature verification | Idempotent webhook handling, replay defense, provider-independent billing |
+| **Telemetry Sensor Fleet** | Enrolled agents with crypto-hashed tokens, heartbeat monitoring | Endpoint & network taps, auto-offline detection, instant agent revocation |
+| **Enterprise Connectors** | SIEM (Splunk, Elastic, Sentinel), Slack, generic Webhook, EDR | Automated critical incident dispatching, two-way containment |
+| **Customer SaaS Portal** | React 18 frontend: Organizations, Billing, API Keys, Sensors, Integrations, Setup Wizard | Self-service team management, tier upgrades, key generation, guided onboarding |
+
+---
+
 ## 🚀 Phase 3.3 Upgrade: Production Kubernetes & Deployment Hardening
 
 SentinelAI includes production-grade Kubernetes manifests and container hardening under [`k8s/`](k8s/):
