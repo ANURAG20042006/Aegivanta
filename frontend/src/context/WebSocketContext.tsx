@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { SOCEventItem } from '../services/dashboard';
 
 export interface PacketEvent {
   type: string;
@@ -27,6 +28,8 @@ export interface WebSocketContextType {
   threatAlerts: PacketEvent[];
   packets: PacketEvent[];
   alerts: PacketEvent[];
+  socEvents: SOCEventItem[];
+  latestSOCEvent: SOCEventItem | null;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -37,9 +40,13 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [latestPacket, setLatestPacket] = useState<PacketEvent | null>(null);
   const [packetStream, setPacketStream] = useState<PacketEvent[]>([]);
   const [threatAlerts, setThreatAlerts] = useState<PacketEvent[]>([]);
+  const [socEvents, setSocEvents] = useState<SOCEventItem[]>([]);
+  const [latestSOCEvent, setLatestSOCEvent] = useState<SOCEventItem | null>(null);
 
-  const wsRef = useRef<WebSocket | null>(null);
+  const wsThreatsRef = useRef<WebSocket | null>(null);
+  const wsSocRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<any>(null);
+  const seenEventIdsRef = useRef<Set<string>>(new Set());
 
   const connect = useCallback(() => {
     if (!token) {
@@ -47,70 +54,113 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
 
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
-      return;
-    }
-
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
-    const socketUrl = `${wsProtocol}//${wsHost}/ws/threats?token=${encodeURIComponent(token)}`;
 
-    try {
-      const ws = new WebSocket(socketUrl);
-      wsRef.current = ws;
+    // 1. Connect SOC Operational Events Stream
+    if (!wsSocRef.current || wsSocRef.current.readyState === WebSocket.CLOSED) {
+      try {
+        const socUrl = `${wsProtocol}//${wsHost}/ws/soc-events?token=${encodeURIComponent(token)}`;
+        const socWs = new WebSocket(socUrl);
+        wsSocRef.current = socWs;
 
-      ws.onopen = () => {
-        setIsConnected(true);
-        console.log('Connected to SentinelAI Live Threat WebSocket Stream.');
-      };
+        socWs.onopen = () => {
+          setIsConnected(true);
+        };
 
-      ws.onmessage = (event) => {
-        try {
-          const packet = JSON.parse(event.data);
+        socWs.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
 
-          // Handle server-side heartbeat ping
-          if (packet.type === 'PING') {
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'PONG' }));
+            if (parsed.type === 'PING') {
+              if (socWs.readyState === WebSocket.OPEN) {
+                socWs.send(JSON.stringify({ type: 'PONG' }));
+              }
+              return;
             }
-            return;
-          }
 
-          if (packet.type === 'PACKET_STREAM' || packet.type === 'THREAT_EVENT' || packet.type === 'SYSTEM_STATUS') {
-            const pktEvent: PacketEvent = packet;
-            setLatestPacket(pktEvent);
-            setPacketStream((prev) => [pktEvent, ...prev.slice(0, 49)]);
-
-            if (pktEvent.is_malicious) {
-              setThreatAlerts((prev) => [pktEvent, ...prev.slice(0, 19)]);
+            if (parsed.type === 'INIT_SYNC' && Array.isArray(parsed.events)) {
+              const newEvts: SOCEventItem[] = parsed.events;
+              newEvts.forEach(e => seenEventIdsRef.current.add(e.event_id));
+              setSocEvents(newEvts);
+              if (newEvts.length > 0) {
+                setLatestSOCEvent(newEvts[0]);
+              }
+              return;
             }
+
+            // Structured SOC Event
+            const evt: SOCEventItem = parsed.data || parsed;
+            if (evt && evt.event_id) {
+              if (seenEventIdsRef.current.has(evt.event_id)) {
+                return; // Suppress duplicate
+              }
+              seenEventIdsRef.current.add(evt.event_id);
+              setLatestSOCEvent(evt);
+              setSocEvents((prev) => [evt, ...prev.slice(0, 99)]);
+            }
+          } catch (err) {
+            console.error('Error parsing SOC event frame:', err);
           }
-        } catch (e) {
-          console.error('Error parsing WebSocket telemetry frame:', e);
-        }
-      };
+        };
 
-      ws.onclose = () => {
-        setIsConnected(false);
-        wsRef.current = null;
-        // Schedule auto-reconnect in 3s
-        if (token) {
-          clearTimeout(reconnectTimerRef.current);
-          reconnectTimerRef.current = setTimeout(connect, 3000);
-        }
-      };
+        socWs.onclose = () => {
+          setIsConnected(false);
+          wsSocRef.current = null;
+        };
 
-      ws.onerror = (err) => {
-        console.warn('WebSocket connection event:', err);
-        try {
-          ws.close();
-        } catch {}
-      };
-    } catch (err) {
-      console.error('Failed to establish WebSocket connection:', err);
-      if (token) {
-        clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = setTimeout(connect, 3000);
+        socWs.onerror = () => {
+          try { socWs.close(); } catch {}
+        };
+      } catch (err) {
+        console.error('Failed to connect SOC Events WebSocket:', err);
+      }
+    }
+
+    // 2. Connect Threat Packet Telemetry Stream
+    if (!wsThreatsRef.current || wsThreatsRef.current.readyState === WebSocket.CLOSED) {
+      try {
+        const threatUrl = `${wsProtocol}//${wsHost}/ws/threats?token=${encodeURIComponent(token)}`;
+        const threatWs = new WebSocket(threatUrl);
+        wsThreatsRef.current = threatWs;
+
+        threatWs.onmessage = (event) => {
+          try {
+            const packet = JSON.parse(event.data);
+            if (packet.type === 'PING') {
+              if (threatWs.readyState === WebSocket.OPEN) {
+                threatWs.send(JSON.stringify({ type: 'PONG' }));
+              }
+              return;
+            }
+
+            if (packet.type === 'PACKET_STREAM' || packet.type === 'THREAT_EVENT' || packet.type === 'SYSTEM_STATUS') {
+              const pktEvent: PacketEvent = packet;
+              setLatestPacket(pktEvent);
+              setPacketStream((prev) => [pktEvent, ...prev.slice(0, 49)]);
+
+              if (pktEvent.is_malicious) {
+                setThreatAlerts((prev) => [pktEvent, ...prev.slice(0, 19)]);
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing packet frame:', e);
+          }
+        };
+
+        threatWs.onclose = () => {
+          wsThreatsRef.current = null;
+          if (token) {
+            clearTimeout(reconnectTimerRef.current);
+            reconnectTimerRef.current = setTimeout(connect, 3000);
+          }
+        };
+
+        threatWs.onerror = () => {
+          try { threatWs.close(); } catch {}
+        };
+      } catch (err) {
+        console.error('Failed to connect threats websocket:', err);
       }
     }
   }, [token]);
@@ -120,9 +170,13 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     return () => {
       clearTimeout(reconnectTimerRef.current);
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
+      if (wsSocRef.current) {
+        wsSocRef.current.close();
+        wsSocRef.current = null;
+      }
+      if (wsThreatsRef.current) {
+        wsThreatsRef.current.close();
+        wsThreatsRef.current = null;
       }
     };
   }, [connect]);
@@ -136,6 +190,8 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
         threatAlerts,
         packets: packetStream,
         alerts: threatAlerts,
+        socEvents,
+        latestSOCEvent
       }}
     >
       {children}

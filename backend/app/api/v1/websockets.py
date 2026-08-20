@@ -368,3 +368,51 @@ async def websocket_threat_stream(
         heartbeat_task.cancel()
         listener_task.cancel()
         manager.disconnect(websocket)
+
+
+@router.websocket("/ws/soc-events")
+async def websocket_soc_events_stream(
+    websocket: WebSocket,
+    token: Optional[str] = Query(default=None, description="JWT bearer token for authentication")
+):
+    """
+    Dedicated Authenticated WebSocket stream for unified SOC Operational Events.
+    Streams all 12 SOC event categories (Detections, Incidents, Threat Intel,
+    Lateral Movement, SOAR Response, Investigations, System Alerts).
+    """
+    payload = await _authenticate_websocket(websocket, token)
+    if payload is None:
+        return
+
+    await manager.connect(websocket)
+
+    # Initial sync snapshot
+    try:
+        from backend.app.services.soc_event_broadcaster import soc_broadcaster
+        recent_events = soc_broadcaster.get_recent_events(limit=20)
+        await websocket.send_json({
+            "type": "INIT_SYNC",
+            "events": recent_events,
+            "timestamp": asyncio.get_event_loop().time(),
+            "status": "CONNECTED"
+        })
+    except Exception as sync_err:
+        logger.debug("Initial sync frame error: %s", sync_err)
+
+    heartbeat_state = {"pong_received": True, "missed": 0}
+    heartbeat_task = asyncio.create_task(_heartbeat(websocket, heartbeat_state))
+    listener_task = asyncio.create_task(_client_listener(websocket, heartbeat_state))
+
+    try:
+        while True:
+            # Keep connection alive while event broadcasts are pushed asynchronously
+            await asyncio.sleep(1.0)
+    except WebSocketDisconnect:
+        logger.info("SOC Events WebSocket client disconnected.")
+    except Exception as e:
+        logger.error(f"SOC Events WebSocket error: {e}")
+    finally:
+        heartbeat_task.cancel()
+        listener_task.cancel()
+        manager.disconnect(websocket)
+
