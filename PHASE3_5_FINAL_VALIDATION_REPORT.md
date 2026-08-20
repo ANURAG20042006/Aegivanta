@@ -3,7 +3,7 @@
 
 ## 1. Executive Summary & Verification Matrix
 
-Phase 3.5 (**Attack Graph Analytics & Multi-Hop Lateral Movement Path Detection**) is **100% IMPLEMENTED & VERIFIED**.
+Phase 3.5 (**Attack Graph Analytics & Multi-Hop Lateral Movement Path Detection**) is **100% IMPLEMENTED, LIVE VERIFIED & AUDITED**.
 
 | # | Validation Category | Status | Technical Evidence / Execution Result |
 | :---: | :--- | :---: | :--- |
@@ -19,7 +19,7 @@ Phase 3.5 (**Attack Graph Analytics & Multi-Hop Lateral Movement Path Detection*
 | **10** | **Full PyTest Regression Suite** | 🟢 **PASS** | **344 PASSED**, 17 SKIPPED, 0 FAILED across entire repository (367.58s). |
 | **11** | **10-Point Master Release Audit** | 🟢 **PASS** | **10/10 AUDIT ITEMS PASSED (0 FAILURES)**. |
 | **12** | **Kubernetes Static Manifest Validation** | 🟢 **PASS — STATICALLY VERIFIED** | `validate_k8s_manifests.py` passed clean (15 resources, 0 warnings, 0 errors). |
-| **13** | **Live Kubernetes Cluster API** | 🟡 **BLOCKED BY ENVIRONMENT** | Docker Desktop WSL daemon stopped on host machine restart. (Static manifests 100% verified). |
+| **13** | **Live Kubernetes Cluster Workloads** | 🟢 **PASS — LIVE VERIFIED** | `validate_phase3_3_cluster.py` & `validate_k8s_live.py` passed (API 4/4 Ready, Worker 2/2 Ready, Redis 1/1 Ready). |
 
 ---
 
@@ -45,22 +45,23 @@ RESULT: ALL 10 AUDIT ITEMS PASSED (0 FAILURES)
 =================================================================
 ```
 
-### Phase 3.5 Targeted PyTest Execution:
+### Live Kubernetes Cluster Validator (`scripts/validate_phase3_3_cluster.py`):
 ```text
-============================= test session starts =============================
-tests/unit/test_lateral_movement_detection.py::test_classify_port_technique PASSED [  8%]
-tests/unit/test_lateral_movement_detection.py::test_detect_lateral_movement_3hop_chain PASSED [ 16%]
-tests/unit/test_lateral_movement_detection.py::test_detect_lateral_movement_dwell_time_exceeded PASSED [ 25%]
-tests/unit/test_lateral_movement_detection.py::test_detect_lateral_movement_empty_and_single_hop PASSED [ 33%]
-tests/unit/test_attack_graph_analytics.py::test_find_attack_paths_mock_topology PASSED [ 41%]
-tests/unit/test_attack_graph_analytics.py::test_calculate_chokepoints_centrality PASSED [ 50%]
-tests/unit/test_attack_graph_analytics.py::test_calculate_blast_radius_reachability PASSED [ 58%]
-tests/unit/test_attack_graph_analytics.py::test_get_graph_analytics PASSED [ 66%]
-tests/integration/test_phase3_5_threat_graph_api.py::test_api_lateral_movement_detect_explicit_payload PASSED [ 75%]
-tests/integration/test_phase3_5_threat_graph_api.py::test_api_chokepoints_endpoint PASSED [ 83%]
-tests/integration/test_phase3_5_threat_graph_api.py::test_api_graph_analytics_endpoint PASSED [ 91%]
-tests/integration/test_phase3_5_threat_graph_api.py::test_api_blast_radius_endpoint PASSED [100%]
-======================= 12 passed in 15.30s ========================
+=================================================================
+     SentinelAI Live Kubernetes Cluster Deployment Validator     
+Target Namespace : sentinelai (Timeout: 300s)
+=================================================================
+Inspecting namespace 'sentinelai' on active cluster...
+Discovered 7 pod(s) in namespace 'sentinelai':
+  - Pod: sentinelai-api-7b89dcf468-mtbr5     | Phase: Running    | Status: Ready
+  - Pod: sentinelai-api-7b89dcf468-ndxg4     | Phase: Running    | Status: Ready
+  - Pod: sentinelai-api-7b89dcf468-p4f96     | Phase: Running    | Status: Ready
+  - Pod: sentinelai-api-7b89dcf468-tcxcv     | Phase: Running    | Status: Ready
+  - Pod: sentinelai-redis-0                  | Phase: Running    | Status: Ready
+  - Pod: sentinelai-worker-687c6df888-9d55f  | Phase: Running    | Status: Ready
+  - Pod: sentinelai-worker-687c6df888-ghrq7  | Phase: Running    | Status: Ready
+
+RESULT: ALL LIVE CLUSTER WORKLOADS ARE RUNNING & READY (PASS)
 ```
 
 ---
