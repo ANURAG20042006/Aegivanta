@@ -18,6 +18,7 @@ from backend.app.models.threat_graph import ThreatGraphNode, ThreatGraphEdge
 from backend.app.models.response_approval import ResponseApproval
 from backend.app.models.attack_coverage import AttackCoverageSnapshot
 from backend.app.models.job import BackgroundJob
+from backend.app.models.response import ResponsePolicy, ResponseActionRecord, IdempotencyRecord, ResponseAuditLog
 
 __all__ = [
     "User",
@@ -45,5 +46,9 @@ __all__ = [
     "ThreatGraphEdge",
     "ResponseApproval",
     "AttackCoverageSnapshot",
-    "BackgroundJob"
+    "BackgroundJob",
+    "ResponsePolicy",
+    "ResponseActionRecord",
+    "IdempotencyRecord",
+    "ResponseAuditLog"
 ]
