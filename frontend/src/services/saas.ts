@@ -175,5 +175,43 @@ export const saasApi = {
   getOnboardingStatus: async (): Promise<any> => {
     const res = await axios.get(`${API_BASE}/onboarding/status`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 5 Enterprise Security Center APIs
+  setupMFA: async (): Promise<{ secret: string; recovery_codes: string[]; otpauth_uri: string }> => {
+    const res = await axios.post(`${API_BASE}/identity/mfa/setup`, {}, getAuthHeaders());
+    return res.data;
+  },
+  verifyMFA: async (code: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/identity/mfa/verify`, { code }, getAuthHeaders());
+    return res.data;
+  },
+  listSessions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/identity/sessions`, getAuthHeaders());
+    return res.data;
+  },
+  revokeSession: async (sessionId: string): Promise<void> => {
+    await axios.delete(`${API_BASE}/identity/sessions/${sessionId}`, getAuthHeaders());
+  },
+  configureSSO: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/identity/sso/config`, data, getAuthHeaders());
+    return res.data;
+  },
+  getSecurityPosture: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/posture`, getAuthHeaders());
+    return res.data;
+  },
+  getSecurityPolicies: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/policies`, getAuthHeaders());
+    return res.data;
+  },
+  updateSecurityPolicies: async (data: any): Promise<any> => {
+    const res = await axios.put(`${API_BASE}/security/policies`, data, getAuthHeaders());
+    return res.data;
+  },
+  listSecurityEvents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/security/events`, getAuthHeaders());
+    return res.data;
   }
 };
+

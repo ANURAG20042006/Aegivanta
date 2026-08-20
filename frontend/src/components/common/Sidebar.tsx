@@ -47,12 +47,14 @@ export const navItems = [
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },
   { path: '/history', label: 'Incident history', section: 'Actions', icon: History },
   
+  { path: '/security-center', label: 'Security Center', section: 'Enterprise SaaS', icon: ShieldCheck },
   { path: '/organizations', label: 'Organizations', section: 'Enterprise SaaS', icon: Users },
   { path: '/billing', label: 'Billing & Plans', section: 'Enterprise SaaS', icon: BarChart3 },
   { path: '/api-keys', label: 'API Keys', section: 'Enterprise SaaS', icon: Key },
   { path: '/sensors', label: 'Sensors & Agents', section: 'Enterprise SaaS', icon: Server },
   { path: '/integrations', label: 'Integrations', section: 'Enterprise SaaS', icon: Network },
   { path: '/onboarding', label: 'Setup Guide', section: 'Enterprise SaaS', icon: HelpCircle },
+
 
   { path: '/users', label: 'Team members', section: 'Manage', icon: Users },
   { path: '/settings', label: 'Settings', section: 'Manage', icon: Settings },

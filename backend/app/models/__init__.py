@@ -28,6 +28,9 @@ from backend.app.models.usage import UsageRecord, UsageQuota
 from backend.app.models.integration import CustomerIntegration
 from backend.app.models.sensor import Sensor
 from backend.app.models.billing import BillingWebhookEvent, Invoice
+from backend.app.models.identity import IdentityProvider, UserSession, MFAEnrollment
+from backend.app.models.scim import SCIMConfiguration, SCIMProvisioningEvent
+from backend.app.models.security_policy import SecurityPolicy, CustomerSecurityEvent
 
 __all__ = [
     "User",
@@ -76,6 +79,14 @@ __all__ = [
     "CustomerIntegration",
     "Sensor",
     "BillingWebhookEvent",
-    "Invoice"
+    "Invoice",
+    "IdentityProvider",
+    "UserSession",
+    "MFAEnrollment",
+    "SCIMConfiguration",
+    "SCIMProvisioningEvent",
+    "SecurityPolicy",
+    "CustomerSecurityEvent"
 ]
+
 

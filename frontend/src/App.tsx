@@ -39,6 +39,10 @@ import { IntegrationsPage } from './pages/Integrations';
 import { SensorsPage } from './pages/Sensors';
 import { OnboardingPage } from './pages/Onboarding';
 
+// Phase 5 Enterprise Security Center
+import { SecurityCenterPage } from './pages/SecurityCenter';
+
+
 
 const ProtectedLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -77,12 +81,14 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/attack-coverage" element={<AttackCoverage />} />
               <Route path="/soc-analytics" element={<SOCAnalytics />} />
               <Route path="/response-center" element={<ResponseCenter />} />
+              <Route path="/security-center" element={<SecurityCenterPage />} />
               <Route path="/organizations" element={<OrganizationsPage />} />
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/api-keys" element={<ApiKeysPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="/sensors" element={<SensorsPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
+
               <Route path="/guide" element={<GuidePage />} />
 
               <Route path="/prediction" element={<Prediction />} />

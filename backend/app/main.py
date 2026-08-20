@@ -53,6 +53,12 @@ from backend.app.api.v1.billing_webhooks import router as billing_webhooks_route
 from backend.app.api.v1.onboarding import router as onboarding_router
 from backend.app.api.v1.sensors import router as sensors_router
 from backend.app.api.v1.integrations import router as integrations_router
+from backend.app.api.v1.identity import router as identity_router
+from backend.app.api.v1.scim import router as scim_router
+from backend.app.api.v1.security_policies import router as security_policies_router
+from backend.app.api.v1.security_posture import router as security_posture_router
+from backend.app.api.v1.customer_security_events import router as customer_security_events_router
+
 
 
 from dotenv import load_dotenv
@@ -290,7 +296,13 @@ app.include_router(billing_webhooks_router, prefix=settings.API_V1_STR)
 app.include_router(onboarding_router, prefix=settings.API_V1_STR)
 app.include_router(sensors_router, prefix=settings.API_V1_STR)
 app.include_router(integrations_router, prefix=settings.API_V1_STR)
+app.include_router(identity_router, prefix=settings.API_V1_STR)
+app.include_router(scim_router, prefix=settings.API_V1_STR)
+app.include_router(security_policies_router, prefix=settings.API_V1_STR)
+app.include_router(security_posture_router, prefix=settings.API_V1_STR)
+app.include_router(customer_security_events_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 # ---------------------------------------------------------------------------
