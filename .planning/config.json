@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-gsd/get-shit-done/main/schema/gsd-config.schema.json",
+  "project": {
+    "name": "Aegivanta",
+    "description": "Autonomous Cyber Defense and Security Operations Platform",
+    "version": "3.0.0",
+    "repository": "ANURAG20042006/Aegivanta",
+    "stack": {
+      "backend": "FastAPI / Python 3.11",
+      "frontend": "React / Vite / Tailwind CSS / TypeScript",
+      "ml": "CatBoost / Scikit-Learn 1.6.1 / TreeSHAP / XGBoost",
+      "database": "PostgreSQL / SQLite / Redis",
+      "orchestration": "Kubernetes / Docker Compose"
+    }
+  },
+  "workflow": {
+    "phases": [
+      {
+        "id": "discuss",
+        "name": "Discussion and Requirement Gathering",
+        "prompt": ".planning/commands/discuss.md",
+        "output": ".planning/DISCUSS.md"
+      },
+      {
+        "id": "plan",
+        "name": "Spec-Driven Planning",
+        "prompt": ".planning/commands/plan.md",
+        "output": ".planning/STATE.md"
+      },
+      {
+        "id": "execute",
+        "name": "Atomic Sub-Agent Execution",
+        "prompt": ".planning/commands/execute.md",
+        "freshContext": true
+      },
+      {
+        "id": "verify",
+        "name": "Automated Multi-Gate Verification",
+        "prompt": ".planning/commands/verify.md",
+        "strict": true
+      },
+      {
+        "id": "review",
+        "name": "Spec Conformance Review",
+        "prompt": ".planning/commands/review.md"
+      }
+    ]
+  },
+  "verification": {
+    "commands": {
+      "backend_test": ".venv/Scripts/python -m pytest -q",
+      "environment_verify": ".venv/Scripts/python scripts/verify_environment.py",
+      "integrity_audit": ".venv/Scripts/python scripts/final_integrity_audit.py",
+      "k8s_manifest_validation": ".venv/Scripts/python scripts/validate_k8s_manifests.py"
+    },
+    "required_pass": [
+      "backend_test",
+      "environment_verify",
+      "integrity_audit"
+    ]
+  },
+  "agent_rules": {
+    "prevent_context_rot": true,
+    "atomic_commits": true,
+    "preserve_invariants": [
+      "scikit-learn==1.6.1",
+      "zero-shell-execution in SOAR playbooks",
+      "fail-closed security posture",
+      "always maintain typed API interfaces"
+    ]
+  }
+}

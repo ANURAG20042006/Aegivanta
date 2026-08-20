@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# ==============================================================================
+# CodeRabbit AI Code Review Configuration for Aegivanta
+# ==============================================================================
+language: "en-US"
+early_access: false
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+      - "master"
+      - "develop"
+
+  path_filters:
+    - "!**/*.lock"
+    - "!**/*.db"
+    - "!**/*.sqlite3"
+    - "!catboost_info/**"
+    - "!backups/**"
+    - "!results/**"
+    - "!reports/**"
+    - "!archive/**"
+    - "!.venv/**"
+    - "!node_modules/**"
+    - "!frontend/dist/**"
+    - "!*.min.js"
+    - "!*.min.css"
+
+  path_instructions:
+    - path: "backend/**/*.py"
+      instructions: |
+        - Ensure all API endpoints have strict Pydantic v2 schemas and explicit response_model typing.
+        - Verify JWT authentication and RBAC authorization decorators on sensitive routes.
+        - Enforce fail-closed error handling without exposing stack traces to clients.
+        - Check for SQL injection vulnerabilities and enforce parameterized queries or ORM practices.
+        - SOAR playbooks and actions must NEVER execute shell commands or eval().
+
+    - path: "ml/**/*.py"
+      instructions: |
+        - Verify strict compatibility with scikit-learn==1.6.1.
+        - Ensure all ML models and pipelines have SHA-256 integrity verification.
+        - Verify TreeSHAP and explainability outputs do not cause numerical instability or NaN leaks.
+
+    - path: "frontend/src/**/*.{ts,tsx}"
+      instructions: |
+        - Ensure TypeScript strict typing without using 'any'.
+        - Verify proper XSS sanitization for all rendered telemetry and log outputs.
+        - Check that state management handles loading, error, and empty states cleanly.
+
+    - path: "k8s/**/*.yaml"
+      instructions: |
+        - Verify securityContext sets runAsNonRoot: true and allowPrivilegeEscalation: false.
+        - Ensure resource limits and requests are defined for all containers.
+        - Verify health check readiness and liveness probes are properly configured.
+
+chat:
+  auto_reply: true
+
+finishing_touches:
+  docstrings:
+    enabled: true
+  unit_tests:
+    enabled: true

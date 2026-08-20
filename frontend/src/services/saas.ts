@@ -363,8 +363,47 @@ export const saasApi = {
   getControlEffectiveness: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/security/control-effectiveness`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 18 Threat Intelligence & Threat Hunting Platform APIs
+  listThreatActors: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intelligence/actors`, getAuthHeaders());
+    return res.data;
+  },
+  createThreatActor: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intelligence/actors`, data, getAuthHeaders());
+    return res.data;
+  },
+  listThreatCampaigns: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intelligence/campaigns`, getAuthHeaders());
+    return res.data;
+  },
+  createThreatCampaign: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intelligence/campaigns`, data, getAuthHeaders());
+    return res.data;
+  },
+  correlateThreatIndicator: async (ioc_value: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intelligence/correlate`, { ioc_value }, getAuthHeaders());
+    return res.data;
+  },
+  recordThreatSighting: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intelligence/sightings`, data, getAuthHeaders());
+    return res.data;
+  },
+  syncThreatFeed: async (feedId: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intelligence/feeds/${feedId}/sync`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getHuntingTemplates: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/hunting-workbench/templates`, getAuthHeaders());
+    return res.data;
+  },
+  executeAdvancedHunt: async (data: { target_entity: string; query_pattern: string; limit?: number }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/hunting-workbench/execute`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

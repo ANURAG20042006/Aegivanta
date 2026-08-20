@@ -57,6 +57,10 @@ import { SecurityAutomation } from './pages/SecurityAutomation';
 import { ResponseApprovals } from './pages/ResponseApprovals';
 import { SecurityValidation } from './pages/SecurityValidation';
 
+// Phase 18 Threat Intelligence Platform
+import { ThreatIntelligenceCenter } from './pages/ThreatIntelligenceCenter';
+
+
 
 
 
@@ -110,6 +114,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/security-automation" element={<SecurityAutomation />} />
               <Route path="/response-approvals" element={<ResponseApprovals />} />
               <Route path="/security-validation" element={<SecurityValidation />} />
+              <Route path="/threat-intelligence-center" element={<ThreatIntelligenceCenter />} />
+
 
 
               <Route path="/organizations" element={<OrganizationsPage />} />

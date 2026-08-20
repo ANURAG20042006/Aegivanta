@@ -23,7 +23,8 @@ import {
   Activity,
   Zap,
   Key,
-  Layers
+  Layers,
+  Flame,
 } from 'lucide-react';
 
 
@@ -53,8 +54,10 @@ export const navItems = [
   { path: '/security-automation', label: 'Autonomous Response', section: 'Autonomous Ops', icon: Zap },
   { path: '/response-approvals', label: 'Response Approvals', section: 'Autonomous Ops', icon: ShieldCheck },
   { path: '/security-validation', label: 'Continuous Validation', section: 'Autonomous Ops', icon: ShieldCheck },
+  { path: '/threat-intelligence-center', label: 'Threat Intel Platform', section: 'Threat Intel', icon: Flame },
 
   { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
+
 
 
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },

@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-08-20T22:20:00Z",
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Validate GSD and Ralph Autonomous Workflow Integration",
+      "description": "Ensure .planning and .ralph directories, configs, and scripts exist and pass syntax validation.",
+      "priority": "P0",
+      "status": "completed",
+      "acceptance_criteria": [
+        "All JSON and YAML configs are syntactically valid",
+        "PyTest suite passes with zero failures"
+      ],
+      "completed_at": "2026-08-20T22:20:00Z"
+    },
+    {
+      "id": "TASK-002",
+      "title": "Verify CodeRabbit Schema and Security Guardrails",
+      "description": "Validate .coderabbit.yaml adheres to official schema v2 and enforces strict Aegivanta security rules.",
+      "priority": "P1",
+      "status": "completed",
+      "acceptance_criteria": [
+        "Schema URL valid",
+        "Path filters cover ML caches and artifacts"
+      ],
+      "completed_at": "2026-08-20T22:20:00Z"
+    }
+  ]
+}

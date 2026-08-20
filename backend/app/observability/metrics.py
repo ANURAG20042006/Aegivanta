@@ -476,8 +476,48 @@ aegivanta_response_rollbacks_total = _make(
 )
 
 # ===========================================================================
+# Phase 18: Advanced Threat Intelligence & Threat Hunting Metrics
+# ===========================================================================
+aegivanta_threat_indicators_total = _make(
+    "gauge",
+    "aegivanta_threat_indicators_total",
+    "Total active indicators of compromise (IOCs) across intelligence platform",
+    ["ioc_type"]
+)
+
+aegivanta_threat_feed_sync_duration_seconds = _make(
+    "histogram",
+    "aegivanta_threat_feed_sync_duration_seconds",
+    "Duration of threat intelligence feed sync execution",
+    [],
+    _LATENCY_BUCKETS
+)
+
+aegivanta_threat_hunt_queries_total = _make(
+    "counter",
+    "aegivanta_threat_hunt_queries_total",
+    "Total executed analyst threat hunting workbench queries",
+    ["target_entity"]
+)
+
+aegivanta_threat_correlations_total = _make(
+    "counter",
+    "aegivanta_threat_correlations_total",
+    "Total indicator cross-correlations performed",
+    ["risk_tier"]
+)
+
+aegivanta_threat_actor_profiles_total = _make(
+    "gauge",
+    "aegivanta_threat_actor_profiles_total",
+    "Total active threat actor profiles in platform",
+    []
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 

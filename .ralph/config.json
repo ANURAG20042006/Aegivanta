@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "agent": {
+    "name": "Ralph Loop Runner",
+    "model": "inherit",
+    "max_iterations": 25,
+    "timeout_seconds_per_iteration": 600,
+    "fresh_context_per_iteration": true
+  },
+  "tasks_file": ".ralph/tasks.json",
+  "prompt_file": ".ralph/prompt.md",
+  "verification": {
+    "test_command": ".venv/Scripts/python -m pytest -q",
+    "require_clean_git": false,
+    "auto_commit": true,
+    "commit_prefix": "feat(agent):"
+  },
+  "logs": {
+    "directory": "logs/ralph",
+    "save_iterations": true
+  }
+}

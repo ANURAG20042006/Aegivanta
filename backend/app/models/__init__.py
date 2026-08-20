@@ -38,6 +38,8 @@ from backend.app.models.autonomous_response import AutonomousResponsePolicy, Res
 from backend.app.models.security_validation import SecurityValidationRun, SecurityValidationCheck
 from backend.app.models.security_simulation import SecuritySimulation, SecuritySimulationEvent
 from backend.app.models.security_intelligence import DetectionCoverageGap, AssetRiskScore, SecurityControlEffectiveness
+from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign, MalwareFamily, IndicatorSighting
+
 
 
 __all__ = [

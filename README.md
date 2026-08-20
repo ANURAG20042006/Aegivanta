@@ -319,10 +319,65 @@ Default user accounts are initialized on startup. Passwords can be configured in
 
 ---
 
+## 🤖 AI Agent Engineering & Continuous Review (GSD, Ralph, CodeRabbit)
+
+Aegivanta integrates industry-standard agentic workflows to enable safe, structured, and autonomous engineering:
+
+```
+┌────────────────────────┐      ┌────────────────────────┐      ┌────────────────────────┐
+│     GSD Framework      │ ───> │       Ralph Loop       │ ───> │       CodeRabbit       │
+│ (.planning/ Spec SDD)  │      │ (Autonomous Execution) │      │  (Automated PR Review) │
+└────────────────────────┘      └────────────────────────┘      └────────────────────────┘
+```
+
+### 1. GSD (Get Shit Done) Framework
+- **Path**: [`.planning/`](.planning/)
+- **Purpose**: Spec-Driven Development (SDD) to prevent context rot.
+- **Workflow**: `discuss` ➔ `plan` ➔ `execute` ➔ `verify` ➔ `review`
+- **Core Files**:
+  - [`.planning/config.json`](.planning/config.json) — Workflow orchestration and environment rules
+  - [`.planning/SPEC.md`](.planning/SPEC.md) — Authoritative system invariants and architectural bounds
+  - [`.planning/STATE.md`](.planning/STATE.md) — Dynamic project focus, milestones, and blockers
+  - [`.planning/ROADMAP.md`](.planning/ROADMAP.md) — Long-term release milestones
+
+### 2. Ralph Loop (Autonomous Agent Execution)
+- **Path**: [`.ralph/`](.ralph/) & [`scripts/ralph.ps1`](scripts/ralph.ps1) / [`scripts/ralph.sh`](scripts/ralph.sh)
+- **Purpose**: Atomic, loop-based execution preserving external memory across fresh agent context windows.
+- **Usage**:
+  ```bash
+  # Linux / macOS / WSL
+  bash scripts/ralph.sh 25
+
+  # Windows PowerShell
+  .\scripts\ralph.ps1 -MaxIterations 25
+  ```
+
+### 3. CodeRabbit (AI Code Review Guardrails)
+- **Path**: [`.coderabbit.yaml`](.coderabbit.yaml)
+- **Purpose**: Automated high-signal pull request reviews with Aegivanta-specific security and quality rules.
+- **Features**:
+  - Pydantic v2 and FastAPI endpoint typing validation
+  - Zero-shell-execution SOAR safety enforcement
+  - Strict Scikit-Learn 1.6.1 model compliance
+  - Auto-generated high-level PR summaries and walkthroughs
+
+## 🎯 Phase 18: Advanced Threat Intelligence & Threat Hunting Platform (v18.0.0)
+
+Aegivanta v18.0 introduces an enterprise-grade adversary intelligence and hunting workbench:
+
+- **Adversary & Campaign Tracking**: Structured entity models for Nation-State, Cybercriminal, and APT groups mapped directly to MITRE ATT&CK techniques.
+- **SSRF-Guarded Feed Federation**: Extensible provider architecture for STIX/TAXII, MISP, Generic JSON, and CSV feeds with strict private IP and metadata endpoint filtering.
+- **Transparent 0–100 Threat Score**: Weighted scoring covering source reliability, indicator confidence, network sightings, severity, and inactivity confidence decay.
+- **Analyst Threat Hunting Workbench**: Parameterized DSL query builder across 11 entity types (IPs, Domains, Hashes, Authentication, Lateral Movement, ATT&CK).
+
+---
+
 ## 📄 License
+
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 <div align="center">
   <sub>Built with ❤️ for Enterprise SOC Operations. Aegivanta © 2026</sub>
 </div>
+
