@@ -251,7 +251,62 @@ export const saasApi = {
   testDetectionRule: async (data: { rule_dsl: any; sample_events: any[] }): Promise<any> => {
     const res = await axios.post(`${API_BASE}/detection-rules/test`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 16 Production Intelligence & Value APIs
+  getDetectionQuality: async (lookback_days: number = 30): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/detection/quality?lookback_days=${lookback_days}`, getAuthHeaders());
+    return res.data;
+  },
+  getDetectionQualityHistory: async (limit: number = 30): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/detection/quality/history?limit=${limit}`, getAuthHeaders());
+    return res.data;
+  },
+  listBenchmarks: async (limit: number = 20): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/detection/benchmarks?limit=${limit}`, getAuthHeaders());
+    return res.data;
+  },
+  getAlertPriority: async (alertId: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/alerts/${alertId}/priority`, getAuthHeaders());
+    return res.data;
+  },
+  listAlertGroups: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/alerts/groups/active`, getAuthHeaders());
+    return res.data;
+  },
+  getIncidentTimeline: async (incidentId: string): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/incidents/${incidentId}/timeline`, getAuthHeaders());
+    return res.data;
+  },
+  transitionIncidentStatus: async (incidentId: string, data: { new_status: string; reason?: string; notes?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/incidents/${incidentId}/transition`, data, getAuthHeaders());
+    return res.data;
+  },
+  assignIncidentAnalyst: async (incidentId: string, analyst_username: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/incidents/${incidentId}/assign`, { analyst_username }, getAuthHeaders());
+    return res.data;
+  },
+  searchInvestigations: async (payload: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/investigations/search`, payload, getAuthHeaders());
+    return res.data;
+  },
+  getSecurityValue: async (lookback_days: number = 30): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/analytics/security-value?lookback_days=${lookback_days}`, getAuthHeaders());
+    return res.data;
+  },
+  getPostureImprovements: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security-posture/improvements`, getAuthHeaders());
+    return res.data;
+  },
+  getTelemetryCostIntelligence: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/telemetry/cost-intelligence`, getAuthHeaders());
+    return res.data;
+  },
+  getProductAnalytics: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/analytics/product`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 

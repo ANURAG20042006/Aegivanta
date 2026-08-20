@@ -61,6 +61,12 @@ from backend.app.api.v1.customer_security_events import router as customer_secur
 from backend.app.api.v1.detection_rules import router as detection_rules_router
 from backend.app.api.v1.ai_copilot import router as ai_copilot_router
 from backend.app.api.v1.compliance import router as compliance_router
+from backend.app.api.v1.detection_quality import router as detection_quality_router
+from backend.app.api.v1.alert_intelligence import router as alert_intelligence_router
+from backend.app.api.v1.incident_workflow import router as incident_workflow_router
+from backend.app.api.v1.investigation_search import router as investigation_search_router
+from backend.app.api.v1.security_value import router as security_value_router
+
 
 
 
@@ -309,7 +315,13 @@ app.include_router(customer_security_events_router, prefix=settings.API_V1_STR)
 app.include_router(detection_rules_router, prefix=settings.API_V1_STR)
 app.include_router(ai_copilot_router, prefix=settings.API_V1_STR)
 app.include_router(compliance_router, prefix=settings.API_V1_STR)
+app.include_router(detection_quality_router, prefix=settings.API_V1_STR)
+app.include_router(alert_intelligence_router, prefix=settings.API_V1_STR)
+app.include_router(incident_workflow_router, prefix=settings.API_V1_STR)
+app.include_router(investigation_search_router, prefix=settings.API_V1_STR)
+app.include_router(security_value_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

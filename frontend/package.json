@@ -1,8 +1,9 @@
 {
   "name": "aegivanta-frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "16.0.0",
   "type": "module",
+
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

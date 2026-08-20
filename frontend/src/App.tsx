@@ -45,6 +45,14 @@ import { SecurityCenterPage } from './pages/SecurityCenter';
 // Phase 9 AI Security Copilot
 import { AICopilotPage } from './pages/AICopilot';
 
+// Phase 16 Production Intelligence & Value Pages
+import { DetectionQuality } from './pages/DetectionQuality';
+import { AlertQueue } from './pages/AlertQueue';
+import { SecurityValue } from './pages/SecurityValue';
+import { TelemetryCost } from './pages/TelemetryCost';
+import { Benchmarking } from './pages/Benchmarking';
+
+
 
 
 
@@ -87,6 +95,12 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/response-center" element={<ResponseCenter />} />
               <Route path="/copilot" element={<AICopilotPage />} />
               <Route path="/security-center" element={<SecurityCenterPage />} />
+              <Route path="/detection-quality" element={<DetectionQuality />} />
+              <Route path="/alert-queue" element={<AlertQueue />} />
+              <Route path="/security-value" element={<SecurityValue />} />
+              <Route path="/telemetry-cost" element={<TelemetryCost />} />
+              <Route path="/benchmarks" element={<Benchmarking />} />
+
 
               <Route path="/organizations" element={<OrganizationsPage />} />
               <Route path="/billing" element={<BillingPage />} />

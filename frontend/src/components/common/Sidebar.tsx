@@ -22,8 +22,10 @@ import {
   Target,
   Activity,
   Zap,
-  Key
+  Key,
+  Layers
 } from 'lucide-react';
+
 
 export const navItems = [
   { path: '/dashboard', label: 'Dashboard', section: 'Monitor', icon: LayoutDashboard },
@@ -42,8 +44,14 @@ export const navItems = [
   { path: '/attack-coverage', label: 'ATT&CK Matrix', section: 'Advanced SOC', icon: Target },
   { path: '/soc-analytics', label: 'SOC Analytics', section: 'Advanced SOC', icon: Activity },
 
+  { path: '/detection-quality', label: 'Detection Quality', section: 'Production Intel', icon: Activity },
+  { path: '/alert-queue', label: 'Alert Queue', section: 'Production Intel', icon: Layers },
+  { path: '/security-value', label: 'Security ROI & Value', section: 'Production Intel', icon: ShieldCheck },
+  { path: '/telemetry-cost', label: 'Telemetry Costs', section: 'Production Intel', icon: BarChart3 },
+  { path: '/benchmarks', label: 'ML Benchmarks', section: 'Production Intel', icon: Zap },
 
   { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
+
   { path: '/guide', label: 'How to use', section: 'Actions', icon: Sparkles },
   { path: '/prediction', label: 'Inspect traffic', section: 'Actions', icon: Search },
   { path: '/reports', label: 'Create reports', section: 'Actions', icon: FileText },

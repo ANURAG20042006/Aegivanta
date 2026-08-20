@@ -30,7 +30,10 @@ from backend.app.models.sensor import Sensor
 from backend.app.models.billing import BillingWebhookEvent, Invoice
 from backend.app.models.identity import IdentityProvider, UserSession, MFAEnrollment
 from backend.app.models.scim import SCIMConfiguration, SCIMProvisioningEvent
-from backend.app.models.security_policy import SecurityPolicy, CustomerSecurityEvent
+from backend.app.models.detection_rule import DetectionRule
+from backend.app.models.detection_quality import DetectionQualitySnapshot, DetectionEvaluation, DetectionBenchmark
+from backend.app.models.alert_intelligence import AlertFingerprint, AlertGroup, AlertPriorityScore
+from backend.app.models.security_insights import SecurityScoreHistory, SecurityImprovementRecommendation
 
 __all__ = [
     "User",

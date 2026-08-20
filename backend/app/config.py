@@ -33,8 +33,9 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
-    PROJECT_VERSION: str = "15.0.0"
+    PROJECT_VERSION: str = "16.0.0"
     SECRET_KEY: str = Field(default_factory=lambda: os.environ.get("SECRET_KEY", _RUNTIME_DEV_SECRET))
+
 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours

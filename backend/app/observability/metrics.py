@@ -319,8 +319,98 @@ audit_events_total = _make(
 )
 
 # ===========================================================================
+# Phase 16: Detection Quality, Alert Intelligence & Copilot Metrics
+# ===========================================================================
+aegivanta_alerts_correlated_total = _make(
+    "counter",
+    "aegivanta_alerts_correlated_total",
+    "Total security alerts correlated into incident groups",
+    ["attack_type"]
+)
+
+aegivanta_alerts_deduplicated_total = _make(
+    "counter",
+    "aegivanta_alerts_deduplicated_total",
+    "Total redundant alerts suppressed via intelligent fingerprinting",
+    ["attack_type"]
+)
+
+aegivanta_incident_mttd_seconds = _make(
+    "gauge",
+    "aegivanta_incident_mttd_seconds",
+    "Mean Time to Detect security incidents in seconds",
+    []
+)
+
+aegivanta_incident_mtta_seconds = _make(
+    "gauge",
+    "aegivanta_incident_mtta_seconds",
+    "Mean Time to Acknowledge security incidents in seconds",
+    []
+)
+
+aegivanta_incident_mttr_seconds = _make(
+    "gauge",
+    "aegivanta_incident_mttr_seconds",
+    "Mean Time to Respond and contain security incidents in seconds",
+    []
+)
+
+aegivanta_detection_precision = _make(
+    "gauge",
+    "aegivanta_detection_precision",
+    "Current detection precision ratio (0.0 to 1.0)",
+    []
+)
+
+aegivanta_detection_recall = _make(
+    "gauge",
+    "aegivanta_detection_recall",
+    "Current detection recall ratio (0.0 to 1.0)",
+    []
+)
+
+aegivanta_detection_f1 = _make(
+    "gauge",
+    "aegivanta_detection_f1",
+    "Current detection F1 score (0.0 to 1.0)",
+    []
+)
+
+aegivanta_ai_requests_total = _make(
+    "counter",
+    "aegivanta_ai_requests_total",
+    "Total AI Security Copilot inquiries processed",
+    ["status"]
+)
+
+aegivanta_ai_latency_seconds = _make(
+    "histogram",
+    "aegivanta_ai_latency_seconds",
+    "AI Security Copilot response generation latency",
+    [],
+    _LATENCY_BUCKETS
+)
+
+aegivanta_search_latency_seconds = _make(
+    "histogram",
+    "aegivanta_search_latency_seconds",
+    "Threat investigation search query latency",
+    [],
+    _LATENCY_BUCKETS
+)
+
+aegivanta_telemetry_bytes_total = _make(
+    "counter",
+    "aegivanta_telemetry_bytes_total",
+    "Total volume of telemetry bytes ingested",
+    ["schema_type"]
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 def record_api_request(method: str, endpoint: str, status_code: int, duration_s: float) -> None:
     """Records a single API request outcome into Prometheus."""
