@@ -74,6 +74,8 @@ from backend.app.api.v1.threat_intelligence_platform import router as threat_int
 from backend.app.api.v1.threat_hunting_workbench import router as threat_hunting_workbench_router
 from backend.app.api.v1.soar_v2 import router as soar_v2_router
 from backend.app.api.v1.ai_security_intelligence import router as ai_security_intelligence_router
+from backend.app.api.v1.cloud_security import router as cloud_security_router
+
 
 
 
@@ -340,7 +342,9 @@ app.include_router(threat_intelligence_platform_router, prefix=settings.API_V1_S
 app.include_router(threat_hunting_workbench_router, prefix=settings.API_V1_STR)
 app.include_router(soar_v2_router, prefix=settings.API_V1_STR)
 app.include_router(ai_security_intelligence_router, prefix=settings.API_V1_STR)
+app.include_router(cloud_security_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

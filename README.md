@@ -396,7 +396,21 @@ Aegivanta v20.0 upgrades the intelligence core with multi-model detection, crypt
 
 ---
 
+## ☁️ Phase 21: Cloud & Container Security Platform (v21.0.0)
+
+Aegivanta v21.0 introduces full-stack multi-cloud, container, and Kubernetes security:
+
+- **Multi-Cloud Asset Inventory**: Discovers and normalizes VMs, S3/GCS buckets, databases, K8s Pods, and IAM identities across AWS, GCP, Azure, and Kubernetes.
+- **CSPM Misconfiguration Engine**: Automated evaluation against CIS Benchmarks detecting public storage, exposed SSH/RDP ports, unencrypted databases, and over-privileged policies.
+- **Container Vulnerability & SBOM Scanner**: CycloneDX SBOM generator, CVE matching with CVSS scoring, and Cosign image signature verification.
+- **Kubernetes Workload Security (KSPM)**: Evaluates manifests for `privileged` execution, `hostNetwork` sharing, dangerous Linux capabilities, and hardcoded plaintext credentials.
+- **Cloud IAM Entitlement Management (CIEM)**: Identifies stale credentials, wildcard permissions, and multi-hop privilege escalation vectors.
+- **Explainable Cloud Attack Paths**: Graph-synthesized attack paths tracing from Internet ingress to critical cloud assets with prescribed remediation steps.
+
+---
+
 ## 📄 License
+
 
 
 

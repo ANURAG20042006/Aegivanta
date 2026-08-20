@@ -24,6 +24,8 @@ import {
   Zap,
   Key,
   Brain,
+  Cloud,
+
 
 
   Layers,
@@ -54,8 +56,10 @@ export const navItems = [
   { path: '/telemetry-cost', label: 'Telemetry Costs', section: 'Production Intel', icon: BarChart3 },
   { path: '/benchmarking', label: 'ML Benchmarks', section: 'Production Intel', icon: Zap },
   { path: '/ai-intelligence', label: 'AI Security Intel', section: 'Production Intel', icon: Brain },
+  { path: '/cloud-security', label: 'Cloud & Containers', section: 'Production Intel', icon: Cloud },
 
   { path: '/security-automation', label: 'Autonomous Response', section: 'Autonomous Ops', icon: Zap },
+
 
   { path: '/response-approvals', label: 'Response Approvals', section: 'Autonomous Ops', icon: ShieldCheck },
   { path: '/security-validation', label: 'Continuous Validation', section: 'Autonomous Ops', icon: ShieldCheck },

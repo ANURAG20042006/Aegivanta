@@ -485,9 +485,46 @@ export const saasApi = {
   reasonAICopilot: async (data: { prompt: string; incident_id?: string }): Promise<any> => {
     const res = await axios.post(`${API_BASE}/ai-intel/copilot/reason`, data, getAuthHeaders());
     return res.data;
-  }
+  },
 
+  // Phase 21 Cloud & Container Security APIs
+  getCloudInventory: async (provider?: string, asset_type?: string): Promise<any[]> => {
+    const params: any = {};
+    if (provider) params.provider = provider;
+    if (asset_type) params.asset_type = asset_type;
+    const res = await axios.get(`${API_BASE}/cloud-security/inventory`, { ...getAuthHeaders(), params });
+    return res.data;
+  },
+  runCSPMScan: async (): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/cspm/scan`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getCSPMFindings: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/cspm/findings`, getAuthHeaders());
+    return res.data;
+  },
+  scanContainerImage: async (data: { image_name: string; image_tag?: string; signature_token?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/containers/scan`, data, getAuthHeaders());
+    return res.data;
+  },
+  listContainerScans: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/containers/scans`, getAuthHeaders());
+    return res.data;
+  },
+  auditK8sManifest: async (data: { manifest_yaml: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/k8s/audit-manifest`, data, getAuthHeaders());
+    return res.data;
+  },
+  getCloudIAMAnalysis: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/iam/analysis`, getAuthHeaders());
+    return res.data;
+  },
+  getCloudAttackPaths: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/attack-paths`, getAuthHeaders());
+    return res.data;
+  }
 };
+
 
 
 

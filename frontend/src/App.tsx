@@ -66,6 +66,10 @@ import { SOARCommandCenter } from './pages/SOARCommandCenter';
 // Phase 20 AI/ML Security Intelligence Command Center
 import { AISecurityIntelligence } from './pages/AISecurityIntelligence';
 
+// Phase 21 Cloud & Container Security Command Center
+import { CloudSecurityCenter } from './pages/CloudSecurityCenter';
+
+
 
 
 
@@ -125,6 +129,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/threat-intelligence-center" element={<ThreatIntelligenceCenter />} />
               <Route path="/soar-command-center" element={<SOARCommandCenter />} />
               <Route path="/ai-intelligence" element={<AISecurityIntelligence />} />
+              <Route path="/cloud-security" element={<CloudSecurityCenter />} />
+
 
 
 

@@ -592,8 +592,47 @@ aegivanta_ai_model_signature_verifications_total = _make(
 )
 
 # ===========================================================================
+# Phase 21: Cloud & Container Security Metrics
+# ===========================================================================
+aegivanta_cloud_assets_total = _make(
+    "gauge",
+    "aegivanta_cloud_assets_total",
+    "Total multi-cloud and container assets inventoried",
+    []
+)
+
+aegivanta_cspm_findings_total = _make(
+    "gauge",
+    "aegivanta_cspm_findings_total",
+    "Total active Cloud Security Posture Management misconfiguration findings",
+    []
+)
+
+aegivanta_container_images_scanned_total = _make(
+    "counter",
+    "aegivanta_container_images_scanned_total",
+    "Total container images scanned for CVE vulnerabilities and SBOM",
+    []
+)
+
+aegivanta_k8s_workload_violations_total = _make(
+    "counter",
+    "aegivanta_k8s_workload_violations_total",
+    "Total Kubernetes workload and manifest security violations detected",
+    []
+)
+
+aegivanta_cloud_iam_privilege_escalation_paths_total = _make(
+    "gauge",
+    "aegivanta_cloud_iam_privilege_escalation_paths_total",
+    "Total cloud IAM privilege escalation vectors identified",
+    []
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 

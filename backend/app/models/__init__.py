@@ -41,6 +41,8 @@ from backend.app.models.security_intelligence import DetectionCoverageGap, Asset
 from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign, MalwareFamily, IndicatorSighting
 from backend.app.models.soar_v2 import DeclarativePlaybook, SOARExecutionSession, SOARConnector, SOARKillSwitch
 from backend.app.models.ai_security_intelligence import AIModelGovernance, AIModelDriftRecord, AIAdversarialEvent, AICopilotSession
+from backend.app.models.cloud_security import CloudAsset, CSPMFinding, ContainerVulnerabilityScan, CloudAttackPath, CloudIAMIdentityRisk
+
 
 
 
@@ -108,8 +110,14 @@ __all__ = [
     "AIModelGovernance",
     "AIModelDriftRecord",
     "AIAdversarialEvent",
-    "AICopilotSession"
+    "AICopilotSession",
+    "CloudAsset",
+    "CSPMFinding",
+    "ContainerVulnerabilityScan",
+    "CloudAttackPath",
+    "CloudIAMIdentityRisk"
 ]
+
 
 
 
