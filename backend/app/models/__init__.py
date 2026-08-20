@@ -40,6 +40,8 @@ from backend.app.models.security_simulation import SecuritySimulation, SecurityS
 from backend.app.models.security_intelligence import DetectionCoverageGap, AssetRiskScore, SecurityControlEffectiveness
 from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign, MalwareFamily, IndicatorSighting
 from backend.app.models.soar_v2 import DeclarativePlaybook, SOARExecutionSession, SOARConnector, SOARKillSwitch
+from backend.app.models.ai_security_intelligence import AIModelGovernance, AIModelDriftRecord, AIAdversarialEvent, AICopilotSession
+
 
 
 
@@ -98,7 +100,16 @@ __all__ = [
     "SCIMConfiguration",
     "SCIMProvisioningEvent",
     "SecurityPolicy",
-    "CustomerSecurityEvent"
+    "CustomerSecurityEvent",
+    "DeclarativePlaybook",
+    "SOARExecutionSession",
+    "SOARConnector",
+    "SOARKillSwitch",
+    "AIModelGovernance",
+    "AIModelDriftRecord",
+    "AIAdversarialEvent",
+    "AICopilotSession"
 ]
+
 
 

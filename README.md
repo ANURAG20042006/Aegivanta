@@ -384,7 +384,20 @@ Aegivanta v19.0 introduces an enterprise autonomous SOC orchestration layer:
 
 ---
 
+## 🧠 Phase 20: Advanced AI/ML Security Intelligence (v20.0.0)
+
+Aegivanta v20.0 upgrades the intelligence core with multi-model detection, cryptographic governance, and adversarial hardening:
+
+- **Multi-Model Orchestration & XAI**: Coordinates Supervised Classifiers, Isolation Forest Anomaly Detection, and Behavioral Baseline Deviations with calibrated consensus and SHAP-inspired feature attribution weights.
+- **Cryptographic Model Governance**: HMAC-SHA256 model signing and artifact verification on load with full lineage and 1-click rollback.
+- **Continuous Drift Auditing**: Population Stability Index (PSI) and Kolmogorov-Smirnov statistics tracking feature and prediction distribution stability.
+- **Adversarial Threat Defense**: Active defenses against prompt injections, training data poisoning, malicious telemetry, and high-frequency model extraction probing.
+- **AI Copilot 2.0**: Multi-turn analyst reasoning engine with automated threat hunting query generation and strict human approval gating.
+
+---
+
 ## 📄 License
+
 
 
 

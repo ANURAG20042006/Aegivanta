@@ -443,8 +443,52 @@ export const saasApi = {
   testSOARConnectorHealth: async (id: string): Promise<any> => {
     const res = await axios.post(`${API_BASE}/soar/connectors/${id}/health-check`, {}, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 20 Advanced AI/ML Security Intelligence APIs
+  listAIModels: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-intel/models`, getAuthHeaders());
+    return res.data;
+  },
+  registerAIModel: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/models/register`, data, getAuthHeaders());
+    return res.data;
+  },
+  promoteAIModel: async (id: string, data: { target_stage: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/models/${id}/promote`, data, getAuthHeaders());
+    return res.data;
+  },
+  rollbackAIModel: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/models/${id}/rollback`, {}, getAuthHeaders());
+    return res.data;
+  },
+  verifyAIModelSignature: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/models/${id}/verify-signature`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getAIModelDrift: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ai-intel/drift`, getAuthHeaders());
+    return res.data;
+  },
+  getAIDetectionQuality: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ai-intel/quality`, getAuthHeaders());
+    return res.data;
+  },
+  executeMultiModelDetection: async (data: { features: Record<string, number>; entity_id?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/detect/multi-model`, data, getAuthHeaders());
+    return res.data;
+  },
+  listAIAdversarialEvents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-intel/adversarial/events`, getAuthHeaders());
+    return res.data;
+  },
+  reasonAICopilot: async (data: { prompt: string; incident_id?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-intel/copilot/reason`, data, getAuthHeaders());
+    return res.data;
   }
+
 };
+
 
 
 

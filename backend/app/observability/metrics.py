@@ -554,8 +554,47 @@ aegivanta_soar_kill_switch_active = _make(
 )
 
 # ===========================================================================
+# Phase 20: Advanced AI/ML Security Intelligence Metrics
+# ===========================================================================
+aegivanta_ai_models_registered_total = _make(
+    "gauge",
+    "aegivanta_ai_models_registered_total",
+    "Total registered ML models in platform registry",
+    ["stage"]
+)
+
+aegivanta_ai_inference_drift_psi = _make(
+    "gauge",
+    "aegivanta_ai_inference_drift_psi",
+    "Current Population Stability Index (PSI) drift score for inference",
+    ["model_version"]
+)
+
+aegivanta_ai_adversarial_attacks_blocked_total = _make(
+    "counter",
+    "aegivanta_ai_adversarial_attacks_blocked_total",
+    "Total adversarial threats mitigated (poisoning, prompt injection, extraction)",
+    ["threat_type"]
+)
+
+aegivanta_ai_copilot_queries_total = _make(
+    "counter",
+    "aegivanta_ai_copilot_queries_total",
+    "Total AI Copilot 2.0 reasoning queries processed",
+    ["status"]
+)
+
+aegivanta_ai_model_signature_verifications_total = _make(
+    "counter",
+    "aegivanta_ai_model_signature_verifications_total",
+    "Total cryptographic HMAC-SHA256 signature verifications performed on models",
+    ["result"]
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 

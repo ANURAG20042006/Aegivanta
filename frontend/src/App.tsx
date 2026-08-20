@@ -63,6 +63,10 @@ import { ThreatIntelligenceCenter } from './pages/ThreatIntelligenceCenter';
 // Phase 19 Autonomous SOC & SOAR 2.0 Command Center
 import { SOARCommandCenter } from './pages/SOARCommandCenter';
 
+// Phase 20 AI/ML Security Intelligence Command Center
+import { AISecurityIntelligence } from './pages/AISecurityIntelligence';
+
+
 
 
 
@@ -120,6 +124,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/security-validation" element={<SecurityValidation />} />
               <Route path="/threat-intelligence-center" element={<ThreatIntelligenceCenter />} />
               <Route path="/soar-command-center" element={<SOARCommandCenter />} />
+              <Route path="/ai-intelligence" element={<AISecurityIntelligence />} />
+
 
 
 
