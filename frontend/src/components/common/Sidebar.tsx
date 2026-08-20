@@ -54,9 +54,11 @@ export const navItems = [
   { path: '/security-automation', label: 'Autonomous Response', section: 'Autonomous Ops', icon: Zap },
   { path: '/response-approvals', label: 'Response Approvals', section: 'Autonomous Ops', icon: ShieldCheck },
   { path: '/security-validation', label: 'Continuous Validation', section: 'Autonomous Ops', icon: ShieldCheck },
+  { path: '/soar-command-center', label: 'SOAR 2.0 Center', section: 'Autonomous Ops', icon: Zap },
   { path: '/threat-intelligence-center', label: 'Threat Intel Platform', section: 'Threat Intel', icon: Flame },
 
   { path: '/response-center', label: 'Response Center', section: 'Actions', icon: Zap },
+
 
 
 

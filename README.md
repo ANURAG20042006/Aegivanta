@@ -372,7 +372,20 @@ Aegivanta v18.0 introduces an enterprise-grade adversary intelligence and huntin
 
 ---
 
+## ⚡ Phase 19: Autonomous SOC & SOAR 2.0 Layer (v19.0.0)
+
+Aegivanta v19.0 introduces an enterprise autonomous SOC orchestration layer:
+
+- **Declarative SOAR Playbooks**: Version-controlled YAML/JSON workflow definitions with validation, step-level tracking, and dry-run simulation mode.
+- **Explainable Multi-Factor Decision Engine**: Recommends autonomous execution vs human gating based on severity, confidence, threat intelligence score, and asset criticality.
+- **Emergency Kill Switch**: Tenant-wide instant containment suppression ensuring fail-closed safety.
+- **Transactional Rollbacks**: Reversible containment snapshots for IP blocks, endpoint isolations, and API key revocations.
+- **Extensible Connector Ecosystem**: Integrations across Firewall (Palo Alto), EDR (CrowdStrike), IAM (Okta), and SIEM/Ticketing (ServiceNow).
+
+---
+
 ## 📄 License
+
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

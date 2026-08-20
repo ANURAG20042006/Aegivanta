@@ -515,8 +515,48 @@ aegivanta_threat_actor_profiles_total = _make(
 )
 
 # ===========================================================================
+# Phase 19: Autonomous SOC & SOAR 2.0 Metrics
+# ===========================================================================
+aegivanta_soar_playbooks_total = _make(
+    "gauge",
+    "aegivanta_soar_playbooks_total",
+    "Total declarative SOAR playbooks in platform",
+    ["category"]
+)
+
+aegivanta_soar_executions_total = _make(
+    "counter",
+    "aegivanta_soar_executions_total",
+    "Total executed SOAR containment sessions",
+    ["status"]
+)
+
+aegivanta_soar_approvals_pending = _make(
+    "gauge",
+    "aegivanta_soar_approvals_pending",
+    "Total SOAR containment actions pending human approval",
+    []
+)
+
+aegivanta_soar_action_duration_seconds = _make(
+    "histogram",
+    "aegivanta_soar_action_duration_seconds",
+    "Execution duration of individual SOAR containment actions",
+    ["action_type"],
+    _LATENCY_BUCKETS
+)
+
+aegivanta_soar_kill_switch_active = _make(
+    "gauge",
+    "aegivanta_soar_kill_switch_active",
+    "Current status of SOAR Emergency Containment Kill Switch (1=Active, 0=Inactive)",
+    []
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 

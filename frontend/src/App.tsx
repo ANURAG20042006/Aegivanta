@@ -60,6 +60,10 @@ import { SecurityValidation } from './pages/SecurityValidation';
 // Phase 18 Threat Intelligence Platform
 import { ThreatIntelligenceCenter } from './pages/ThreatIntelligenceCenter';
 
+// Phase 19 Autonomous SOC & SOAR 2.0 Command Center
+import { SOARCommandCenter } from './pages/SOARCommandCenter';
+
+
 
 
 
@@ -115,6 +119,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/response-approvals" element={<ResponseApprovals />} />
               <Route path="/security-validation" element={<SecurityValidation />} />
               <Route path="/threat-intelligence-center" element={<ThreatIntelligenceCenter />} />
+              <Route path="/soar-command-center" element={<SOARCommandCenter />} />
+
 
 
 

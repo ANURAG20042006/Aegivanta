@@ -401,8 +401,51 @@ export const saasApi = {
   executeAdvancedHunt: async (data: { target_entity: string; query_pattern: string; limit?: number }): Promise<any> => {
     const res = await axios.post(`${API_BASE}/hunting-workbench/execute`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 19 Autonomous SOC & SOAR 2.0 APIs
+  listSOARPlaybooks: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/soar/playbooks`, getAuthHeaders());
+    return res.data;
+  },
+  createSOARPlaybook: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/playbooks`, data, getAuthHeaders());
+    return res.data;
+  },
+  executeSOARPlaybook: async (id: string, data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/playbooks/${id}/execute`, data, getAuthHeaders());
+    return res.data;
+  },
+  dryRunSOARPlaybook: async (id: string, data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/playbooks/${id}/dry-run`, data, getAuthHeaders());
+    return res.data;
+  },
+  listSOARExecutions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/soar/executions`, getAuthHeaders());
+    return res.data;
+  },
+  evaluateSOARDecision: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/decision/evaluate`, data, getAuthHeaders());
+    return res.data;
+  },
+  getSOARKillSwitch: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/soar/kill-switch`, getAuthHeaders());
+    return res.data;
+  },
+  toggleSOARKillSwitch: async (data: { is_active: boolean; reason?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/kill-switch`, data, getAuthHeaders());
+    return res.data;
+  },
+  listSOARConnectors: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/soar/connectors`, getAuthHeaders());
+    return res.data;
+  },
+  testSOARConnectorHealth: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soar/connectors/${id}/health-check`, {}, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
