@@ -630,8 +630,65 @@ aegivanta_cloud_iam_privilege_escalation_paths_total = _make(
 )
 
 # ===========================================================================
+# Phase 22: Endpoint XDR & Zero-Trust Security Metrics
+# ===========================================================================
+aegivanta_endpoint_telemetry_events_total = _make(
+    "counter",
+    "aegivanta_endpoint_telemetry_events_total",
+    "Total normalized endpoint telemetry events ingested",
+    []
+)
+
+aegivanta_edr_detections_total = _make(
+    "gauge",
+    "aegivanta_edr_detections_total",
+    "Total active EDR endpoint behavioral detections",
+    []
+)
+
+aegivanta_xdr_correlated_incidents_total = _make(
+    "gauge",
+    "aegivanta_xdr_correlated_incidents_total",
+    "Total cross-domain correlated XDR incidents",
+    []
+)
+
+aegivanta_zero_trust_device_trust_score = _make(
+    "gauge",
+    "aegivanta_zero_trust_device_trust_score",
+    "Average Zero Trust device trust score across fleet",
+    []
+)
+
+aegivanta_endpoint_response_actions_total = _make(
+    "counter",
+    "aegivanta_endpoint_response_actions_total",
+    "Total governed endpoint response & containment actions executed",
+    []
+)
+
+# ===========================================================================
+# Phase 23: Enterprise Integration Ecosystem Metrics
+# ===========================================================================
+aegivanta_integration_connectors_total = _make(
+    "gauge",
+    "aegivanta_integration_connectors_total",
+    "Total registered integration connectors",
+    []
+)
+
+aegivanta_webhook_dead_letter_events_total = _make(
+    "gauge",
+    "aegivanta_webhook_dead_letter_events_total",
+    "Total webhook events in dead-letter queue",
+    []
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
+
 
 
 

@@ -42,6 +42,10 @@ from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign
 from backend.app.models.soar_v2 import DeclarativePlaybook, SOARExecutionSession, SOARConnector, SOARKillSwitch
 from backend.app.models.ai_security_intelligence import AIModelGovernance, AIModelDriftRecord, AIAdversarialEvent, AICopilotSession
 from backend.app.models.cloud_security import CloudAsset, CSPMFinding, ContainerVulnerabilityScan, CloudAttackPath, CloudIAMIdentityRisk
+from backend.app.models.endpoint_xdr import EndpointTelemetryEvent, EndpointDetection, XDRCorrelationIncident, ZeroTrustDevicePosture, EndpointResponseAction
+from backend.app.models.integration_ecosystem import IntegrationConnector, EventBusContract, WebhookDelivery
+
+
 
 
 
@@ -115,8 +119,18 @@ __all__ = [
     "CSPMFinding",
     "ContainerVulnerabilityScan",
     "CloudAttackPath",
-    "CloudIAMIdentityRisk"
+    "CloudIAMIdentityRisk",
+    "EndpointTelemetryEvent",
+    "EndpointDetection",
+    "XDRCorrelationIncident",
+    "ZeroTrustDevicePosture",
+    "EndpointResponseAction",
+    "IntegrationConnector",
+    "EventBusContract",
+    "WebhookDelivery"
 ]
+
+
 
 
 

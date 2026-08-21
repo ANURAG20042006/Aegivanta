@@ -522,8 +522,80 @@ export const saasApi = {
   getCloudAttackPaths: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/cloud-security/attack-paths`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 22 Endpoint XDR & Zero-Trust APIs
+  getEndpointTelemetry: async (event_category?: string, hostname?: string): Promise<any[]> => {
+    const params: any = {};
+    if (event_category) params.event_category = event_category;
+    if (hostname) params.hostname = hostname;
+    const res = await axios.get(`${API_BASE}/endpoint-xdr/telemetry`, { ...getAuthHeaders(), params });
+    return res.data;
+  },
+  getEndpointDetections: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/endpoint-xdr/detections`, getAuthHeaders());
+    return res.data;
+  },
+  getXDRIncidents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/endpoint-xdr/xdr/incidents`, getAuthHeaders());
+    return res.data;
+  },
+  getZeroTrustPostures: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/endpoint-xdr/zero-trust/posture`, getAuthHeaders());
+    return res.data;
+  },
+  evaluateZeroTrustPosture: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/endpoint-xdr/zero-trust/evaluate`, data, getAuthHeaders());
+    return res.data;
+  },
+  executeEndpointResponse: async (data: { sensor_id: string; hostname: string; action_type: string; target_entity: string; reason: string; approval_id?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/endpoint-xdr/response/execute`, data, getAuthHeaders());
+    return res.data;
+  },
+  rollbackEndpointResponse: async (actionId: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/endpoint-xdr/response/rollback/${actionId}`, {}, getAuthHeaders());
+    return res.data;
+  },
+
+  // Phase 23 Integration Ecosystem APIs
+  getIntegrationCatalog: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/integrations/marketplace/catalog`, getAuthHeaders());
+    return res.data;
+  },
+  getConnectors: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/integrations/connectors`, getAuthHeaders());
+    return res.data;
+  },
+  registerConnector: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/integrations/connectors/register`, data, getAuthHeaders());
+    return res.data;
+  },
+  getWebhookDeliveries: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/integrations/webhooks/deliveries`, getAuthHeaders());
+    return res.data;
+  },
+  getIntegrationHealthDashboard: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/integrations/health/dashboard`, getAuthHeaders());
+    return res.data;
+  },
+
+  // Phase 24 Global Ops / FinOps / SRE APIs
+  getFinOpsDashboard: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/global-ops/finops/dashboard`, getAuthHeaders());
+    return res.data;
+  },
+  getCapacityDashboard: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/global-ops/capacity/dashboard`, getAuthHeaders());
+    return res.data;
+  },
+  getSLODashboard: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/global-ops/sre/slo-dashboard`, getAuthHeaders());
+    return res.data;
   }
 };
+
+
+
 
 
 

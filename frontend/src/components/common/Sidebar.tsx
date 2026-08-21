@@ -25,6 +25,10 @@ import {
   Key,
   Brain,
   Cloud,
+  Laptop,
+  Plug,
+
+
 
 
 
@@ -57,8 +61,12 @@ export const navItems = [
   { path: '/benchmarking', label: 'ML Benchmarks', section: 'Production Intel', icon: Zap },
   { path: '/ai-intelligence', label: 'AI Security Intel', section: 'Production Intel', icon: Brain },
   { path: '/cloud-security', label: 'Cloud & Containers', section: 'Production Intel', icon: Cloud },
+  { path: '/endpoint-xdr', label: 'Endpoint XDR', section: 'Production Intel', icon: Laptop },
+  { path: '/integrations', label: 'Integrations', section: 'Production Intel', icon: Plug },
+
 
   { path: '/security-automation', label: 'Autonomous Response', section: 'Autonomous Ops', icon: Zap },
+
 
 
   { path: '/response-approvals', label: 'Response Approvals', section: 'Autonomous Ops', icon: ShieldCheck },

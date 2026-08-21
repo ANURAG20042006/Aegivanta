@@ -69,6 +69,16 @@ import { AISecurityIntelligence } from './pages/AISecurityIntelligence';
 // Phase 21 Cloud & Container Security Command Center
 import { CloudSecurityCenter } from './pages/CloudSecurityCenter';
 
+// Phase 22 Endpoint XDR & Zero-Trust Security Command Center
+import { EndpointXDRCenter } from './pages/EndpointXDRCenter';
+
+// Phase 23 Integration Marketplace
+import { IntegrationMarketplace } from './pages/IntegrationMarketplace';
+
+// Phase 24 Global Operations Center
+import { GlobalOpsCenter } from './pages/GlobalOpsCenter';
+
+
 
 
 
@@ -130,6 +140,10 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/soar-command-center" element={<SOARCommandCenter />} />
               <Route path="/ai-intelligence" element={<AISecurityIntelligence />} />
               <Route path="/cloud-security" element={<CloudSecurityCenter />} />
+              <Route path="/endpoint-xdr" element={<EndpointXDRCenter />} />
+              <Route path="/integrations" element={<IntegrationMarketplace />} />
+              <Route path="/global-ops" element={<GlobalOpsCenter />} />
+
 
 
 
