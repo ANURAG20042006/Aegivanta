@@ -114,6 +114,10 @@ import { AISOCCommandCenter } from './pages/AISOCCommandCenter';
 // Phase 38 Autonomous Detection Engineering & Multi-Standard Compliance
 import { ComplianceDetectionCenter } from './pages/ComplianceDetectionCenter';
 
+// Phase 39 Predictive Security Intelligence & Emerging Threat Forecasting
+import { PredictiveIntelCenter } from './pages/PredictiveIntelCenter';
+
+
 
 
 
@@ -203,6 +207,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/microsegmentation" element={<MicrosegmentationCenter />} />
               <Route path="/ai-soc-ueba" element={<AISOCCommandCenter />} />
               <Route path="/compliance-detection" element={<ComplianceDetectionCenter />} />
+              <Route path="/predictive-intel" element={<PredictiveIntelCenter />} />
+
 
 
 

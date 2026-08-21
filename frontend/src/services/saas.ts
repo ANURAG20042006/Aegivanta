@@ -1078,8 +1078,32 @@ export const saasApi = {
   generateComplianceReport: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/compliance-detection/compliance-reports/generate`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 39 Predictive Security Intelligence & Emerging Threat Forecasting APIs
+  getPredictiveIntelSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/predictive-intel/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getPredictiveForecasts: async (horizon?: string): Promise<any[]> => {
+    const params = horizon ? { horizon } : {};
+    const res = await axios.get(`${API_BASE}/predictive-intel/forecasts`, { ...getAuthHeaders(), params });
+    return res.data;
+  },
+  generatePredictiveForecast: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/predictive-intel/forecasts/generate`, data, getAuthHeaders());
+    return res.data;
+  },
+  getAdversarialSimulations: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/predictive-intel/simulations`, getAuthHeaders());
+    return res.data;
+  },
+  getThreatHorizonIndicators: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/predictive-intel/horizon-indicators`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

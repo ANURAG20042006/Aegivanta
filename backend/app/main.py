@@ -96,6 +96,8 @@ from backend.app.api.v1.dlp_security import router as dlp_security_router
 from backend.app.api.v1.microsegmentation import router as microsegmentation_router
 from backend.app.api.v1.ai_soc_ueba import router as ai_soc_ueba_router
 from backend.app.api.v1.compliance_detection_eng import router as compliance_detection_router
+from backend.app.api.v1.predictive_intel import router as predictive_intel_router
+
 
 
 
@@ -403,7 +405,9 @@ app.include_router(dlp_security_router, prefix=settings.API_V1_STR)
 app.include_router(microsegmentation_router, prefix=settings.API_V1_STR)
 app.include_router(ai_soc_ueba_router, prefix=settings.API_V1_STR)
 app.include_router(compliance_detection_router, prefix=settings.API_V1_STR)
+app.include_router(predictive_intel_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

@@ -83,6 +83,10 @@ from backend.app.models.ai_soc_ueba import (
 from backend.app.models.compliance_detection_eng import (
     AutonomousDetectionRule, ComplianceFrameworkControl, ComplianceAuditReport, DetectionSandboxExecution
 )
+from backend.app.models.predictive_intel import (
+    PredictiveThreatForecast, AdversarialVectorSimulation, ThreatHorizonIndicator
+)
+
 
 
 
@@ -236,8 +240,12 @@ __all__ = [
     "AutonomousDetectionRule",
     "ComplianceFrameworkControl",
     "ComplianceAuditReport",
-    "DetectionSandboxExecution"
+    "DetectionSandboxExecution",
+    "PredictiveThreatForecast",
+    "AdversarialVectorSimulation",
+    "ThreatHorizonIndicator"
 ]
+
 
 
 

@@ -86,6 +86,8 @@ export const navItems = [
   { path: '/microsegmentation', label: 'ZTNA & Microsegmentation', section: 'Production Intel', icon: Network },
   { path: '/ai-soc-ueba', label: 'AI SOC Autonomy & UEBA', section: 'Production Intel', icon: Brain },
   { path: '/compliance-detection', label: 'Compliance & Detection-as-Code', section: 'Production Intel', icon: FileCode },
+  { path: '/predictive-intel', label: 'Predictive Intel & Forecasting', section: 'Production Intel', icon: TrendingUp },
+
 
 
 
