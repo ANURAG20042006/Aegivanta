@@ -76,6 +76,8 @@ export const navItems = [
   { path: '/llm-security', label: 'AI/LLM Security & OWASP', section: 'Production Intel', icon: Brain },
   { path: '/attack-surface', label: 'Attack Surface & CTEM', section: 'Production Intel', icon: Globe },
   { path: '/threat-intel-v2', label: 'Threat Intel 2.0 & STIX', section: 'Production Intel', icon: Crosshair },
+  { path: '/deception', label: 'Deception & Honeypots', section: 'Production Intel', icon: Sparkles },
+
 
 
 

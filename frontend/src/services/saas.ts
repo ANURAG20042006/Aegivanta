@@ -884,8 +884,43 @@ export const saasApi = {
   generateThreatHuntingQueries: async (data: any): Promise<any[]> => {
     const res = await axios.post(`${API_BASE}/threat-intel-v2/hunting/generate-queries`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 33 Deception Technology & Honeypot Fleet APIs
+  getDeceptionSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/deception/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getHoneypots: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/deception/honeypots`, getAuthHeaders());
+    return res.data;
+  },
+  deployHoneypot: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/deception/honeypots/deploy`, data, getAuthHeaders());
+    return res.data;
+  },
+  getCanaries: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/deception/canaries`, getAuthHeaders());
+    return res.data;
+  },
+  generateCanary: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/deception/canaries/generate`, data, getAuthHeaders());
+    return res.data;
+  },
+  triggerCanary: async (id: string, data: any = {}): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/deception/canaries/trigger/${id}`, data, getAuthHeaders());
+    return res.data;
+  },
+  getDeceptionInteractions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/deception/interactions`, getAuthHeaders());
+    return res.data;
+  },
+  getEndpointLures: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/deception/endpoint-lures`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

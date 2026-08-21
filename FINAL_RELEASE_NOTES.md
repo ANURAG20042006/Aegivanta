@@ -1,19 +1,20 @@
-# AEGIVANTA v32.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v33.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v32.0.0 (Cyber Threat Intelligence 2.0 & STIX/TAXII Ingestion)
+## Release: v33.0.0 (Deception Technology, Honeypots & Active Adversary Engagement)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 32 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 33 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v32.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v33.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Deception & Active Engagement** | SSH Cowrie/Web/SMB/DB honeypot fleet, traceable AWS/Doc/DNS canaries, 100% true-positive keystroke telemetry |
 | **Threat Intel 2.0 & STIX/TAXII** | Automated STIX 2.1 parser, TAXII 2.1 feed sync, Diamond Model actor profiling, exponential IOC decay, hunting generator |
 | **Attack Surface & CTEM** | External asset discovery, open port scanning, dangling DNS takeover guard, dark web breach intel, brand protection |
 | **AI/LLM Security & OWASP** | Real-time Guardrail Firewall (prompt injection, DAN jailbreak block, PII masking, system prompt shield) |
@@ -75,6 +76,8 @@ Aegivanta v32.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 30 | AI/LLM Security & Shadow AI | OWASP Top 10 for LLMs, Prompt Firewall, PII Redaction, Shadow AI, Vector DB Security |
 | 31 | Attack Surface Management & CTEM | External Recon, Dangling DNS Takeovers, Dark Web Breach Intel, Brand Typosquatting |
 | 32 | Cyber Threat Intelligence (CTI) 2.0 | STIX/TAXII 2.1, Diamond Model Actor Profiling, IOC Sighting Decay, Hunting Dispatch |
+| 33 | Deception Technology & Honeypots | Honeypot Decoy Fleet, Traceable Canary Tokens, Real-Time Keystroke Ledger, MITRE Engage |
+
 
 
 

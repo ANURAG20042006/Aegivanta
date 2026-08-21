@@ -65,6 +65,10 @@ from backend.app.models.attack_surface import (
 from backend.app.models.threat_intel_v2 import (
     ThreatActorProfile, STIXFeedSource, CTIIndicatorRecord, CampaignHeatmapItem
 )
+from backend.app.models.deception import (
+    HoneypotNode, CanaryToken, DeceptionInteractionEvent, EndpointLureDeployment
+)
+
 
 
 
@@ -188,8 +192,13 @@ __all__ = [
     "ThreatActorProfile",
     "STIXFeedSource",
     "CTIIndicatorRecord",
-    "CampaignHeatmapItem"
+    "CampaignHeatmapItem",
+    "HoneypotNode",
+    "CanaryToken",
+    "DeceptionInteractionEvent",
+    "EndpointLureDeployment"
 ]
+
 
 
 

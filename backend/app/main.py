@@ -90,6 +90,8 @@ from backend.app.api.v1.supply_chain import router as supply_chain_router
 from backend.app.api.v1.llm_security import router as llm_security_router
 from backend.app.api.v1.attack_surface import router as attack_surface_router
 from backend.app.api.v1.threat_intel_v2 import router as threat_intel_v2_router
+from backend.app.api.v1.deception import router as deception_router
+
 
 
 
@@ -385,7 +387,9 @@ app.include_router(supply_chain_router, prefix=settings.API_V1_STR)
 app.include_router(llm_security_router, prefix=settings.API_V1_STR)
 app.include_router(attack_surface_router, prefix=settings.API_V1_STR)
 app.include_router(threat_intel_v2_router, prefix=settings.API_V1_STR)
+app.include_router(deception_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

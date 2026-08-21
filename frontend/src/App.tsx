@@ -96,6 +96,10 @@ import { AttackSurfaceCenter } from './pages/AttackSurfaceCenter';
 // Phase 32 Cyber Threat Intelligence 2.0
 import { ThreatIntelCenterV2 } from './pages/ThreatIntelCenterV2';
 
+// Phase 33 Deception Technology & Honeypots
+import { DeceptionCenter } from './pages/DeceptionCenter';
+
+
 
 
 
@@ -173,6 +177,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/llm-security" element={<LLMSecurityCenter />} />
               <Route path="/attack-surface" element={<AttackSurfaceCenter />} />
               <Route path="/threat-intel-v2" element={<ThreatIntelCenterV2 />} />
+              <Route path="/deception" element={<DeceptionCenter />} />
+
 
 
 
