@@ -1,19 +1,20 @@
-# AEGIVANTA v43.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v44.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v43.0.0 (Enterprise Data Governance, Lineage, Legal Hold & DSAR Privacy Workflows)
+## Release: v44.0.0 (Security Marketplace & Ecosystem Package Manager)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 43 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/EDGE-FABRIC/MULTI-REGION/DATA-GOVERNANCE/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 44 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/EDGE-FABRIC/MULTI-REGION/DATA-GOVERNANCE/MARKETPLACE/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v43.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v44.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Security Marketplace & Ecosystem** | Certified detection packs, SOAR playbooks, connector adapters, Ed25519 signing, sandboxed hot-reload |
 | **Enterprise Data Governance & DSAR** | End-to-end telemetry lineage DAG, forensic legal hold custody, GDPR/CCPA automated DSAR erasure |
 | **Multi-Region & Residency** | Active-active database sync, CRDT vector clocks, sub-second DR failover (<400ms), GDPR/FedRAMP residency |
 | **Global Edge Security Fabric** | Worldwide PoP ingestion mesh, edge-side DDoS scrubbing, TLS 1.3 termination, WireGuard mTLS replication |
@@ -97,6 +98,8 @@ Aegivanta v43.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 41 | Distributed Edge Fabric | Global PoP Ingestion Mesh, Edge DDoS Scrubbing, WireGuard mTLS WAN Replication |
 | 42 | Multi-Region Resilience | Active-Active CRDT Replication, Sub-Second DR Failover, Sovereign Data Residency |
 | 43 | Data Governance & DSAR | Cryptographic Lineage DAG, Forensic Legal Hold Vault, GDPR/CCPA Privacy Engine |
+| 44 | Security Marketplace | Curated Extension Catalog, Ed25519 Signatures, Sandboxed Dynamic Hot-Reload |
+
 
 
 

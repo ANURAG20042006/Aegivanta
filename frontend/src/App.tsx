@@ -129,6 +129,10 @@ import { MultiRegionResilienceCenter } from './pages/MultiRegionResilienceCenter
 // Phase 43 Enterprise Data Governance, Lineage, Legal Hold & DSAR Privacy
 import { DataGovernanceCenter } from './pages/DataGovernanceCenter';
 
+// Phase 44 Security Marketplace & Ecosystem Package Manager
+import { SecurityMarketplaceCenter } from './pages/SecurityMarketplaceCenter';
+
+
 
 
 
@@ -228,6 +232,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/edge-fabric" element={<EdgeFabricCenter />} />
               <Route path="/multi-region" element={<MultiRegionResilienceCenter />} />
               <Route path="/governance-dsar" element={<DataGovernanceCenter />} />
+              <Route path="/marketplace" element={<SecurityMarketplaceCenter />} />
+
 
 
 

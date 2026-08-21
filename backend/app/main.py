@@ -101,6 +101,8 @@ from backend.app.api.v1.federated_threat_sharing import router as federated_thre
 from backend.app.api.v1.edge_security_fabric import router as edge_security_fabric_router
 from backend.app.api.v1.multi_region_resilience import router as multi_region_resilience_router
 from backend.app.api.v1.data_governance_dsar import router as data_governance_dsar_router
+from backend.app.api.v1.security_marketplace import router as security_marketplace_router
+
 
 
 
@@ -418,7 +420,9 @@ app.include_router(federated_threat_router, prefix=settings.API_V1_STR)
 app.include_router(edge_security_fabric_router, prefix=settings.API_V1_STR)
 app.include_router(multi_region_resilience_router, prefix=settings.API_V1_STR)
 app.include_router(data_governance_dsar_router, prefix=settings.API_V1_STR)
+app.include_router(security_marketplace_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

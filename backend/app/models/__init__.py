@@ -98,6 +98,10 @@ from backend.app.models.multi_region_resilience import (
 from backend.app.models.data_governance_dsar import (
     DataLineageRecord, LegalHoldOrder, DSARPrivacyRequest
 )
+from backend.app.models.security_marketplace import (
+    MarketplacePackage, InstalledExtension, PackageReviewRating
+)
+
 
 
 
@@ -271,8 +275,12 @@ __all__ = [
     "FailoverExecutionEvent",
     "DataLineageRecord",
     "LegalHoldOrder",
-    "DSARPrivacyRequest"
+    "DSARPrivacyRequest",
+    "MarketplacePackage",
+    "InstalledExtension",
+    "PackageReviewRating"
 ]
+
 
 
 

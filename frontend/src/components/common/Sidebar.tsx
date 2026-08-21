@@ -26,6 +26,8 @@ import {
   FileCode,
   Share2,
   Scale,
+  ShoppingBag,
+
 
 
 
@@ -95,6 +97,8 @@ export const navItems = [
   { path: '/edge-fabric', label: 'Edge Security & Ingestion', section: 'Production Intel', icon: Globe },
   { path: '/multi-region', label: 'Multi-Region & Residency', section: 'Production Intel', icon: Database },
   { path: '/governance-dsar', label: 'Data Governance & DSAR', section: 'Production Intel', icon: Scale },
+  { path: '/marketplace', label: 'Security Marketplace', section: 'Production Intel', icon: ShoppingBag },
+
 
 
 

@@ -1197,8 +1197,36 @@ export const saasApi = {
   createDSARRequest: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/governance-dsar/requests`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 44 Security Marketplace & Ecosystem Package Manager APIs
+  getMarketplaceSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/marketplace/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getMarketplacePackages: async (packageType?: string): Promise<any[]> => {
+    const url = packageType ? `${API_BASE}/marketplace/packages?package_type=${packageType}` : `${API_BASE}/marketplace/packages`;
+    const res = await axios.get(url, getAuthHeaders());
+    return res.data;
+  },
+  getInstalledExtensions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/marketplace/installed`, getAuthHeaders());
+    return res.data;
+  },
+  installMarketplacePackage: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/marketplace/install`, data, getAuthHeaders());
+    return res.data;
+  },
+  uninstallMarketplacePackage: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/marketplace/uninstall`, data, getAuthHeaders());
+    return res.data;
+  },
+  publishMarketplacePackage: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/marketplace/publish`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
