@@ -1,19 +1,21 @@
-# AEGIVANTA v28.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v29.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v28.0.0 (Enterprise Identity, Access Management & Zero Trust 2.0)
+## Release: v29.0.0 (Supply Chain Security, SBOM 2.0 & Code-to-Cloud Governance)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 28 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 29 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v28.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v29.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Supply Chain & SBOM 2.0** | CycloneDX 1.5 & SPDX 2.3 export, OpenVEX exploitability ledger, SLSA Level 3 builder provenance |
+| **CI/CD Gatekeeper** | Blocking deployment gates (0 Critical CVEs, copyleft block), high-entropy secret scanner |
 | **Enterprise IAM & PAM** | Time-bounded JIT privilege elevations, break-glass admin paths, session recording ledgers |
 | **ITDR & Zero Trust 2.0** | Real-time MFA push fatigue defense, password spray blocking, continuous dynamic session verdicts |
 | **FIDO2 & Governance** | Hardware-bound WebAuthn passkeys, dormant account reaper (>90d), SCIM 2.0 directory lifecycle |
@@ -64,6 +66,8 @@ Aegivanta v28.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 26 | Autonomous SOC & Continuous Validation | Continuous defense checks, purple-team simulations, case management, SRE chaos |
 | 27 | Cloud Security & CNAPP | Multi-cloud connectors, CWPP runtime defense, serverless security, KSPM governance |
 | 28 | Enterprise IAM & Zero Trust 2.0 | Privileged Access Management (PAM), ITDR, Continuous Auth, FIDO2 Passkeys |
+| 29 | Supply Chain Security & SBOM 2.0 | CycloneDX/SPDX SBOM 2.0, OpenVEX, SLSA Level 3 Provenance, CI/CD Gatekeeper |
+
 
 
 

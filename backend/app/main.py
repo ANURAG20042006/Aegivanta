@@ -86,6 +86,8 @@ from backend.app.api.v1.ai_analyst_v2 import router as ai_analyst_v2_router
 from backend.app.api.v1.sre_ops import router as sre_ops_router
 from backend.app.api.v1.security_scorecard import router as security_scorecard_router
 from backend.app.api.v1.enterprise_iam import router as enterprise_iam_router
+from backend.app.api.v1.supply_chain import router as supply_chain_router
+
 
 
 
@@ -370,7 +372,9 @@ app.include_router(ai_analyst_v2_router, prefix=settings.API_V1_STR)
 app.include_router(sre_ops_router, prefix=settings.API_V1_STR)
 app.include_router(security_scorecard_router, prefix=settings.API_V1_STR)
 app.include_router(enterprise_iam_router, prefix=settings.API_V1_STR)
+app.include_router(supply_chain_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

@@ -752,8 +752,51 @@ export const saasApi = {
   reapDormantIdentities: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/iam/governance/reap-dormant`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 29 Supply Chain Security, SBOM 2.0 & SLSA Level 3 APIs
+  getSupplyChainSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/supply-chain/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getSBOMComponents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/supply-chain/sbom/components`, getAuthHeaders());
+    return res.data;
+  },
+  generateSBOMExport: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/supply-chain/sbom/generate`, data, getAuthHeaders());
+    return res.data;
+  },
+  getVEXStatements: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/supply-chain/vex/statements`, getAuthHeaders());
+    return res.data;
+  },
+  publishVEXStatement: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/supply-chain/vex/publish`, data, getAuthHeaders());
+    return res.data;
+  },
+  getSLSAAttestations: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/supply-chain/slsa/attestations`, getAuthHeaders());
+    return res.data;
+  },
+  verifySLSAProvenance: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/supply-chain/slsa/verify`, data, getAuthHeaders());
+    return res.data;
+  },
+  getPipelineGates: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/supply-chain/gates`, getAuthHeaders());
+    return res.data;
+  },
+  evaluatePipelineGate: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/supply-chain/gates/evaluate`, data, getAuthHeaders());
+    return res.data;
+  },
+  scanCodeSecrets: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/supply-chain/secrets/scan`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

@@ -35,7 +35,9 @@ import {
   Layers,
   Flame,
   Shield,
+  GitBranch,
 } from 'lucide-react';
+
 
 
 
@@ -68,6 +70,8 @@ export const navItems = [
   { path: '/global-ops', label: 'Global Operations', section: 'Production Intel', icon: Server },
   { path: '/soc-v2', label: 'SOC Center V2', section: 'Production Intel', icon: Shield },
   { path: '/enterprise-iam', label: 'Enterprise IAM & PAM', section: 'Production Intel', icon: Key },
+  { path: '/supply-chain', label: 'Supply Chain & SBOM', section: 'Production Intel', icon: GitBranch },
+
 
 
 
