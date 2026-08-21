@@ -1,19 +1,20 @@
-# AEGIVANTA v31.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v32.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v31.0.0 (Attack Surface Management, CTEM & External Recon)
+## Release: v32.0.0 (Cyber Threat Intelligence 2.0 & STIX/TAXII Ingestion)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 31 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 32 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v31.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v32.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Threat Intel 2.0 & STIX/TAXII** | Automated STIX 2.1 parser, TAXII 2.1 feed sync, Diamond Model actor profiling, exponential IOC decay, hunting generator |
 | **Attack Surface & CTEM** | External asset discovery, open port scanning, dangling DNS takeover guard, dark web breach intel, brand protection |
 | **AI/LLM Security & OWASP** | Real-time Guardrail Firewall (prompt injection, DAN jailbreak block, PII masking, system prompt shield) |
 | **Shadow AI Governance** | Employee consumer AI monitoring (ChatGPT, Claude, Midjourney), outbound data exfiltration blocks |
@@ -73,6 +74,8 @@ Aegivanta v31.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 29 | Supply Chain Security & SBOM 2.0 | CycloneDX/SPDX SBOM 2.0, OpenVEX, SLSA Level 3 Provenance, CI/CD Gatekeeper |
 | 30 | AI/LLM Security & Shadow AI | OWASP Top 10 for LLMs, Prompt Firewall, PII Redaction, Shadow AI, Vector DB Security |
 | 31 | Attack Surface Management & CTEM | External Recon, Dangling DNS Takeovers, Dark Web Breach Intel, Brand Typosquatting |
+| 32 | Cyber Threat Intelligence (CTI) 2.0 | STIX/TAXII 2.1, Diamond Model Actor Profiling, IOC Sighting Decay, Hunting Dispatch |
+
 
 
 

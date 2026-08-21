@@ -62,6 +62,10 @@ from backend.app.models.llm_security import (
 from backend.app.models.attack_surface import (
     ExternalAsset, DanglingDNSRisk, DarkWebCredentialLeak, BrandImpersonationAlert
 )
+from backend.app.models.threat_intel_v2 import (
+    ThreatActorProfile, STIXFeedSource, CTIIndicatorRecord, CampaignHeatmapItem
+)
+
 
 
 
@@ -180,8 +184,13 @@ __all__ = [
     "ExternalAsset",
     "DanglingDNSRisk",
     "DarkWebCredentialLeak",
-    "BrandImpersonationAlert"
+    "BrandImpersonationAlert",
+    "ThreatActorProfile",
+    "STIXFeedSource",
+    "CTIIndicatorRecord",
+    "CampaignHeatmapItem"
 ]
+
 
 
 

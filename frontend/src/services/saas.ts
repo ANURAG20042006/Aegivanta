@@ -854,8 +854,39 @@ export const saasApi = {
   getCTEMPrioritizedExposures: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/attack-surface/ctem/prioritized-exposures`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 32 Cyber Threat Intelligence (CTI) 2.0 APIs
+  getCTISummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/threat-intel-v2/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getThreatActors: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intel-v2/actors`, getAuthHeaders());
+    return res.data;
+  },
+  getSTIXFeeds: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intel-v2/feeds`, getAuthHeaders());
+    return res.data;
+  },
+  pollSTIXFeed: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/threat-intel-v2/feeds/poll/${id}`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getCTIIndicators: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intel-v2/indicators`, getAuthHeaders());
+    return res.data;
+  },
+  getCampaignHeatmaps: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/threat-intel-v2/campaigns/heatmap`, getAuthHeaders());
+    return res.data;
+  },
+  generateThreatHuntingQueries: async (data: any): Promise<any[]> => {
+    const res = await axios.post(`${API_BASE}/threat-intel-v2/hunting/generate-queries`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

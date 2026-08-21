@@ -93,6 +93,10 @@ import { LLMSecurityCenter } from './pages/LLMSecurityCenter';
 // Phase 31 Attack Surface Management & CTEM
 import { AttackSurfaceCenter } from './pages/AttackSurfaceCenter';
 
+// Phase 32 Cyber Threat Intelligence 2.0
+import { ThreatIntelCenterV2 } from './pages/ThreatIntelCenterV2';
+
+
 
 
 
@@ -168,6 +172,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/supply-chain" element={<SupplyChainSecurityCenter />} />
               <Route path="/llm-security" element={<LLMSecurityCenter />} />
               <Route path="/attack-surface" element={<AttackSurfaceCenter />} />
+              <Route path="/threat-intel-v2" element={<ThreatIntelCenterV2 />} />
+
 
 
 
