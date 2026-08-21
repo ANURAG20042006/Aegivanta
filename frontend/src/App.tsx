@@ -120,6 +120,10 @@ import { PredictiveIntelCenter } from './pages/PredictiveIntelCenter';
 // Phase 40 Privacy-Preserving Threat Intelligence & Federated IOC Exchange
 import { FederatedThreatCenter } from './pages/FederatedThreatCenter';
 
+// Phase 41 Global Distributed Edge Security & Regional Ingestion Fabric
+import { EdgeFabricCenter } from './pages/EdgeFabricCenter';
+
+
 
 
 
@@ -213,6 +217,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/compliance-detection" element={<ComplianceDetectionCenter />} />
               <Route path="/predictive-intel" element={<PredictiveIntelCenter />} />
               <Route path="/federated-threat" element={<FederatedThreatCenter />} />
+              <Route path="/edge-fabric" element={<EdgeFabricCenter />} />
+
 
 
 

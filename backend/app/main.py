@@ -98,6 +98,8 @@ from backend.app.api.v1.ai_soc_ueba import router as ai_soc_ueba_router
 from backend.app.api.v1.compliance_detection_eng import router as compliance_detection_router
 from backend.app.api.v1.predictive_intel import router as predictive_intel_router
 from backend.app.api.v1.federated_threat_sharing import router as federated_threat_router
+from backend.app.api.v1.edge_security_fabric import router as edge_security_fabric_router
+
 
 
 
@@ -409,7 +411,9 @@ app.include_router(ai_soc_ueba_router, prefix=settings.API_V1_STR)
 app.include_router(compliance_detection_router, prefix=settings.API_V1_STR)
 app.include_router(predictive_intel_router, prefix=settings.API_V1_STR)
 app.include_router(federated_threat_router, prefix=settings.API_V1_STR)
+app.include_router(edge_security_fabric_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

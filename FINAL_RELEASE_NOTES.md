@@ -1,19 +1,20 @@
-# AEGIVANTA v40.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v41.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v40.0.0 (Privacy-Preserving Threat Intelligence & Federated IOC Exchange)
+## Release: v41.0.0 (Global Distributed Edge Security & Regional Ingestion Fabric)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 40 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 41 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/EDGE-FABRIC/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v40.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v41.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Global Edge Security Fabric** | Worldwide PoP ingestion mesh, edge-side DDoS scrubbing, TLS 1.3 termination, WireGuard mTLS replication |
 | **Federated Threat & Privacy** | Zero-knowledge federated IOC exchange, homomorphic blind matching, differential privacy ($\epsilon$-DP noise) |
 | **Predictive Security Intelligence** | Machine learning threat vector probability forecasting (30/60/90d), adversarial blast radius sims, horizon trajectories |
 | **Detection & Compliance Engine** | Autonomous Sigma/YARA-L compiler, telemetry sandbox, SOC 2, ISO 27001, HIPAA, FedRAMP, PCI-DSS attestation |
@@ -91,6 +92,8 @@ Aegivanta v40.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 38 | Autonomous Detection & Compliance | Sigma/YARA-L Compiler, Sandbox Tester, SOC 2, ISO 27001, HIPAA, FedRAMP, PCI-DSS |
 | 39 | Predictive Intelligence & Forecasting | ML Threat Vector Forecasting (30/60/90d), Adversarial Blast Radius Sims, Horizon Trends |
 | 40 | Federated Threat & Privacy | Zero-Knowledge Exchange, Homomorphic Matching, Differential Privacy ($\epsilon$-DP) |
+| 41 | Distributed Edge Fabric | Global PoP Ingestion Mesh, Edge DDoS Scrubbing, WireGuard mTLS WAN Replication |
+
 
 
 

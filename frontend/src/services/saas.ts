@@ -1123,8 +1123,31 @@ export const saasApi = {
   executeBlindHomomorphicMatch: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/federated-threat/blind-match`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 41 Global Distributed Edge Security & Regional Ingestion Fabric APIs
+  getEdgeFabricSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/edge-fabric/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getEdgePoPs: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/edge-fabric/pops`, getAuthHeaders());
+    return res.data;
+  },
+  getEdgeInspectionPolicies: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/edge-fabric/policies`, getAuthHeaders());
+    return res.data;
+  },
+  createEdgeInspectionPolicy: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/edge-fabric/policies`, data, getAuthHeaders());
+    return res.data;
+  },
+  getRegionalIngestionRoutes: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/edge-fabric/routes`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

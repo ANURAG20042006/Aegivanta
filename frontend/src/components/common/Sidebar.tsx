@@ -90,6 +90,8 @@ export const navItems = [
   { path: '/compliance-detection', label: 'Compliance & Detection-as-Code', section: 'Production Intel', icon: FileCode },
   { path: '/predictive-intel', label: 'Predictive Intel & Forecasting', section: 'Production Intel', icon: TrendingUp },
   { path: '/federated-threat', label: 'Federated Threat & Privacy', section: 'Production Intel', icon: Share2 },
+  { path: '/edge-fabric', label: 'Edge Security & Ingestion', section: 'Production Intel', icon: Globe },
+
 
 
 

@@ -89,6 +89,10 @@ from backend.app.models.predictive_intel import (
 from backend.app.models.federated_threat_sharing import (
     FederatedIOCExchangeNode, FederatedThreatIndicator, HomomorphicMatchQuery
 )
+from backend.app.models.edge_security_fabric import (
+    GlobalEdgePoPNode, EdgeInspectionPolicy, RegionalIngestionRoute
+)
+
 
 
 
@@ -250,8 +254,12 @@ __all__ = [
     "ThreatHorizonIndicator",
     "FederatedIOCExchangeNode",
     "FederatedThreatIndicator",
-    "HomomorphicMatchQuery"
+    "HomomorphicMatchQuery",
+    "GlobalEdgePoPNode",
+    "EdgeInspectionPolicy",
+    "RegionalIngestionRoute"
 ]
+
 
 
 
