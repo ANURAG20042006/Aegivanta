@@ -86,6 +86,10 @@ from backend.app.models.compliance_detection_eng import (
 from backend.app.models.predictive_intel import (
     PredictiveThreatForecast, AdversarialVectorSimulation, ThreatHorizonIndicator
 )
+from backend.app.models.federated_threat_sharing import (
+    FederatedIOCExchangeNode, FederatedThreatIndicator, HomomorphicMatchQuery
+)
+
 
 
 
@@ -243,8 +247,12 @@ __all__ = [
     "DetectionSandboxExecution",
     "PredictiveThreatForecast",
     "AdversarialVectorSimulation",
-    "ThreatHorizonIndicator"
+    "ThreatHorizonIndicator",
+    "FederatedIOCExchangeNode",
+    "FederatedThreatIndicator",
+    "HomomorphicMatchQuery"
 ]
+
 
 
 

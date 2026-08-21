@@ -24,6 +24,8 @@ import {
   Zap,
   Key,
   FileCode,
+  Share2,
+
 
   Brain,
   Cloud,
@@ -87,6 +89,8 @@ export const navItems = [
   { path: '/ai-soc-ueba', label: 'AI SOC Autonomy & UEBA', section: 'Production Intel', icon: Brain },
   { path: '/compliance-detection', label: 'Compliance & Detection-as-Code', section: 'Production Intel', icon: FileCode },
   { path: '/predictive-intel', label: 'Predictive Intel & Forecasting', section: 'Production Intel', icon: TrendingUp },
+  { path: '/federated-threat', label: 'Federated Threat & Privacy', section: 'Production Intel', icon: Share2 },
+
 
 
 

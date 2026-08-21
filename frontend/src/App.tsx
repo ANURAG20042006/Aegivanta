@@ -117,6 +117,10 @@ import { ComplianceDetectionCenter } from './pages/ComplianceDetectionCenter';
 // Phase 39 Predictive Security Intelligence & Emerging Threat Forecasting
 import { PredictiveIntelCenter } from './pages/PredictiveIntelCenter';
 
+// Phase 40 Privacy-Preserving Threat Intelligence & Federated IOC Exchange
+import { FederatedThreatCenter } from './pages/FederatedThreatCenter';
+
+
 
 
 
@@ -208,6 +212,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/ai-soc-ueba" element={<AISOCCommandCenter />} />
               <Route path="/compliance-detection" element={<ComplianceDetectionCenter />} />
               <Route path="/predictive-intel" element={<PredictiveIntelCenter />} />
+              <Route path="/federated-threat" element={<FederatedThreatCenter />} />
+
 
 
 

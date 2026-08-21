@@ -1101,8 +1101,31 @@ export const saasApi = {
   getThreatHorizonIndicators: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/predictive-intel/horizon-indicators`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 40 Privacy-Preserving Threat Intelligence & Federated IOC Exchange APIs
+  getFederatedThreatSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/federated-threat/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getFederatedNodes: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/federated-threat/nodes`, getAuthHeaders());
+    return res.data;
+  },
+  getFederatedThreatIndicators: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/federated-threat/indicators`, getAuthHeaders());
+    return res.data;
+  },
+  shareFederatedIndicator: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/federated-threat/indicators/share`, data, getAuthHeaders());
+    return res.data;
+  },
+  executeBlindHomomorphicMatch: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/federated-threat/blind-match`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
