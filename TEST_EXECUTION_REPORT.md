@@ -7,16 +7,20 @@
 
 ---
 
-## 1. Test Suite Discovery
+## 1. Test Suite Discovery — VERIFIED FINAL RUN
 
 | Metric | Value |
 | :--- | :--- |
 | **Test Runner** | `pytest 9.1.1` on Python 3.11.5 |
 | **Test Plugin** | `anyio 4.14.2`, `pytest-asyncio 1.4.0` (MODE=AUTO) |
 | **Total Tests Collected** | `1,042` |
-| **Total Tests Passed** | `1,042` (100%) |
-| **Total Test Failures** | `0` |
-| **Total Errors** | `0` |
+| **Total Tests Passed** | **1,025** |
+| **Total Tests Skipped** | **17** (all expected — PyTorch not installed + 1 CSV pre-condition) |
+| **Total Test Failures** | **0** |
+| **Total Test Errors** | **0** |
+| **Total Warnings** | 25 (all non-blocking `RuntimeWarning: coroutine was never awaited` in mock fixtures) |
+| **Total Execution Time** | **563.32s (9 minutes 23 seconds)** |
+| **Final pytest Exit Code** | **0 (success)** |
 
 ---
 
