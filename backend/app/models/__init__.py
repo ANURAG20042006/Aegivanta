@@ -80,6 +80,10 @@ from backend.app.models.microsegmentation import (
 from backend.app.models.ai_soc_ueba import (
     UEBAUserProfile, AISOCInvestigation, InsiderThreatIndicator, AISOCDecisionAudit
 )
+from backend.app.models.compliance_detection_eng import (
+    AutonomousDetectionRule, ComplianceFrameworkControl, ComplianceAuditReport, DetectionSandboxExecution
+)
+
 
 
 
@@ -228,8 +232,13 @@ __all__ = [
     "UEBAUserProfile",
     "AISOCInvestigation",
     "InsiderThreatIndicator",
-    "AISOCDecisionAudit"
+    "AISOCDecisionAudit",
+    "AutonomousDetectionRule",
+    "ComplianceFrameworkControl",
+    "ComplianceAuditReport",
+    "DetectionSandboxExecution"
 ]
+
 
 
 

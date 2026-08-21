@@ -23,6 +23,8 @@ import {
   Activity,
   Zap,
   Key,
+  FileCode,
+
   Brain,
   Cloud,
   Laptop,
@@ -83,6 +85,8 @@ export const navItems = [
   { path: '/dlp-security', label: 'DLP & Tokenization', section: 'Production Intel', icon: Lock },
   { path: '/microsegmentation', label: 'ZTNA & Microsegmentation', section: 'Production Intel', icon: Network },
   { path: '/ai-soc-ueba', label: 'AI SOC Autonomy & UEBA', section: 'Production Intel', icon: Brain },
+  { path: '/compliance-detection', label: 'Compliance & Detection-as-Code', section: 'Production Intel', icon: FileCode },
+
 
 
 

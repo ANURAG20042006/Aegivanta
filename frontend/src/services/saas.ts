@@ -1046,8 +1046,41 @@ export const saasApi = {
   getAISOCDecisionAudits: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/ai-soc-ueba/decision-audits`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 38 Autonomous Detection Engineering & Multi-Standard Compliance APIs
+  getComplianceDetectionSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/compliance-detection/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getAutonomousDetectionRules: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/compliance-detection/detection-rules`, getAuthHeaders());
+    return res.data;
+  },
+  createAutonomousDetectionRule: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/compliance-detection/detection-rules`, data, getAuthHeaders());
+    return res.data;
+  },
+  testDetectionRuleSandbox: async (data: any): Promise<any> => {
+
+    const res = await axios.post(`${API_BASE}/compliance-detection/detection-rules/test-sandbox`, data, getAuthHeaders());
+    return res.data;
+  },
+  getComplianceControls: async (framework?: string): Promise<any[]> => {
+    const params = framework ? { framework } : {};
+    const res = await axios.get(`${API_BASE}/compliance-detection/compliance-controls`, { ...getAuthHeaders(), params });
+    return res.data;
+  },
+  getComplianceReports: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/compliance-detection/compliance-reports`, getAuthHeaders());
+    return res.data;
+  },
+  generateComplianceReport: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/compliance-detection/compliance-reports/generate`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

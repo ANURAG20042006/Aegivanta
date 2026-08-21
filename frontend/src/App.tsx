@@ -111,6 +111,10 @@ import { MicrosegmentationCenter } from './pages/MicrosegmentationCenter';
 // Phase 37 AI SOC Autonomy & UEBA 2.0
 import { AISOCCommandCenter } from './pages/AISOCCommandCenter';
 
+// Phase 38 Autonomous Detection Engineering & Multi-Standard Compliance
+import { ComplianceDetectionCenter } from './pages/ComplianceDetectionCenter';
+
+
 
 
 
@@ -198,6 +202,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/dlp-security" element={<DLPCommandCenter />} />
               <Route path="/microsegmentation" element={<MicrosegmentationCenter />} />
               <Route path="/ai-soc-ueba" element={<AISOCCommandCenter />} />
+              <Route path="/compliance-detection" element={<ComplianceDetectionCenter />} />
+
 
 
 
