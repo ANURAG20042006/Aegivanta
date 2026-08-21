@@ -1284,6 +1284,138 @@ export const saasApi = {
   }
 };
 
+// Phase 47 — Executive Security Intelligence, Cyber ROI & CISO Posture Reporting
+export const executiveIntelligenceApi = {
+  getSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/summary`, getAuthHeaders());
+    return res.data;
+  },
+  listReports: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/reports`, getAuthHeaders());
+    return res.data;
+  },
+  getLatestReport: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/reports/latest`, getAuthHeaders());
+    return res.data;
+  },
+  generateReport: async (data: { report_period: string; report_type?: string }): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/executive-intelligence/reports/generate`, data, getAuthHeaders());
+    return res.data;
+  },
+  listROI: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/roi`, getAuthHeaders());
+    return res.data;
+  },
+  getLatestROI: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/roi/latest`, getAuthHeaders());
+    return res.data;
+  },
+  listKPISnapshots: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/executive-intelligence/kpi-snapshots`, getAuthHeaders());
+    return res.data;
+  }
+};
+
+// Phase 48 — Global AI/ML Model Platform, Registry, Drift Monitoring & Adversarial Defenses
+export const mlModelPlatformApi = {
+  getSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/summary`, getAuthHeaders());
+    return res.data;
+  },
+  listModels: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/models`, getAuthHeaders());
+    return res.data;
+  },
+  getChampionModel: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/models/champion`, getAuthHeaders());
+    return res.data;
+  },
+  registerModel: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ml-platform/models/register`, data, getAuthHeaders());
+    return res.data;
+  },
+  listDriftRecords: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/drift`, getAuthHeaders());
+    return res.data;
+  },
+  getDriftSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/drift/summary`, getAuthHeaders());
+    return res.data;
+  },
+  listAdversarialEvents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/adversarial/events`, getAuthHeaders());
+    return res.data;
+  },
+  getAdversarialSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ml-platform/adversarial/summary`, getAuthHeaders());
+    return res.data;
+  },
+  simulateAdversarialDefense: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ml-platform/adversarial/simulate`, data, getAuthHeaders());
+    return res.data;
+  }
+};
+
+// Phase 49 — Autonomous Cyber Defense Control Plane & Decisive War Room
+export const autonomousControlPlaneApi = {
+  getSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/control-plane/summary`, getAuthHeaders());
+    return res.data;
+  },
+  listMissions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/control-plane/missions`, getAuthHeaders());
+    return res.data;
+  },
+  createMission: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/control-plane/missions`, data, getAuthHeaders());
+    return res.data;
+  },
+  listWarRooms: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/control-plane/war-rooms`, getAuthHeaders());
+    return res.data;
+  },
+  getWarRoomDetails: async (id: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/control-plane/war-rooms/${id}`, getAuthHeaders());
+    return res.data;
+  },
+  toggleKillSwitch: async (id: string, activate: boolean): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/control-plane/war-rooms/${id}/kill-switch`, { activate }, getAuthHeaders());
+    return res.data;
+  },
+  executeAction: async (id: string, data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/control-plane/war-rooms/${id}/action`, data, getAuthHeaders());
+    return res.data;
+  }
+};
+
+// Phase 50 — Global Enterprise Certification, Production Readiness & Sovereign Attestation (Capstone)
+export const globalEnterpriseCertificationApi = {
+  getSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/global-certification/summary`, getAuthHeaders());
+    return res.data;
+  },
+  listCertifications: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/global-certification/certifications`, getAuthHeaders());
+    return res.data;
+  },
+  listReadinessGates: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/global-certification/readiness-gates`, getAuthHeaders());
+    return res.data;
+  },
+  generateAttestation: async (data?: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/global-certification/attestations/generate`, data || {}, getAuthHeaders());
+    return res.data;
+  },
+  listAttestations: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/global-certification/attestations`, getAuthHeaders());
+    return res.data;
+  }
+};
+
+
+
+
+
 
 
 

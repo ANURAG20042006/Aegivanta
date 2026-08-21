@@ -104,6 +104,10 @@ from backend.app.api.v1.data_governance_dsar import router as data_governance_ds
 from backend.app.api.v1.security_marketplace import router as security_marketplace_router
 from backend.app.api.v1.developer_platform import router as developer_platform_router
 from backend.app.api.v1.security_automation_studio import router as security_automation_studio_router
+from backend.app.api.v1.executive_security_intelligence import router as executive_intelligence_router
+from backend.app.api.v1.ai_ml_model_platform import router as ai_ml_model_platform_router
+from backend.app.api.v1.autonomous_control_plane import router as autonomous_control_plane_router
+from backend.app.api.v1.global_enterprise_certification import router as global_enterprise_certification_router
 
 
 
@@ -427,6 +431,10 @@ app.include_router(data_governance_dsar_router, prefix=settings.API_V1_STR)
 app.include_router(security_marketplace_router, prefix=settings.API_V1_STR)
 app.include_router(developer_platform_router, prefix=settings.API_V1_STR)
 app.include_router(security_automation_studio_router, prefix=settings.API_V1_STR)
+app.include_router(executive_intelligence_router, prefix=settings.API_V1_STR)
+app.include_router(ai_ml_model_platform_router, prefix=settings.API_V1_STR)
+app.include_router(autonomous_control_plane_router, prefix=settings.API_V1_STR)
+app.include_router(global_enterprise_certification_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
 
 

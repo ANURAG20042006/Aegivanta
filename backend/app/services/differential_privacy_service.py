@@ -45,6 +45,17 @@ class DifferentialPrivacyService:
         )
         match = (await db.execute(stmt)).scalars().first()
 
+        if not match:
+            # Check if seeding defaults is needed for this tenant
+            count_stmt = select(FederatedThreatIndicator).where(
+                FederatedThreatIndicator.tenant_id == tenant_id
+            )
+            has_records = (await db.execute(count_stmt)).scalars().first()
+            if not has_records:
+                from backend.app.services.federated_exchange_service import FederatedExchangeService
+                await FederatedExchangeService.list_indicators(db, tenant_id)
+                match = (await db.execute(stmt)).scalars().first()
+
         status = "BLIND_MATCH_FOUND" if match else "NO_MATCH"
         latency_ms = 1.84
 

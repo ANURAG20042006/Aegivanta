@@ -107,6 +107,22 @@ from backend.app.models.developer_webhooks import (
 from backend.app.models.security_automation_studio import (
     AutomationPlaybook, PlaybookExecutionRun, PlaybookTemplate
 )
+from backend.app.models.executive_security_intelligence import (
+    CISOBoardReport, CyberROIRecord, ExecutiveKPISnapshot
+)
+from backend.app.models.ai_ml_model_platform import (
+    MLModelRegistryV2, MLModelDriftRecord, AdversarialAttackEvent
+)
+from backend.app.models.autonomous_control_plane import (
+    AutonomousDefenseMission, DefenseWarRoomSession, WarRoomActionDecision
+)
+from backend.app.models.global_enterprise_certification import (
+    EnterpriseCertificationBadge, ProductionReadinessGate, AutonomousDefenseAttestation
+)
+
+
+
+
 
 
 

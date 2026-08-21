@@ -104,6 +104,10 @@ export const navItems = [
   { path: '/marketplace', label: 'Security Marketplace', section: 'Production Intel', icon: ShoppingBag },
   { path: '/developer', label: 'Developer & Webhooks', section: 'Production Intel', icon: Code },
   { path: '/automation-studio', label: 'Automation Studio', section: 'Production Intel', icon: Workflow },
+  { path: '/executive-intelligence', label: 'Executive Intelligence', section: 'Production Intel', icon: TrendingUp },
+  { path: '/ml-platform', label: 'AI/ML Model Platform', section: 'Production Intel', icon: Brain },
+  { path: '/control-plane', label: 'Autonomous Control Plane', section: 'Production Intel', icon: Target },
+  { path: '/global-certification', label: 'Global Certification (Phase 50)', section: 'Production Intel', icon: ShieldCheck },
 
 
 

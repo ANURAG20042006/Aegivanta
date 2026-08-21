@@ -138,6 +138,18 @@ import { DeveloperPlatformCenter } from './pages/DeveloperPlatformCenter';
 // Phase 46 Security Automation Studio (Visual Playbook Builder & SOAR Canvas)
 import { SecurityAutomationStudioCenter } from './pages/SecurityAutomationStudioCenter';
 
+// Phase 47 Executive Security Intelligence, Cyber ROI & CISO Posture Reporting
+import { ExecutiveSecurityIntelligenceCenter } from './pages/ExecutiveSecurityIntelligenceCenter';
+
+// Phase 48 Global AI/ML Model Platform, Registry, Drift Monitoring & Adversarial Defenses
+import { MLModelPlatformCenter } from './pages/MLModelPlatformCenter';
+
+// Phase 49 Autonomous Cyber Defense Control Plane & Decisive War Room
+import { AutonomousControlPlaneCenter } from './pages/AutonomousControlPlaneCenter';
+
+// Phase 50 Global Enterprise Certification, Production Readiness & Sovereign Attestation (Capstone)
+import { GlobalEnterpriseCertificationCenter } from './pages/GlobalEnterpriseCertificationCenter';
+
 
 
 
@@ -243,6 +255,10 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/marketplace" element={<SecurityMarketplaceCenter />} />
               <Route path="/developer" element={<DeveloperPlatformCenter />} />
               <Route path="/automation-studio" element={<SecurityAutomationStudioCenter />} />
+              <Route path="/executive-intelligence" element={<ExecutiveSecurityIntelligenceCenter />} />
+              <Route path="/ml-platform" element={<MLModelPlatformCenter />} />
+              <Route path="/control-plane" element={<AutonomousControlPlaneCenter />} />
+              <Route path="/global-certification" element={<GlobalEnterpriseCertificationCenter />} />
 
 
 
