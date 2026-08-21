@@ -1,19 +1,22 @@
-# AEGIVANTA v27.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v28.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v27.0.0 (Cloud-Native Application Protection Platform & Multi-Cloud Defense)
+## Release: v28.0.0 (Enterprise Identity, Access Management & Zero Trust 2.0)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 27 development phases into a unified, commercially deployable, and operationally resilient CNAPP/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 28 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v27.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v28.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Enterprise IAM & PAM** | Time-bounded JIT privilege elevations, break-glass admin paths, session recording ledgers |
+| **ITDR & Zero Trust 2.0** | Real-time MFA push fatigue defense, password spray blocking, continuous dynamic session verdicts |
+| **FIDO2 & Governance** | Hardware-bound WebAuthn passkeys, dormant account reaper (>90d), SCIM 2.0 directory lifecycle |
 | **CNAPP Platform** | Multi-pillar posture engine: CSPM (30%), CWPP (25%), CIEM (20%), KSPM (15%), Serverless (10%) |
 | **Multi-Cloud Connectors** | Automated onboarding for AWS (AssumeRole), Azure (Service Principal), GCP (Service Account), K8s |
 | **CWPP Runtime Defense** | eBPF container anomaly detection, reverse shell blocking, one-click workload quarantine |
@@ -60,6 +63,8 @@ Aegivanta v27.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 25 | Productization & Certification | Security hardening, release packaging, full regression |
 | 26 | Autonomous SOC & Continuous Validation | Continuous defense checks, purple-team simulations, case management, SRE chaos |
 | 27 | Cloud Security & CNAPP | Multi-cloud connectors, CWPP runtime defense, serverless security, KSPM governance |
+| 28 | Enterprise IAM & Zero Trust 2.0 | Privileged Access Management (PAM), ITDR, Continuous Auth, FIDO2 Passkeys |
+
 
 
 ---

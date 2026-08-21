@@ -81,6 +81,10 @@ import { GlobalOpsCenter } from './pages/GlobalOpsCenter';
 // Phase 26 SOC Command Center V2
 import { SOCCommandCenterV2 } from './pages/SOCCommandCenterV2';
 
+// Phase 28 Enterprise IAM & Zero Trust Center
+import { EnterpriseIAMCenter } from './pages/EnterpriseIAMCenter';
+
+
 
 
 
@@ -148,6 +152,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/integrations" element={<IntegrationMarketplace />} />
               <Route path="/global-ops" element={<GlobalOpsCenter />} />
               <Route path="/soc-v2" element={<SOCCommandCenterV2 />} />
+              <Route path="/enterprise-iam" element={<EnterpriseIAMCenter />} />
+
 
 
 

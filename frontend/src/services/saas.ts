@@ -706,8 +706,55 @@ export const saasApi = {
   enrollK8sCluster: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/cloud-security/k8s/clusters/enroll`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 28 Enterprise Identity, PAM & Zero Trust 2.0 APIs
+  getIAMSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/iam/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getPAMElevations: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/iam/pam/elevations`, getAuthHeaders());
+    return res.data;
+  },
+  requestJITElevation: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/pam/request-elevation`, data, getAuthHeaders());
+    return res.data;
+  },
+  approveJITElevation: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/pam/approve/${id}`, {}, getAuthHeaders());
+    return res.data;
+  },
+  revokeJITElevation: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/pam/revoke/${id}`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getITDRDetections: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/iam/itdr/detections`, getAuthHeaders());
+    return res.data;
+  },
+  simulateITDREvent: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/itdr/simulate-attack`, data, getAuthHeaders());
+    return res.data;
+  },
+  evaluateZeroTrustSession: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/zero-trust/evaluate-session`, data, getAuthHeaders());
+    return res.data;
+  },
+  getRegisteredPasskeys: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/iam/passkeys`, getAuthHeaders());
+    return res.data;
+  },
+  getIdentityScorecards: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/iam/governance/scorecards`, getAuthHeaders());
+    return res.data;
+  },
+  reapDormantIdentities: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/iam/governance/reap-dormant`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
