@@ -105,6 +105,10 @@ import { VulnerabilityMgmtCenter } from './pages/VulnerabilityMgmtCenter';
 // Phase 35 Data Loss Prevention & Cryptographic Tokenization
 import { DLPCommandCenter } from './pages/DLPCommandCenter';
 
+// Phase 36 Microsegmentation & ZTNA 2.0
+import { MicrosegmentationCenter } from './pages/MicrosegmentationCenter';
+
+
 
 
 
@@ -188,6 +192,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/deception" element={<DeceptionCenter />} />
               <Route path="/vulnerability-mgmt" element={<VulnerabilityMgmtCenter />} />
               <Route path="/dlp-security" element={<DLPCommandCenter />} />
+              <Route path="/microsegmentation" element={<MicrosegmentationCenter />} />
+
 
 
 

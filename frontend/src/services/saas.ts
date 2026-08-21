@@ -982,8 +982,43 @@ export const saasApi = {
   getShadowData: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/dlp-security/shadow-data`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 36 Microsegmentation & ZTNA 2.0 APIs
+  getZTNAMicrosegSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getZTNAConnectors: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/connectors`, getAuthHeaders());
+    return res.data;
+  },
+  getMicrosegPolicies: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/policies`, getAuthHeaders());
+    return res.data;
+  },
+  createMicrosegPolicy: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/microsegmentation/policies`, data, getAuthHeaders());
+    return res.data;
+  },
+  getZTNAClients: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/sessions`, getAuthHeaders());
+    return res.data;
+  },
+  terminateZTNASession: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/microsegmentation/sessions/terminate`, data, getAuthHeaders());
+    return res.data;
+  },
+  getLateralAlerts: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/lateral-alerts`, getAuthHeaders());
+    return res.data;
+  },
+  getNetworkFlowGraph: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/microsegmentation/network-flow-graph`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

@@ -74,6 +74,10 @@ from backend.app.models.vulnerability_mgmt import (
 from backend.app.models.dlp_security import (
     DLPInspectionPolicy, DLPIncidentEvent, TokenizedDataVault, ShadowDataStore
 )
+from backend.app.models.microsegmentation import (
+    ZTNAConnectorNode, MicrosegmentationPolicy, ZTNAAccessSession, LateralMovementBlockedAlert
+)
+
 
 
 
@@ -212,8 +216,13 @@ __all__ = [
     "DLPInspectionPolicy",
     "DLPIncidentEvent",
     "TokenizedDataVault",
-    "ShadowDataStore"
+    "ShadowDataStore",
+    "ZTNAConnectorNode",
+    "MicrosegmentationPolicy",
+    "ZTNAAccessSession",
+    "LateralMovementBlockedAlert"
 ]
+
 
 
 
