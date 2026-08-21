@@ -1224,8 +1224,40 @@ export const saasApi = {
   publishMarketplacePackage: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/marketplace/publish`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 45 Developer Platform, Public Versioned API & Webhooks Engine APIs
+  getDeveloperSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/developer/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getDeveloperApiKeys: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/developer/keys`, getAuthHeaders());
+    return res.data;
+  },
+  createDeveloperApiKey: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/developer/keys`, data, getAuthHeaders());
+    return res.data;
+  },
+  getWebhookSubscriptions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/developer/webhooks`, getAuthHeaders());
+    return res.data;
+  },
+  createWebhookSubscription: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/developer/webhooks`, data, getAuthHeaders());
+    return res.data;
+  },
+  getDeveloperWebhookDeliveries: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/developer/deliveries`, getAuthHeaders());
+    return res.data;
+  },
+
+  testDispatchWebhook: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/developer/test-dispatch`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

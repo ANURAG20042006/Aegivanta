@@ -101,6 +101,10 @@ from backend.app.models.data_governance_dsar import (
 from backend.app.models.security_marketplace import (
     MarketplacePackage, InstalledExtension, PackageReviewRating
 )
+from backend.app.models.developer_webhooks import (
+    DeveloperApiKey, WebhookSubscription, WebhookDeliveryLog
+)
+
 
 
 
@@ -278,8 +282,12 @@ __all__ = [
     "DSARPrivacyRequest",
     "MarketplacePackage",
     "InstalledExtension",
-    "PackageReviewRating"
+    "PackageReviewRating",
+    "DeveloperApiKey",
+    "WebhookSubscription",
+    "WebhookDeliveryLog"
 ]
+
 
 
 

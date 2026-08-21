@@ -132,6 +132,10 @@ import { DataGovernanceCenter } from './pages/DataGovernanceCenter';
 // Phase 44 Security Marketplace & Ecosystem Package Manager
 import { SecurityMarketplaceCenter } from './pages/SecurityMarketplaceCenter';
 
+// Phase 45 Developer Platform, Public Versioned API & Webhooks Engine
+import { DeveloperPlatformCenter } from './pages/DeveloperPlatformCenter';
+
+
 
 
 
@@ -233,6 +237,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/multi-region" element={<MultiRegionResilienceCenter />} />
               <Route path="/governance-dsar" element={<DataGovernanceCenter />} />
               <Route path="/marketplace" element={<SecurityMarketplaceCenter />} />
+              <Route path="/developer" element={<DeveloperPlatformCenter />} />
+
 
 
 
