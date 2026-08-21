@@ -1,19 +1,23 @@
-# AEGIVANTA v26.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v27.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v26.0.0 (Autonomous SOC Intelligence & Continuous Validation)
+## Release: v27.0.0 (Cloud-Native Application Protection Platform & Multi-Cloud Defense)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 26 development phases into a unified, commercially deployable, and operationally resilient XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 27 development phases into a unified, commercially deployable, and operationally resilient CNAPP/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v26.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v27.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **CNAPP Platform** | Multi-pillar posture engine: CSPM (30%), CWPP (25%), CIEM (20%), KSPM (15%), Serverless (10%) |
+| **Multi-Cloud Connectors** | Automated onboarding for AWS (AssumeRole), Azure (Service Principal), GCP (Service Account), K8s |
+| **CWPP Runtime Defense** | eBPF container anomaly detection, reverse shell blocking, one-click workload quarantine |
+| **Serverless & KSPM** | Lambda/Cloud Function policy auditing, interactive Kubernetes YAML manifest security evaluator |
 | **Core XDR** | Multi-source correlation, alert triage, incident management, MITRE ATT&CK mapping |
 | **Continuous Validation** | 16-domain security control verification, safe purple-team attack simulations |
 | **Autonomous SOC** | Multi-domain explainable correlation, 11-factor risk scoring, AI SOC Analyst V2 |
@@ -24,7 +28,6 @@ Aegivanta v26.0.0 delivers a fully integrated enterprise cybersecurity operation
 | **Threat Intelligence** | IOC management, threat actor tracking, MITRE campaign correlation |
 | **SOAR 2.0** | Declarative playbooks, approval gates, rollback, emergency kill switch |
 | **Endpoint XDR** | Normalized 8-category telemetry, EDR detection, zero-trust device posture |
-| **Cloud Security** | CSPM, KSPM, CIEM, container SBOM, cloud attack path graphs |
 | **Integration Ecosystem** | 17+ connectors (SIEM, EDR, IAM, SOAR, ticketing, messaging, webhooks) |
 | **Global Ops** | FinOps cost modeling, SRE SLO/error budget dashboards, capacity planning |
 | **Enterprise SaaS** | Multi-tenancy, RBAC, billing, API keys, SSO, SCIM, MFA |
@@ -56,6 +59,8 @@ Aegivanta v26.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 24 | Global Distributed Scale | FinOps cost modeling, capacity planning, SLO tracking |
 | 25 | Productization & Certification | Security hardening, release packaging, full regression |
 | 26 | Autonomous SOC & Continuous Validation | Continuous defense checks, purple-team simulations, case management, SRE chaos |
+| 27 | Cloud Security & CNAPP | Multi-cloud connectors, CWPP runtime defense, serverless security, KSPM governance |
+
 
 ---
 

@@ -660,8 +660,55 @@ export const saasApi = {
   runChaosSimulation: async (scenarioKey: string): Promise<any> => {
     const res = await axios.post(`${API_BASE}/sre/chaos/run`, { scenario_key: scenarioKey }, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 27 Cloud Security & CNAPP APIs
+  getCNAPPSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/cnapp/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getCloudAccounts: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/accounts`, getAuthHeaders());
+    return res.data;
+  },
+  connectCloudAccount: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/accounts`, data, getAuthHeaders());
+    return res.data;
+  },
+  syncCloudAccount: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/accounts/${id}/sync`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getCWPPFindings: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/cwpp/findings`, getAuthHeaders());
+    return res.data;
+  },
+  simulateCWPPThreat: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/cwpp/simulate-threat`, data, getAuthHeaders());
+    return res.data;
+  },
+  containWorkload: async (id: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/cwpp/contain/${id}`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getServerlessFindings: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/serverless/findings`, getAuthHeaders());
+    return res.data;
+  },
+  auditServerlessFunction: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/serverless/audit`, data, getAuthHeaders());
+    return res.data;
+  },
+  getK8sClusters: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/cloud-security/k8s/clusters`, getAuthHeaders());
+    return res.data;
+  },
+  enrollK8sCluster: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/cloud-security/k8s/clusters/enroll`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

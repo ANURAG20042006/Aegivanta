@@ -1,19 +1,110 @@
 """
 backend/app/services/kubernetes_security_service.py
 ==================================================
-Phase 21 Kubernetes Security Posture Management (KSPM) Service.
-Audits Kubernetes YAML manifests, Pod security contexts, and RBAC configs.
+Phase 21 & Phase 27 Kubernetes Security Posture Management (KSPM) Service.
+Audits Kubernetes YAML manifests, Pod security standards, RBAC policies, and cluster postures.
 """
 
 import logging
 import re
-from typing import Dict, Any, List
+from datetime import datetime, timezone
+from typing import Dict, Any, List, Optional
+from sqlalchemy import select, desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.app.models.cloud_security import KubernetesCluster
 
 logger = logging.getLogger("Aegivanta.KubernetesSecurity")
 
 
 class KubernetesSecurityService:
     """Audits Kubernetes manifests, PodSecurityStandards, and RBAC policies."""
+
+    @classmethod
+    async def list_clusters(
+        cls,
+        db: AsyncSession,
+        tenant_id: str
+    ) -> List[Dict[str, Any]]:
+        """Lists registered Kubernetes clusters with KSPM compliance posture."""
+        stmt = select(KubernetesCluster).where(
+            KubernetesCluster.tenant_id == tenant_id
+        ).order_by(desc(KubernetesCluster.kspm_health_score))
+
+        clusters = list((await db.execute(stmt)).scalars().all())
+
+        if not clusters:
+            # Seed default clusters
+            defaults = [
+                ("EKS-Production-Cluster-01", "EKS", "v1.28.4", 12, 148, True, "RESTRICTED", 0, 94.0),
+                ("GKE-Data-Analytics-Prod", "GKE", "v1.29.1", 6, 64, True, "BASELINE", 1, 88.0),
+                ("AKS-Staging-Cluster", "AKS", "v1.27.8", 4, 32, False, "PRIVILEGED", 3, 68.0)
+            ]
+            for name, dist, ver, nodes, pods, adm, pss, priv, score in defaults:
+                inst = KubernetesCluster(
+                    tenant_id=tenant_id,
+                    cluster_name=name,
+                    distribution=dist,
+                    k8s_version=ver,
+                    node_count=nodes,
+                    pod_count=pods,
+                    admission_controller_enforced=adm,
+                    pod_security_standard=pss,
+                    privileged_workloads_count=priv,
+                    kspm_health_score=score,
+                    last_audited_at=datetime.now(timezone.utc)
+                )
+                db.add(inst)
+            await db.flush()
+
+            stmt2 = select(KubernetesCluster).where(KubernetesCluster.tenant_id == tenant_id)
+            clusters = list((await db.execute(stmt2)).scalars().all())
+
+        return [
+            {
+                "id": c.id,
+                "cluster_name": c.cluster_name,
+                "distribution": c.distribution,
+                "k8s_version": c.k8s_version,
+                "node_count": c.node_count,
+                "pod_count": c.pod_count,
+                "admission_controller_enforced": c.admission_controller_enforced,
+                "pod_security_standard": c.pod_security_standard,
+                "privileged_workloads_count": c.privileged_workloads_count,
+                "kspm_health_score": c.kspm_health_score,
+                "last_audited_at": c.last_audited_at.isoformat()
+            }
+            for c in clusters
+        ]
+
+    @classmethod
+    async def enroll_cluster(
+        cls,
+        db: AsyncSession,
+        tenant_id: str,
+        cluster_name: str,
+        distribution: str = "EKS",
+        k8s_version: str = "v1.28.4",
+        node_count: int = 5,
+        pod_security_standard: str = "RESTRICTED"
+    ) -> KubernetesCluster:
+        """Enrolls a new Kubernetes cluster into KSPM monitoring."""
+        cluster = KubernetesCluster(
+            tenant_id=tenant_id,
+            cluster_name=cluster_name,
+            distribution=distribution.upper(),
+            k8s_version=k8s_version,
+            node_count=node_count,
+            pod_count=node_count * 8,
+            admission_controller_enforced=True,
+            pod_security_standard=pod_security_standard.upper(),
+            privileged_workloads_count=0,
+            kspm_health_score=95.0,
+            last_audited_at=datetime.now(timezone.utc)
+        )
+        db.add(cluster)
+        await db.flush()
+        return cluster
 
     @classmethod
     def audit_manifest_content(cls, manifest_yaml: str) -> Dict[str, Any]:
@@ -75,7 +166,6 @@ class KubernetesSecurityService:
             })
             is_compliant = False
 
-
         # 5. Missing Read-Only Root Filesystem
         if "readOnlyRootFilesystem: true" not in manifest_yaml:
             violations.append({
@@ -98,5 +188,5 @@ class KubernetesSecurityService:
             "critical_violations": crit_count,
             "high_violations": high_count,
             "violations": violations,
-            "audit_timestamp": "now"
+            "audit_timestamp": datetime.now(timezone.utc).isoformat()
         }

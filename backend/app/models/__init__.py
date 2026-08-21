@@ -41,8 +41,13 @@ from backend.app.models.security_intelligence import DetectionCoverageGap, Asset
 from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign, MalwareFamily, IndicatorSighting
 from backend.app.models.soar_v2 import DeclarativePlaybook, SOARExecutionSession, SOARConnector, SOARKillSwitch
 from backend.app.models.ai_security_intelligence import AIModelGovernance, AIModelDriftRecord, AIAdversarialEvent, AICopilotSession
-from backend.app.models.cloud_security import CloudAsset, CSPMFinding, ContainerVulnerabilityScan, CloudAttackPath, CloudIAMIdentityRisk
+from backend.app.models.cloud_security import (
+    CloudAccount, CloudAsset, CSPMFinding, ContainerVulnerabilityScan,
+    CloudWorkloadFinding, ServerlessFunctionRisk, KubernetesCluster,
+    CloudAttackPath, CloudIAMIdentityRisk
+)
 from backend.app.models.endpoint_xdr import EndpointTelemetryEvent, EndpointDetection, XDRCorrelationIncident, ZeroTrustDevicePosture, EndpointResponseAction
+
 from backend.app.models.integration_ecosystem import IntegrationConnector, EventBusContract, WebhookDelivery
 from backend.app.models.soc_case import SOCCase, SOCCaseTask, SOCCaseComment, SOCCaseAudit
 from backend.app.models.evidence_custody import ForensicEvidenceItem, EvidenceCustodyEvent
@@ -119,11 +124,16 @@ __all__ = [
     "AIModelDriftRecord",
     "AIAdversarialEvent",
     "AICopilotSession",
+    "CloudAccount",
     "CloudAsset",
     "CSPMFinding",
     "ContainerVulnerabilityScan",
+    "CloudWorkloadFinding",
+    "ServerlessFunctionRisk",
+    "KubernetesCluster",
     "CloudAttackPath",
     "CloudIAMIdentityRisk",
+
     "EndpointTelemetryEvent",
     "EndpointDetection",
     "XDRCorrelationIncident",
