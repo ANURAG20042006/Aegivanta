@@ -948,8 +948,43 @@ export const saasApi = {
   getEPSSDistribution: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/vulnerability-mgmt/epss-distribution`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 35 Data Loss Prevention (DLP) & Cryptographic Tokenization APIs
+  getDLPSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/dlp-security/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getDLPPolicies: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/dlp-security/policies`, getAuthHeaders());
+    return res.data;
+  },
+  inspectPayload: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/dlp-security/inspect`, data, getAuthHeaders());
+    return res.data;
+  },
+  getDLPIncidents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/dlp-security/incidents`, getAuthHeaders());
+    return res.data;
+  },
+  getTokenVault: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/dlp-security/tokens`, getAuthHeaders());
+    return res.data;
+  },
+  tokenizeData: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/dlp-security/tokens/tokenize`, data, getAuthHeaders());
+    return res.data;
+  },
+  detokenizeData: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/dlp-security/tokens/detokenize`, data, getAuthHeaders());
+    return res.data;
+  },
+  getShadowData: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/dlp-security/shadow-data`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

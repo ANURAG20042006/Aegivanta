@@ -71,6 +71,10 @@ from backend.app.models.deception import (
 from backend.app.models.vulnerability_mgmt import (
     VulnerabilityRecord, AssetVulnerabilityMapping, VirtualPatchRule, RemediationCampaign
 )
+from backend.app.models.dlp_security import (
+    DLPInspectionPolicy, DLPIncidentEvent, TokenizedDataVault, ShadowDataStore
+)
+
 
 
 
@@ -204,8 +208,13 @@ __all__ = [
     "VulnerabilityRecord",
     "AssetVulnerabilityMapping",
     "VirtualPatchRule",
-    "RemediationCampaign"
+    "RemediationCampaign",
+    "DLPInspectionPolicy",
+    "DLPIncidentEvent",
+    "TokenizedDataVault",
+    "ShadowDataStore"
 ]
+
 
 
 

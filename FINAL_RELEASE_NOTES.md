@@ -1,19 +1,20 @@
-# AEGIVANTA v34.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v35.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v34.0.0 (Adaptive Risk-Based Vulnerability Management & EPSS 2.0)
+## Release: v35.0.0 (Data Loss Prevention, Classification & Tokenization)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 34 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 35 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v34.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v35.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **DLP & Cryptographic Vault** | Multi-channel inspection, PCI Luhn verification, PII/SSN masking, FPE tokenization vault, DSPM shadow data |
 | **RBVM & EPSS 2.0** | Composite vulnerability risk scoring, EPSS 2.0 exploit probabilities, CISA KEV sync, WAF/IPS virtual patches |
 | **Deception & Active Engagement** | SSH Cowrie/Web/SMB/DB honeypot fleet, traceable AWS/Doc/DNS canaries, 100% true-positive keystroke telemetry |
 | **Threat Intel 2.0 & STIX/TAXII** | Automated STIX 2.1 parser, TAXII 2.1 feed sync, Diamond Model actor profiling, exponential IOC decay, hunting generator |
@@ -79,6 +80,8 @@ Aegivanta v34.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 32 | Cyber Threat Intelligence (CTI) 2.0 | STIX/TAXII 2.1, Diamond Model Actor Profiling, IOC Sighting Decay, Hunting Dispatch |
 | 33 | Deception Technology & Honeypots | Honeypot Decoy Fleet, Traceable Canary Tokens, Real-Time Keystroke Ledger, MITRE Engage |
 | 34 | Risk-Based Vulnerability Mgmt (RBVM) | Composite RBVM Scoring, EPSS 2.0 Probabilities, CISA KEV Sync, WAF/IPS Virtual Patching |
+| 35 | Data Loss Prevention (DLP) & Tokenization | Multi-Channel DLP, PCI Luhn Algorithm, PII Masking, FPE Tokenization Vault, DSPM |
+
 
 
 

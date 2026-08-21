@@ -102,6 +102,10 @@ import { DeceptionCenter } from './pages/DeceptionCenter';
 // Phase 34 Risk-Based Vulnerability Management & EPSS 2.0
 import { VulnerabilityMgmtCenter } from './pages/VulnerabilityMgmtCenter';
 
+// Phase 35 Data Loss Prevention & Cryptographic Tokenization
+import { DLPCommandCenter } from './pages/DLPCommandCenter';
+
+
 
 
 
@@ -183,6 +187,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/threat-intel-v2" element={<ThreatIntelCenterV2 />} />
               <Route path="/deception" element={<DeceptionCenter />} />
               <Route path="/vulnerability-mgmt" element={<VulnerabilityMgmtCenter />} />
+              <Route path="/dlp-security" element={<DLPCommandCenter />} />
+
 
 
 
