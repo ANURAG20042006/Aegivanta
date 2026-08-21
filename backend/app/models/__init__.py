@@ -92,6 +92,10 @@ from backend.app.models.federated_threat_sharing import (
 from backend.app.models.edge_security_fabric import (
     GlobalEdgePoPNode, EdgeInspectionPolicy, RegionalIngestionRoute
 )
+from backend.app.models.multi_region_resilience import (
+    RegionReplicationCluster, DataResidencyBoundary, FailoverExecutionEvent
+)
+
 
 
 
@@ -257,8 +261,12 @@ __all__ = [
     "HomomorphicMatchQuery",
     "GlobalEdgePoPNode",
     "EdgeInspectionPolicy",
-    "RegionalIngestionRoute"
+    "RegionalIngestionRoute",
+    "RegionReplicationCluster",
+    "DataResidencyBoundary",
+    "FailoverExecutionEvent"
 ]
+
 
 
 

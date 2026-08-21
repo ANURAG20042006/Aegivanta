@@ -1145,8 +1145,35 @@ export const saasApi = {
   getRegionalIngestionRoutes: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/edge-fabric/routes`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 42 Multi-Region Data Resilience, Active-Active Failover & Data Residency APIs
+  getMultiRegionSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/multi-region/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getMultiRegionClusters: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/multi-region/clusters`, getAuthHeaders());
+    return res.data;
+  },
+  triggerMultiRegionFailover: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/multi-region/failover`, data, getAuthHeaders());
+    return res.data;
+  },
+  getFailoverEvents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/multi-region/failover-events`, getAuthHeaders());
+    return res.data;
+  },
+  getDataResidencyBoundaries: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/multi-region/residency`, getAuthHeaders());
+    return res.data;
+  },
+  createDataResidencyBoundary: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/multi-region/residency`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

@@ -91,6 +91,8 @@ export const navItems = [
   { path: '/predictive-intel', label: 'Predictive Intel & Forecasting', section: 'Production Intel', icon: TrendingUp },
   { path: '/federated-threat', label: 'Federated Threat & Privacy', section: 'Production Intel', icon: Share2 },
   { path: '/edge-fabric', label: 'Edge Security & Ingestion', section: 'Production Intel', icon: Globe },
+  { path: '/multi-region', label: 'Multi-Region & Residency', section: 'Production Intel', icon: Database },
+
 
 
 

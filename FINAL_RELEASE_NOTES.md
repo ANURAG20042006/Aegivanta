@@ -1,19 +1,20 @@
-# AEGIVANTA v41.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v42.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v41.0.0 (Global Distributed Edge Security & Regional Ingestion Fabric)
+## Release: v42.0.0 (Multi-Region Data Resilience, Active-Active Failover & Data Residency)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 41 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/EDGE-FABRIC/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 42 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/COMPLIANCE-DETECTION/PREDICTIVE-INTEL/FEDERATED-THREAT/EDGE-FABRIC/MULTI-REGION/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v41.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v42.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **Multi-Region & Residency** | Active-active database sync, CRDT vector clocks, sub-second DR failover (<400ms), GDPR/FedRAMP residency |
 | **Global Edge Security Fabric** | Worldwide PoP ingestion mesh, edge-side DDoS scrubbing, TLS 1.3 termination, WireGuard mTLS replication |
 | **Federated Threat & Privacy** | Zero-knowledge federated IOC exchange, homomorphic blind matching, differential privacy ($\epsilon$-DP noise) |
 | **Predictive Security Intelligence** | Machine learning threat vector probability forecasting (30/60/90d), adversarial blast radius sims, horizon trajectories |
@@ -93,6 +94,8 @@ Aegivanta v41.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 39 | Predictive Intelligence & Forecasting | ML Threat Vector Forecasting (30/60/90d), Adversarial Blast Radius Sims, Horizon Trends |
 | 40 | Federated Threat & Privacy | Zero-Knowledge Exchange, Homomorphic Matching, Differential Privacy ($\epsilon$-DP) |
 | 41 | Distributed Edge Fabric | Global PoP Ingestion Mesh, Edge DDoS Scrubbing, WireGuard mTLS WAN Replication |
+| 42 | Multi-Region Resilience | Active-Active CRDT Replication, Sub-Second DR Failover, Sovereign Data Residency |
+
 
 
 

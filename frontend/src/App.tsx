@@ -123,6 +123,10 @@ import { FederatedThreatCenter } from './pages/FederatedThreatCenter';
 // Phase 41 Global Distributed Edge Security & Regional Ingestion Fabric
 import { EdgeFabricCenter } from './pages/EdgeFabricCenter';
 
+// Phase 42 Multi-Region Data Resilience, Active-Active Failover & Data Residency
+import { MultiRegionResilienceCenter } from './pages/MultiRegionResilienceCenter';
+
+
 
 
 
@@ -218,6 +222,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/predictive-intel" element={<PredictiveIntelCenter />} />
               <Route path="/federated-threat" element={<FederatedThreatCenter />} />
               <Route path="/edge-fabric" element={<EdgeFabricCenter />} />
+              <Route path="/multi-region" element={<MultiRegionResilienceCenter />} />
+
 
 
 
