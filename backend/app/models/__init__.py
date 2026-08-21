@@ -104,6 +104,10 @@ from backend.app.models.security_marketplace import (
 from backend.app.models.developer_webhooks import (
     DeveloperApiKey, WebhookSubscription, WebhookDeliveryLog
 )
+from backend.app.models.security_automation_studio import (
+    AutomationPlaybook, PlaybookExecutionRun, PlaybookTemplate
+)
+
 
 
 
@@ -285,8 +289,12 @@ __all__ = [
     "PackageReviewRating",
     "DeveloperApiKey",
     "WebhookSubscription",
-    "WebhookDeliveryLog"
+    "WebhookDeliveryLog",
+    "AutomationPlaybook",
+    "PlaybookExecutionRun",
+    "PlaybookTemplate"
 ]
+
 
 
 

@@ -1255,8 +1255,35 @@ export const saasApi = {
   testDispatchWebhook: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/developer/test-dispatch`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 46 Security Automation Studio APIs
+  getAutomationStudioSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/automation-studio/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getAutomationPlaybooks: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/automation-studio/playbooks`, getAuthHeaders());
+    return res.data;
+  },
+  createAutomationPlaybook: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/automation-studio/playbooks`, data, getAuthHeaders());
+    return res.data;
+  },
+  getPlaybookExecutions: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/automation-studio/executions`, getAuthHeaders());
+    return res.data;
+  },
+  simulatePlaybookExecution: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/automation-studio/simulate`, data, getAuthHeaders());
+    return res.data;
+  },
+  getPlaybookTemplates: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/automation-studio/templates`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

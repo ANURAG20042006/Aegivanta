@@ -103,6 +103,8 @@ from backend.app.api.v1.multi_region_resilience import router as multi_region_re
 from backend.app.api.v1.data_governance_dsar import router as data_governance_dsar_router
 from backend.app.api.v1.security_marketplace import router as security_marketplace_router
 from backend.app.api.v1.developer_platform import router as developer_platform_router
+from backend.app.api.v1.security_automation_studio import router as security_automation_studio_router
+
 
 
 
@@ -424,7 +426,9 @@ app.include_router(multi_region_resilience_router, prefix=settings.API_V1_STR)
 app.include_router(data_governance_dsar_router, prefix=settings.API_V1_STR)
 app.include_router(security_marketplace_router, prefix=settings.API_V1_STR)
 app.include_router(developer_platform_router, prefix=settings.API_V1_STR)
+app.include_router(security_automation_studio_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

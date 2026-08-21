@@ -135,6 +135,10 @@ import { SecurityMarketplaceCenter } from './pages/SecurityMarketplaceCenter';
 // Phase 45 Developer Platform, Public Versioned API & Webhooks Engine
 import { DeveloperPlatformCenter } from './pages/DeveloperPlatformCenter';
 
+// Phase 46 Security Automation Studio (Visual Playbook Builder & SOAR Canvas)
+import { SecurityAutomationStudioCenter } from './pages/SecurityAutomationStudioCenter';
+
+
 
 
 
@@ -238,6 +242,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/governance-dsar" element={<DataGovernanceCenter />} />
               <Route path="/marketplace" element={<SecurityMarketplaceCenter />} />
               <Route path="/developer" element={<DeveloperPlatformCenter />} />
+              <Route path="/automation-studio" element={<SecurityAutomationStudioCenter />} />
+
 
 
 

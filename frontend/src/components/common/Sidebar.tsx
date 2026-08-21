@@ -28,6 +28,8 @@ import {
   Scale,
   ShoppingBag,
   Code,
+  Workflow,
+
 
 
 
@@ -101,6 +103,8 @@ export const navItems = [
   { path: '/governance-dsar', label: 'Data Governance & DSAR', section: 'Production Intel', icon: Scale },
   { path: '/marketplace', label: 'Security Marketplace', section: 'Production Intel', icon: ShoppingBag },
   { path: '/developer', label: 'Developer & Webhooks', section: 'Production Intel', icon: Code },
+  { path: '/automation-studio', label: 'Automation Studio', section: 'Production Intel', icon: Workflow },
+
 
 
 
