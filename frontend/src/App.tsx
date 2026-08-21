@@ -108,6 +108,10 @@ import { DLPCommandCenter } from './pages/DLPCommandCenter';
 // Phase 36 Microsegmentation & ZTNA 2.0
 import { MicrosegmentationCenter } from './pages/MicrosegmentationCenter';
 
+// Phase 37 AI SOC Autonomy & UEBA 2.0
+import { AISOCCommandCenter } from './pages/AISOCCommandCenter';
+
+
 
 
 
@@ -193,6 +197,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/vulnerability-mgmt" element={<VulnerabilityMgmtCenter />} />
               <Route path="/dlp-security" element={<DLPCommandCenter />} />
               <Route path="/microsegmentation" element={<MicrosegmentationCenter />} />
+              <Route path="/ai-soc-ueba" element={<AISOCCommandCenter />} />
+
 
 
 

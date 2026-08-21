@@ -77,6 +77,10 @@ from backend.app.models.dlp_security import (
 from backend.app.models.microsegmentation import (
     ZTNAConnectorNode, MicrosegmentationPolicy, ZTNAAccessSession, LateralMovementBlockedAlert
 )
+from backend.app.models.ai_soc_ueba import (
+    UEBAUserProfile, AISOCInvestigation, InsiderThreatIndicator, AISOCDecisionAudit
+)
+
 
 
 
@@ -220,8 +224,13 @@ __all__ = [
     "ZTNAConnectorNode",
     "MicrosegmentationPolicy",
     "ZTNAAccessSession",
-    "LateralMovementBlockedAlert"
+    "LateralMovementBlockedAlert",
+    "UEBAUserProfile",
+    "AISOCInvestigation",
+    "InsiderThreatIndicator",
+    "AISOCDecisionAudit"
 ]
+
 
 
 

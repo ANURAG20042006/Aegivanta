@@ -1,19 +1,20 @@
-# AEGIVANTA v36.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v37.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v36.0.0 (Microsegmentation, SDP & ZTNA 2.0)
+## Release: v37.0.0 (AI SOC Autonomy, Insider Threat Defense & UEBA 2.0)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 36 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 37 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/DLP/ZTNA/AI-SOC-UEBA/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v36.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v37.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **AI SOC Autonomy & UEBA 2.0** | Autonomous alert triage, forensic evidence collection, peer-group URS scoring, insider threat matrix, action gating |
 | **ZTNA 2.0 & Microsegmentation** | Software-Defined Perimeter (SDP), eBPF L4/L7 segment isolation, continuous trust attestation, lateral defense |
 | **DLP & Cryptographic Vault** | Multi-channel inspection, PCI Luhn verification, PII/SSN masking, FPE tokenization vault, DSPM shadow data |
 | **RBVM & EPSS 2.0** | Composite vulnerability risk scoring, EPSS 2.0 exploit probabilities, CISA KEV sync, WAF/IPS virtual patches |
@@ -83,6 +84,8 @@ Aegivanta v36.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 34 | Risk-Based Vulnerability Mgmt (RBVM) | Composite RBVM Scoring, EPSS 2.0 Probabilities, CISA KEV Sync, WAF/IPS Virtual Patching |
 | 35 | Data Loss Prevention (DLP) & Tokenization | Multi-Channel DLP, PCI Luhn Algorithm, PII Masking, FPE Tokenization Vault, DSPM |
 | 36 | Microsegmentation & ZTNA 2.0 | Software-Defined Perimeter, eBPF L4/L7 Policies, Continuous Trust Attestation |
+| 37 | AI SOC Autonomy & UEBA 2.0 | Autonomous Alert Triage, Peer-Group Baseline URS, Insider Threat Defense Matrix |
+
 
 
 

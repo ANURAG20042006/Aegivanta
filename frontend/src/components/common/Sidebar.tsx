@@ -82,6 +82,8 @@ export const navItems = [
   { path: '/vulnerability-mgmt', label: 'Vulnerability & EPSS 2.0', section: 'Production Intel', icon: Flame },
   { path: '/dlp-security', label: 'DLP & Tokenization', section: 'Production Intel', icon: Lock },
   { path: '/microsegmentation', label: 'ZTNA & Microsegmentation', section: 'Production Intel', icon: Network },
+  { path: '/ai-soc-ueba', label: 'AI SOC Autonomy & UEBA', section: 'Production Intel', icon: Brain },
+
 
 
 

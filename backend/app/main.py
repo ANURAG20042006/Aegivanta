@@ -94,6 +94,8 @@ from backend.app.api.v1.deception import router as deception_router
 from backend.app.api.v1.vulnerability_mgmt import router as vulnerability_mgmt_router
 from backend.app.api.v1.dlp_security import router as dlp_security_router
 from backend.app.api.v1.microsegmentation import router as microsegmentation_router
+from backend.app.api.v1.ai_soc_ueba import router as ai_soc_ueba_router
+
 
 
 
@@ -397,7 +399,9 @@ app.include_router(deception_router, prefix=settings.API_V1_STR)
 app.include_router(vulnerability_mgmt_router, prefix=settings.API_V1_STR)
 app.include_router(dlp_security_router, prefix=settings.API_V1_STR)
 app.include_router(microsegmentation_router, prefix=settings.API_V1_STR)
+app.include_router(ai_soc_ueba_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

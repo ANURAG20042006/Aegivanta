@@ -1016,8 +1016,39 @@ export const saasApi = {
   getNetworkFlowGraph: async (): Promise<any> => {
     const res = await axios.get(`${API_BASE}/microsegmentation/network-flow-graph`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 37 AI SOC Autonomy & UEBA 2.0 APIs
+  getAISOCSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ai-soc-ueba/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getUEBAProfiles: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-soc-ueba/profiles`, getAuthHeaders());
+    return res.data;
+  },
+  getAISOCInvestigations: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-soc-ueba/investigations`, getAuthHeaders());
+    return res.data;
+  },
+  triggerAISOCInvestigation: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-soc-ueba/investigations/trigger`, data, getAuthHeaders());
+    return res.data;
+  },
+  approveAISOCAction: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-soc-ueba/investigations/approve-action`, data, getAuthHeaders());
+    return res.data;
+  },
+  getInsiderThreats: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-soc-ueba/insider-threats`, getAuthHeaders());
+    return res.data;
+  },
+  getAISOCDecisionAudits: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/ai-soc-ueba/decision-audits`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
