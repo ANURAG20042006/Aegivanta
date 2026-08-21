@@ -77,6 +77,8 @@ export const navItems = [
   { path: '/attack-surface', label: 'Attack Surface & CTEM', section: 'Production Intel', icon: Globe },
   { path: '/threat-intel-v2', label: 'Threat Intel 2.0 & STIX', section: 'Production Intel', icon: Crosshair },
   { path: '/deception', label: 'Deception & Honeypots', section: 'Production Intel', icon: Sparkles },
+  { path: '/vulnerability-mgmt', label: 'Vulnerability & EPSS 2.0', section: 'Production Intel', icon: Flame },
+
 
 
 

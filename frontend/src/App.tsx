@@ -99,6 +99,10 @@ import { ThreatIntelCenterV2 } from './pages/ThreatIntelCenterV2';
 // Phase 33 Deception Technology & Honeypots
 import { DeceptionCenter } from './pages/DeceptionCenter';
 
+// Phase 34 Risk-Based Vulnerability Management & EPSS 2.0
+import { VulnerabilityMgmtCenter } from './pages/VulnerabilityMgmtCenter';
+
+
 
 
 
@@ -178,6 +182,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/attack-surface" element={<AttackSurfaceCenter />} />
               <Route path="/threat-intel-v2" element={<ThreatIntelCenterV2 />} />
               <Route path="/deception" element={<DeceptionCenter />} />
+              <Route path="/vulnerability-mgmt" element={<VulnerabilityMgmtCenter />} />
+
 
 
 

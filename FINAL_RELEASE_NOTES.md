@@ -1,19 +1,20 @@
-# AEGIVANTA v33.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v34.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v33.0.0 (Deception Technology, Honeypots & Active Adversary Engagement)
+## Release: v34.0.0 (Adaptive Risk-Based Vulnerability Management & EPSS 2.0)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 33 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 34 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/ASM-CTEM/CTI/DECEPTION/RBVM/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v33.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v34.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **RBVM & EPSS 2.0** | Composite vulnerability risk scoring, EPSS 2.0 exploit probabilities, CISA KEV sync, WAF/IPS virtual patches |
 | **Deception & Active Engagement** | SSH Cowrie/Web/SMB/DB honeypot fleet, traceable AWS/Doc/DNS canaries, 100% true-positive keystroke telemetry |
 | **Threat Intel 2.0 & STIX/TAXII** | Automated STIX 2.1 parser, TAXII 2.1 feed sync, Diamond Model actor profiling, exponential IOC decay, hunting generator |
 | **Attack Surface & CTEM** | External asset discovery, open port scanning, dangling DNS takeover guard, dark web breach intel, brand protection |
@@ -77,6 +78,8 @@ Aegivanta v33.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 31 | Attack Surface Management & CTEM | External Recon, Dangling DNS Takeovers, Dark Web Breach Intel, Brand Typosquatting |
 | 32 | Cyber Threat Intelligence (CTI) 2.0 | STIX/TAXII 2.1, Diamond Model Actor Profiling, IOC Sighting Decay, Hunting Dispatch |
 | 33 | Deception Technology & Honeypots | Honeypot Decoy Fleet, Traceable Canary Tokens, Real-Time Keystroke Ledger, MITRE Engage |
+| 34 | Risk-Based Vulnerability Mgmt (RBVM) | Composite RBVM Scoring, EPSS 2.0 Probabilities, CISA KEV Sync, WAF/IPS Virtual Patching |
+
 
 
 

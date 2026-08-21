@@ -68,6 +68,10 @@ from backend.app.models.threat_intel_v2 import (
 from backend.app.models.deception import (
     HoneypotNode, CanaryToken, DeceptionInteractionEvent, EndpointLureDeployment
 )
+from backend.app.models.vulnerability_mgmt import (
+    VulnerabilityRecord, AssetVulnerabilityMapping, VirtualPatchRule, RemediationCampaign
+)
+
 
 
 
@@ -196,8 +200,13 @@ __all__ = [
     "HoneypotNode",
     "CanaryToken",
     "DeceptionInteractionEvent",
-    "EndpointLureDeployment"
+    "EndpointLureDeployment",
+    "VulnerabilityRecord",
+    "AssetVulnerabilityMapping",
+    "VirtualPatchRule",
+    "RemediationCampaign"
 ]
+
 
 
 

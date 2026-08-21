@@ -918,8 +918,39 @@ export const saasApi = {
   getEndpointLures: async (): Promise<any[]> => {
     const res = await axios.get(`${API_BASE}/deception/endpoint-lures`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 34 Risk-Based Vulnerability Management (RBVM) & EPSS 2.0 APIs
+  getRBVMSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getVulnerabilities: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/vulnerabilities`, getAuthHeaders());
+    return res.data;
+  },
+  getAssetExposures: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/asset-exposures`, getAuthHeaders());
+    return res.data;
+  },
+  getVirtualPatches: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/virtual-patches`, getAuthHeaders());
+    return res.data;
+  },
+  deployVirtualPatch: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/vulnerability-mgmt/virtual-patches/deploy`, data, getAuthHeaders());
+    return res.data;
+  },
+  getRemediationCampaigns: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/campaigns`, getAuthHeaders());
+    return res.data;
+  },
+  getEPSSDistribution: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/vulnerability-mgmt/epss-distribution`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
