@@ -126,6 +126,10 @@ import { EdgeFabricCenter } from './pages/EdgeFabricCenter';
 // Phase 42 Multi-Region Data Resilience, Active-Active Failover & Data Residency
 import { MultiRegionResilienceCenter } from './pages/MultiRegionResilienceCenter';
 
+// Phase 43 Enterprise Data Governance, Lineage, Legal Hold & DSAR Privacy
+import { DataGovernanceCenter } from './pages/DataGovernanceCenter';
+
+
 
 
 
@@ -223,6 +227,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/federated-threat" element={<FederatedThreatCenter />} />
               <Route path="/edge-fabric" element={<EdgeFabricCenter />} />
               <Route path="/multi-region" element={<MultiRegionResilienceCenter />} />
+              <Route path="/governance-dsar" element={<DataGovernanceCenter />} />
+
 
 
 

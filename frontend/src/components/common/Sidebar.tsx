@@ -25,6 +25,8 @@ import {
   Key,
   FileCode,
   Share2,
+  Scale,
+
 
 
   Brain,
@@ -92,6 +94,8 @@ export const navItems = [
   { path: '/federated-threat', label: 'Federated Threat & Privacy', section: 'Production Intel', icon: Share2 },
   { path: '/edge-fabric', label: 'Edge Security & Ingestion', section: 'Production Intel', icon: Globe },
   { path: '/multi-region', label: 'Multi-Region & Residency', section: 'Production Intel', icon: Database },
+  { path: '/governance-dsar', label: 'Data Governance & DSAR', section: 'Production Intel', icon: Scale },
+
 
 
 

@@ -1171,8 +1171,35 @@ export const saasApi = {
   createDataResidencyBoundary: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/multi-region/residency`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 43 Enterprise Data Governance, Lineage, Legal Hold & DSAR Privacy APIs
+  getDataGovernanceSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/governance-dsar/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getDataLineage: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/governance-dsar/lineage`, getAuthHeaders());
+    return res.data;
+  },
+  getLegalHolds: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/governance-dsar/legal-holds`, getAuthHeaders());
+    return res.data;
+  },
+  createLegalHold: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/governance-dsar/legal-holds`, data, getAuthHeaders());
+    return res.data;
+  },
+  getDSARRequests: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/governance-dsar/requests`, getAuthHeaders());
+    return res.data;
+  },
+  createDSARRequest: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/governance-dsar/requests`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

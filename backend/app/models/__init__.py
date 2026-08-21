@@ -95,6 +95,10 @@ from backend.app.models.edge_security_fabric import (
 from backend.app.models.multi_region_resilience import (
     RegionReplicationCluster, DataResidencyBoundary, FailoverExecutionEvent
 )
+from backend.app.models.data_governance_dsar import (
+    DataLineageRecord, LegalHoldOrder, DSARPrivacyRequest
+)
+
 
 
 
@@ -264,8 +268,12 @@ __all__ = [
     "RegionalIngestionRoute",
     "RegionReplicationCluster",
     "DataResidencyBoundary",
-    "FailoverExecutionEvent"
+    "FailoverExecutionEvent",
+    "DataLineageRecord",
+    "LegalHoldOrder",
+    "DSARPrivacyRequest"
 ]
+
 
 
 
