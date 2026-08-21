@@ -685,8 +685,40 @@ aegivanta_webhook_dead_letter_events_total = _make(
 )
 
 # ===========================================================================
+# Phase 26: Autonomous SOC Intelligence & Continuous Security Validation Metrics
+# ===========================================================================
+aegivanta_continuous_validation_score = _make(
+    "gauge",
+    "aegivanta_continuous_validation_score",
+    "Latest continuous security validation overall score (0-100)",
+    []
+)
+
+aegivanta_soc_cases_total = _make(
+    "counter",
+    "aegivanta_soc_cases_total",
+    "Total enterprise SOC cases managed",
+    []
+)
+
+aegivanta_threat_hunting_queries_total = _make(
+    "counter",
+    "aegivanta_threat_hunting_queries_total",
+    "Total threat hunting workbench searches executed",
+    []
+)
+
+aegivanta_security_scorecard_index = _make(
+    "gauge",
+    "aegivanta_security_scorecard_index",
+    "Consolidated enterprise security index score (0-100)",
+    []
+)
+
+# ===========================================================================
 # Decorators / Helpers
 # ===========================================================================
+
 
 
 

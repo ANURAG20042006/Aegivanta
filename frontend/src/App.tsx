@@ -78,6 +78,10 @@ import { IntegrationMarketplace } from './pages/IntegrationMarketplace';
 // Phase 24 Global Operations Center
 import { GlobalOpsCenter } from './pages/GlobalOpsCenter';
 
+// Phase 26 SOC Command Center V2
+import { SOCCommandCenterV2 } from './pages/SOCCommandCenterV2';
+
+
 
 
 
@@ -143,6 +147,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/endpoint-xdr" element={<EndpointXDRCenter />} />
               <Route path="/integrations" element={<IntegrationMarketplace />} />
               <Route path="/global-ops" element={<GlobalOpsCenter />} />
+              <Route path="/soc-v2" element={<SOCCommandCenterV2 />} />
+
 
 
 

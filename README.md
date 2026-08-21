@@ -418,7 +418,25 @@ Aegivanta v21.0 introduces full-stack multi-cloud, container, and Kubernetes sec
 
 ---
 
+## 🛡️ Phase 26: Autonomous SOC Intelligence & Continuous Validation (v26.0.0)
+
+Aegivanta v26.0 delivers enterprise autonomous SOC intelligence, purple-team continuous security validation, and SRE resilience:
+
+- **Continuous Security Validation**: Evaluates 16 distinct security control domains (`AUTH`, `RBAC`, `TENANT_ISOLATION`, `API_KEYS`, `SENSORS`, `WEBHOOKS`, `SSO`, `SCIM`, `ENDPOINT_XDR`, `ZERO_TRUST`, `AUDIT_INTEGRITY`, `ENCRYPTION`, `SECRET_REDACTION`, `RATE_LIMITING`, `SECURITY_HEADERS`, `AI_DEFENSES`).
+- **Purple-Team Attack Simulations**: 10 safe MITRE ATT&CK techniques with synthetic payload injection (`is_simulation: true`) and automated purple-team reports.
+- **Autonomous Multi-Domain Correlation**: Explainable correlation graph topology linking endpoint, network, identity, IOC feeds, and Zero-Trust posture.
+- **Advanced 11-Factor Incident Risk Engine**: Dynamic 0–100 scoring factoring asset tier, privilege level, lateral hops, and ML anomaly confidence.
+- **Enterprise SOC Case Management**: 9 lifecycle states (`OPEN` → `CLOSED`/`REOPENED`), subtasks, analyst notes, and immutable SLA audits.
+- **Cryptographic Forensic Evidence Ledger**: SHA-256 fingerprinting, secret token redaction, and tamper verification.
+- **AI SOC Analyst V2 & Adversarial Defense**: Structured schema, zero hallucination telemetry, prompt injection detection, token masking, and mandatory human approval gating.
+- **Security Chaos Engineering**: 8 non-destructive fault simulations validating circuit breakers, DLQs, and graceful degradation.
+- **Site Reliability Engineering & SLO Tracking**: 30-day compliance tracking, error budget burn rate analytics, and breach forecasting.
+- **SOC Command Center V2**: Unified 6-tab frontend dashboard mounted at `/soc-v2`.
+
+---
+
 ## 📄 License
+
 
 
 

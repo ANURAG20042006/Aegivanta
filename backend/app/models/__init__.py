@@ -44,6 +44,10 @@ from backend.app.models.ai_security_intelligence import AIModelGovernance, AIMod
 from backend.app.models.cloud_security import CloudAsset, CSPMFinding, ContainerVulnerabilityScan, CloudAttackPath, CloudIAMIdentityRisk
 from backend.app.models.endpoint_xdr import EndpointTelemetryEvent, EndpointDetection, XDRCorrelationIncident, ZeroTrustDevicePosture, EndpointResponseAction
 from backend.app.models.integration_ecosystem import IntegrationConnector, EventBusContract, WebhookDelivery
+from backend.app.models.soc_case import SOCCase, SOCCaseTask, SOCCaseComment, SOCCaseAudit
+from backend.app.models.evidence_custody import ForensicEvidenceItem, EvidenceCustodyEvent
+from backend.app.models.threat_hunting_v2 import SavedHuntingQuery, HuntingInvestigationSession
+
 
 
 
@@ -127,8 +131,17 @@ __all__ = [
     "EndpointResponseAction",
     "IntegrationConnector",
     "EventBusContract",
-    "WebhookDelivery"
+    "WebhookDelivery",
+    "SOCCase",
+    "SOCCaseTask",
+    "SOCCaseComment",
+    "SOCCaseAudit",
+    "ForensicEvidenceItem",
+    "EvidenceCustodyEvent",
+    "SavedHuntingQuery",
+    "HuntingInvestigationSession"
 ]
+
 
 
 

@@ -1,5 +1,11 @@
+"""
+backend/app/api/v1/security_simulations.py
+==========================================
+Phase 26.2 Purple-Team Defensive Attack Simulation API Endpoints.
+"""
+
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,7 +18,13 @@ router = APIRouter(prefix="/security/simulations", tags=["Defensive Attack Simul
 
 
 class TriggerSimulationRequest(BaseModel):
-    attack_technique: str
+    attack_technique: str = Field(..., example="T1110_BRUTE_FORCE")
+
+
+@router.get("/catalog", summary="List Available Simulation Techniques")
+async def get_simulation_catalog():
+    """Lists all 10 supported safe defensive attack simulation techniques."""
+    return SecuritySimulationService.get_available_techniques()
 
 
 @router.post("", summary="Run Controlled Defensive Attack Simulation")
@@ -67,3 +79,33 @@ async def get_simulation_details(
     if not details:
         raise SentinelAIException(status_code=404, detail="Simulation not found.")
     return details
+
+
+@router.post("/{id}/run", summary="Re-run Simulation Execution")
+async def rerun_simulation(
+    id: str,
+    context: TenantContext = Depends(resolve_tenant_context),
+    db: AsyncSession = Depends(get_db)
+):
+    """Re-runs an existing simulation technique."""
+    tenant_id = context.tenant_id or "default-tenant"
+    existing = await SecuritySimulationService.get_simulation_details(db, id, tenant_id)
+    if not existing:
+        raise SentinelAIException(status_code=404, detail="Simulation not found.")
+    sim = await SecuritySimulationService.run_simulation(
+        db=db,
+        tenant_id=tenant_id,
+        technique_key=existing["attack_technique"]
+    )
+    return await SecuritySimulationService.get_simulation_details(db, sim.id, tenant_id)
+
+
+@router.get("/{id}/report", summary="Generate Purple-Team Security Report")
+async def get_purple_team_report(
+    id: str,
+    context: TenantContext = Depends(resolve_tenant_context),
+    db: AsyncSession = Depends(get_db)
+):
+    """Generates structured purple-team validation report with detection metrics and remediation guidance."""
+    tenant_id = context.tenant_id or "default-tenant"
+    return await SecuritySimulationService.generate_purple_team_report(db, id, tenant_id)

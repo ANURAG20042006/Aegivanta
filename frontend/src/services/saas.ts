@@ -591,8 +591,78 @@ export const saasApi = {
   getSLODashboard: async (): Promise<any> => {
     const res = await axios.get(`${API_BASE}/global-ops/sre/slo-dashboard`, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 26 Autonomous SOC Intelligence & Continuous Security Validation APIs
+  getContinuousValidation: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/continuous-validation`, getAuthHeaders());
+    return res.data;
+  },
+  runContinuousValidation: async (): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/security/continuous-validation/run`, {}, getAuthHeaders());
+    return res.data;
+  },
+  getSecurityScorecard: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/security/scorecard`, getAuthHeaders());
+    return res.data;
+  },
+  getSOCCases: async (status?: string, priority?: string): Promise<any[]> => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (priority) params.append('priority', priority);
+    const res = await axios.get(`${API_BASE}/soc/cases?${params.toString()}`, getAuthHeaders());
+    return res.data;
+  },
+  createSOCCase: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/soc/cases`, data, getAuthHeaders());
+    return res.data;
+  },
+  getSOCCaseDetails: async (id: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/soc/cases/${id}`, getAuthHeaders());
+    return res.data;
+  },
+  updateSOCCaseStatus: async (id: string, newStatus: string): Promise<any> => {
+    const res = await axios.put(`${API_BASE}/soc/cases/${id}/status`, { status: newStatus }, getAuthHeaders());
+    return res.data;
+  },
+  getSavedHuntingQueries: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/hunting/v2/saved`, getAuthHeaders());
+    return res.data;
+  },
+  executeHuntingSearch: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/hunting/v2/search`, data, getAuthHeaders());
+    return res.data;
+  },
+  queryAIAnalyst: async (query: string, caseId?: string, incidentId?: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/ai-analyst/v2/investigate`, { query, case_id: caseId, incident_id: incidentId }, getAuthHeaders());
+    return res.data;
+  },
+  getCorrelationGraph: async (incidentId: string): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/ai-analyst/v2/correlation/${incidentId}`, getAuthHeaders());
+    return res.data;
+  },
+  getSREHealth: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/sre/health`, getAuthHeaders());
+    return res.data;
+  },
+  getSRESLO: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/sre/slo`, getAuthHeaders());
+    return res.data;
+  },
+  getSREErrorBudget: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/sre/error-budget`, getAuthHeaders());
+    return res.data;
+  },
+  getChaosScenarios: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/sre/chaos/scenarios`, getAuthHeaders());
+    return res.data;
+  },
+  runChaosSimulation: async (scenarioKey: string): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/sre/chaos/run`, { scenario_key: scenarioKey }, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

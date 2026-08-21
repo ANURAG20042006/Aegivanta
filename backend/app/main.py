@@ -77,7 +77,15 @@ from backend.app.api.v1.ai_security_intelligence import router as ai_security_in
 from backend.app.api.v1.cloud_security import router as cloud_security_router
 from backend.app.api.v1.endpoint_xdr import router as endpoint_xdr_router
 from backend.app.api.v1.integration_ecosystem import router as integration_ecosystem_router
+
 from backend.app.api.v1.global_ops import router as global_ops_router
+from backend.app.api.v1.continuous_security_validation import router as continuous_security_validation_router
+from backend.app.api.v1.soc_cases import router as soc_cases_router
+from backend.app.api.v1.threat_hunting_v2 import router as threat_hunting_v2_router
+from backend.app.api.v1.ai_analyst_v2 import router as ai_analyst_v2_router
+from backend.app.api.v1.sre_ops import router as sre_ops_router
+from backend.app.api.v1.security_scorecard import router as security_scorecard_router
+
 
 
 
@@ -352,7 +360,14 @@ app.include_router(cloud_security_router, prefix=settings.API_V1_STR)
 app.include_router(endpoint_xdr_router, prefix=settings.API_V1_STR)
 app.include_router(integration_ecosystem_router, prefix=settings.API_V1_STR)
 app.include_router(global_ops_router, prefix=settings.API_V1_STR)
+app.include_router(continuous_security_validation_router, prefix=settings.API_V1_STR)
+app.include_router(soc_cases_router, prefix=settings.API_V1_STR)
+app.include_router(threat_hunting_v2_router, prefix=settings.API_V1_STR)
+app.include_router(ai_analyst_v2_router, prefix=settings.API_V1_STR)
+app.include_router(sre_ops_router, prefix=settings.API_V1_STR)
+app.include_router(security_scorecard_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 
