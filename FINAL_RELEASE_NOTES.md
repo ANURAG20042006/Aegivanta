@@ -1,19 +1,22 @@
-# AEGIVANTA v29.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
+# AEGIVANTA v30.0.0 — FINAL PRODUCTION READINESS & RELEASE NOTES
 
-## Release: v29.0.0 (Supply Chain Security, SBOM 2.0 & Code-to-Cloud Governance)
+## Release: v30.0.0 (AI/LLM Application Security & Shadow AI Governance)
 
 **Release Date**: 2026-08-21
 
-This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 29 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/XDR/SIEM/SOAR platform.
+This is the flagship enterprise certification release of Aegivanta — an AI-Powered Security Operations Platform. It consolidates all 30 development phases into a unified, commercially deployable, and operationally resilient IAM/PAM/CNAPP/SBOM/LLM-SEC/XDR/SIEM/SOAR platform.
 
 ---
 
 ## Platform Summary
 
-Aegivanta v29.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
+Aegivanta v30.0.0 delivers a fully integrated enterprise cybersecurity operations platform covering:
 
 | Domain | Capability |
 | :--- | :--- |
+| **AI/LLM Security & OWASP** | Real-time Guardrail Firewall (prompt injection, DAN jailbreak block, PII masking, system prompt shield) |
+| **Shadow AI Governance** | Employee consumer AI monitoring (ChatGPT, Claude, Midjourney), outbound data exfiltration blocks |
+| **RAG & Vector DB Security** | Pinecone, ChromaDB, Weaviate index auditing (tenant isolation, unencrypted vectors, embedding poisoning) |
 | **Supply Chain & SBOM 2.0** | CycloneDX 1.5 & SPDX 2.3 export, OpenVEX exploitability ledger, SLSA Level 3 builder provenance |
 | **CI/CD Gatekeeper** | Blocking deployment gates (0 Critical CVEs, copyleft block), high-entropy secret scanner |
 | **Enterprise IAM & PAM** | Time-bounded JIT privilege elevations, break-glass admin paths, session recording ledgers |
@@ -67,6 +70,8 @@ Aegivanta v29.0.0 delivers a fully integrated enterprise cybersecurity operation
 | 27 | Cloud Security & CNAPP | Multi-cloud connectors, CWPP runtime defense, serverless security, KSPM governance |
 | 28 | Enterprise IAM & Zero Trust 2.0 | Privileged Access Management (PAM), ITDR, Continuous Auth, FIDO2 Passkeys |
 | 29 | Supply Chain Security & SBOM 2.0 | CycloneDX/SPDX SBOM 2.0, OpenVEX, SLSA Level 3 Provenance, CI/CD Gatekeeper |
+| 30 | AI/LLM Security & Shadow AI | OWASP Top 10 for LLMs, Prompt Firewall, PII Redaction, Shadow AI, Vector DB Security |
+
 
 
 

@@ -71,6 +71,8 @@ export const navItems = [
   { path: '/soc-v2', label: 'SOC Center V2', section: 'Production Intel', icon: Shield },
   { path: '/enterprise-iam', label: 'Enterprise IAM & PAM', section: 'Production Intel', icon: Key },
   { path: '/supply-chain', label: 'Supply Chain & SBOM', section: 'Production Intel', icon: GitBranch },
+  { path: '/llm-security', label: 'AI/LLM Security & OWASP', section: 'Production Intel', icon: Brain },
+
 
 
 

@@ -56,6 +56,10 @@ from backend.app.models.threat_hunting_v2 import SavedHuntingQuery, HuntingInves
 from backend.app.models.supply_chain import (
     SBOMCatalogItem, VEXStatement, SLSAPipelineAttestation, PipelineSecurityGate
 )
+from backend.app.models.llm_security import (
+    LLMGuardrailPolicy, LLMSecurityEvent, ShadowAIDiscoveryRecord, VectorDBAuditRecord
+)
+
 
 
 
@@ -164,8 +168,13 @@ __all__ = [
     "SBOMCatalogItem",
     "VEXStatement",
     "SLSAPipelineAttestation",
-    "PipelineSecurityGate"
+    "PipelineSecurityGate",
+    "LLMGuardrailPolicy",
+    "LLMSecurityEvent",
+    "ShadowAIDiscoveryRecord",
+    "VectorDBAuditRecord"
 ]
+
 
 
 

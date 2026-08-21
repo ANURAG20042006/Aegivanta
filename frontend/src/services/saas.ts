@@ -794,8 +794,39 @@ export const saasApi = {
   scanCodeSecrets: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/supply-chain/secrets/scan`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 30 AI/LLM Security & Shadow AI APIs
+  getAISecuritySummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/llm-security/summary`, getAuthHeaders());
+    return res.data;
+  },
+  inspectLLMPrompt: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/llm-security/guardrails/inspect`, data, getAuthHeaders());
+    return res.data;
+  },
+  getLLMSecurityEvents: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/llm-security/events`, getAuthHeaders());
+    return res.data;
+  },
+  getShadowAITools: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/llm-security/shadow-ai`, getAuthHeaders());
+    return res.data;
+  },
+  toggleShadowAIBlock: async (id: string, data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/llm-security/shadow-ai/block/${id}`, data, getAuthHeaders());
+    return res.data;
+  },
+  getVectorDBAudits: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/llm-security/vectordb/audits`, getAuthHeaders());
+    return res.data;
+  },
+  scanVectorDBCollection: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/llm-security/vectordb/scan`, data, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 
