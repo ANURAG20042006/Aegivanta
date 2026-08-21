@@ -88,6 +88,9 @@ from backend.app.api.v1.security_scorecard import router as security_scorecard_r
 from backend.app.api.v1.enterprise_iam import router as enterprise_iam_router
 from backend.app.api.v1.supply_chain import router as supply_chain_router
 from backend.app.api.v1.llm_security import router as llm_security_router
+from backend.app.api.v1.attack_surface import router as attack_surface_router
+
+
 
 
 
@@ -377,7 +380,9 @@ app.include_router(security_scorecard_router, prefix=settings.API_V1_STR)
 app.include_router(enterprise_iam_router, prefix=settings.API_V1_STR)
 app.include_router(supply_chain_router, prefix=settings.API_V1_STR)
 app.include_router(llm_security_router, prefix=settings.API_V1_STR)
+app.include_router(attack_surface_router, prefix=settings.API_V1_STR)
 app.include_router(health_router, prefix=settings.API_V1_STR)
+
 
 
 

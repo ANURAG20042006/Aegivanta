@@ -90,6 +90,10 @@ import { SupplyChainSecurityCenter } from './pages/SupplyChainSecurityCenter';
 // Phase 30 AI/LLM Security & Shadow AI Center
 import { LLMSecurityCenter } from './pages/LLMSecurityCenter';
 
+// Phase 31 Attack Surface Management & CTEM
+import { AttackSurfaceCenter } from './pages/AttackSurfaceCenter';
+
+
 
 
 
@@ -163,6 +167,8 @@ const ProtectedLayout: React.FC = () => {
               <Route path="/enterprise-iam" element={<EnterpriseIAMCenter />} />
               <Route path="/supply-chain" element={<SupplyChainSecurityCenter />} />
               <Route path="/llm-security" element={<LLMSecurityCenter />} />
+              <Route path="/attack-surface" element={<AttackSurfaceCenter />} />
+
 
 
 

@@ -824,8 +824,39 @@ export const saasApi = {
   scanVectorDBCollection: async (data: any): Promise<any> => {
     const res = await axios.post(`${API_BASE}/llm-security/vectordb/scan`, data, getAuthHeaders());
     return res.data;
+  },
+
+  // Phase 31 Attack Surface Management (ASM) & CTEM APIs
+  getASMSummary: async (): Promise<any> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/summary`, getAuthHeaders());
+    return res.data;
+  },
+  getExternalAssets: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/assets`, getAuthHeaders());
+    return res.data;
+  },
+  discoverExternalDomain: async (data: any): Promise<any> => {
+    const res = await axios.post(`${API_BASE}/attack-surface/assets/discover`, data, getAuthHeaders());
+    return res.data;
+  },
+  getDanglingDNS: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/dangling-dns`, getAuthHeaders());
+    return res.data;
+  },
+  getDarkWebCredentials: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/darkweb/credentials`, getAuthHeaders());
+    return res.data;
+  },
+  getBrandTyposquats: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/brand/typosquats`, getAuthHeaders());
+    return res.data;
+  },
+  getCTEMPrioritizedExposures: async (): Promise<any[]> => {
+    const res = await axios.get(`${API_BASE}/attack-surface/ctem/prioritized-exposures`, getAuthHeaders());
+    return res.data;
   }
 };
+
 
 
 

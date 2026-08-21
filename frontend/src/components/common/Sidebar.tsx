@@ -72,6 +72,8 @@ export const navItems = [
   { path: '/enterprise-iam', label: 'Enterprise IAM & PAM', section: 'Production Intel', icon: Key },
   { path: '/supply-chain', label: 'Supply Chain & SBOM', section: 'Production Intel', icon: GitBranch },
   { path: '/llm-security', label: 'AI/LLM Security & OWASP', section: 'Production Intel', icon: Brain },
+  { path: '/attack-surface', label: 'Attack Surface & CTEM', section: 'Production Intel', icon: Globe },
+
 
 
 

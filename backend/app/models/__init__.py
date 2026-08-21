@@ -59,6 +59,10 @@ from backend.app.models.supply_chain import (
 from backend.app.models.llm_security import (
     LLMGuardrailPolicy, LLMSecurityEvent, ShadowAIDiscoveryRecord, VectorDBAuditRecord
 )
+from backend.app.models.attack_surface import (
+    ExternalAsset, DanglingDNSRisk, DarkWebCredentialLeak, BrandImpersonationAlert
+)
+
 
 
 
@@ -172,8 +176,13 @@ __all__ = [
     "LLMGuardrailPolicy",
     "LLMSecurityEvent",
     "ShadowAIDiscoveryRecord",
-    "VectorDBAuditRecord"
+    "VectorDBAuditRecord",
+    "ExternalAsset",
+    "DanglingDNSRisk",
+    "DarkWebCredentialLeak",
+    "BrandImpersonationAlert"
 ]
+
 
 
 
