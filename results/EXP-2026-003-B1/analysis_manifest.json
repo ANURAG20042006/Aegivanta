@@ -1,0 +1,11 @@
+{
+  "experiment_id": "EXP-2026-003-B1",
+  "task_1_26class_macro_f1": 0.68,
+  "task_2_7family_macro_f1": 0.8121,
+  "task_3_binary_macro_f1": 0.8998,
+  "top_confusion_pair": "DoS-SYN_Flood -> DDoS-SYN_Flood",
+  "top_feature": "Rate",
+  "mean_conf_correct": 0.8988,
+  "high_conf_errors": 23,
+  "provenance_status": "verified"
+}

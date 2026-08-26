@@ -1,0 +1,17 @@
+{
+  "experiment_id": "EXP-2026-003-B1",
+  "parent_experiment_id": "EXP-2026-003",
+  "dataset_identifier": "ciciot2023_derived_benchmark_subset",
+  "dataset_hash": "339dd305a304461aa8e8c17bbdce9f8ea4ec54b608bf315ece6336dbd4d7a778",
+  "feature_schema_version": "schema-v2.0",
+  "champion_model": "LightGBM",
+  "champion_model_version": "lightgbm-v1.1-b1",
+  "model_artifact": "results/EXP-2026-003-B1/best_model.joblib",
+  "model_artifact_hash": "92876bf1d6fcdf94c6ebfe2151dbc03162442a54201dacae993b6f130e276274",
+  "preprocessor_artifact": "results/EXP-2026-003-B1/preprocessor.joblib",
+  "preprocessor_hash": "97e52658d1ea2baedcf3955492a6c6b47397983527d640633ec0b632a9618919",
+  "frozen_test_samples": 1560,
+  "random_seed": 42,
+  "python_version": "3.11.5",
+  "created_at": "2026-08-26T16:57:25.072594+00:00"
+}
