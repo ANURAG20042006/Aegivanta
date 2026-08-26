@@ -1,6 +1,8 @@
 {
   "experiment_id": "EXP-2026-003",
-  "dataset_identifier": "ciciot2023_real_benchmark",
+  "dataset_identifier": "ciciot2023_derived_benchmark_subset",
+  "dataset_full_name": "CICIoT2023: A Real-Time Dataset and Benchmark for Large-Scale Attacks in IoT Environment",
+  "official_dataset_total_flows": 46686579,
   "dataset_hash": "339dd305a304461aa8e8c17bbdce9f8ea4ec54b608bf315ece6336dbd4d7a778",
   "dataset_hash_algorithm": "SHA-256",
   "dataset_total_samples": 7800,

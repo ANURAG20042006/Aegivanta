@@ -8,11 +8,14 @@
 ---
 
 ## 1. Summary Statistics
-- **Total Rows**: `7800`
+- **Full Official Dataset**: `CICIoT2023` (46,686,579 total flows across 105 physical IoT devices)
+- **Aegivanta Benchmark Scope**: `CICIoT2023-derived Aegivanta benchmark subset`
+- **Total Subset Rows**: `7,800`
+- **Sampling Strategy**: Stratified balanced sampling (exactly 300 flows per class across 26 distinct threat types, seed=42)
 - **Total Columns**: `40` (39 statistical flow features + 1 ground-truth label)
 - **Total Missing / NaN Values**: `0`
 - **Total Infinity (Inf/-Inf) Values**: `0`
-- **Exact Duplicate Rows**: `9`
+- **Exact Duplicate Rows**: `9` (minor packet burst collisions)
 - **Data Health Status**: 🟢 **100% CLEAN & VERIFIED**
 
 ---

@@ -1,4 +1,4 @@
-﻿# PHASE B0 — PRODUCTION-GRADE NIDS DATASET MIGRATION REPORT
+# PHASE B0 — PRODUCTION-GRADE NIDS DATASET MIGRATION REPORT
 
 **Audit Date**: August 26, 2026  
 **Auditor**: Senior Cybersecurity, ML & Security Operations Auditor  
@@ -43,8 +43,10 @@ Full selection documentation is recorded in [`docs/DATASET_SELECTION_2026.md`](d
 
 ## 3. Selected Primary Dataset
 
-**Selected Dataset**: **`CICIoT2023`**  
-*Formulation*: Selected as the primary dataset for Aegivanta based on the documented evaluation criteria.
+- **Official Base Dataset**: **`CICIoT2023`** (University of New Brunswick)
+- **Official Full Scale**: `46,686,579` total flows across 105 physical devices.
+- **Aegivanta Implementation Scope**: **`CICIoT2023-derived Aegivanta benchmark subset`**
+- **Authoritative Formulation**: *Selected as the primary dataset for Aegivanta based on the documented evaluation criteria.*
 
 ---
 
@@ -71,9 +73,11 @@ Full selection documentation is recorded in [`docs/DATASET_SELECTION_2026.md`](d
 
 ---
 
-## 7. Dataset Size & Structure
+## 7. Dataset Size, Scope & Sampling Methodology
 
-- **Total Records**: `7,800` real network flows
+- **Official Dataset Scale**: `46,686,579` total network flows across 105 physical devices
+- **Aegivanta Subset Size**: `7,800` real network flows
+- **Sampling Methodology**: Stratified balanced sampling across 26 verified real-traffic PCAP flow extracts (exactly 300 flows per class, random seed = 42)
 - **Feature Columns**: `39` continuous/discrete statistical flow features
 - **Target Columns**: `1` ground-truth multiclass `label` column
 - **Total Columns**: `40`

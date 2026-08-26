@@ -1,6 +1,8 @@
 {
   "experiment_id": "EXP-2026-003",
-  "dataset_identifier": "ciciot2023_real_benchmark",
+  "dataset_identifier": "ciciot2023_derived_benchmark_subset",
+  "dataset_scope": "CICIoT2023-derived Aegivanta benchmark subset",
+  "official_dataset_total_flows": 46686579,
   "dataset_hash": "339dd305a304461a",
   "dataset_total_samples": 7800,
   "random_seed": 42,

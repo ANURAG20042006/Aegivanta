@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/integration/test_exp_2026_003_dataset_integrity.py
 =========================================================
 Independent automated verification suite for EXP-2026-003:
@@ -26,6 +26,9 @@ def test_01_dataset_manifest_exists():
         data = json.load(f)
     assert data["experiment_id"] == "EXP-2026-003"
     assert data["dataset_name"] == "CICIoT2023"
+    assert data["dataset_scope"] == "CICIoT2023-derived Aegivanta benchmark subset"
+    assert data["official_dataset_total_flows"] == 46686579
+    assert data["subset_total_records"] == 7800
 
 
 def test_02_dataset_hash_integrity():

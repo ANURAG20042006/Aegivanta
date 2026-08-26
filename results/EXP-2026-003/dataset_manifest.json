@@ -1,6 +1,11 @@
 {
   "experiment_id": "EXP-2026-003",
   "dataset_name": "CICIoT2023",
+  "dataset_full_name": "CICIoT2023: A Real-Time Dataset and Benchmark for Large-Scale Attacks in IoT Environment",
+  "dataset_scope": "CICIoT2023-derived Aegivanta benchmark subset",
+  "official_dataset_total_flows": 46686579,
+  "subset_total_records": 7800,
+  "subset_sampling_methodology": "Stratified balanced sampling across 26 verified real-traffic PCAP flow extracts (300 flows per class, seed=42)",
   "dataset_version": "v1.0-flow-benchmark",
   "release_year": "2023",
   "official_source": "https://www.unb.ca/cic/datasets/iotdataset-2023.html",
