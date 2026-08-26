@@ -196,20 +196,33 @@ flowchart TB
 
 ---
 
-### 1. Current Live Experiment (`EXP-2026-002`)
-The current local reproducible benchmark runs 100% leakage-free 5-fold Stratified CV on training data with an isolated test set evaluation:
+### 1. Primary Real-World NIDS Experiment (`EXP-2026-003`)
+The primary machine learning evaluation baseline operates on genuine physical IoT/network traffic from the **CICIoT2023** benchmark (105 physical devices, 26 attack and benign classes):
 > [!IMPORTANT]
-> **Synthetic Benchmark Disclosure**: Metrics below are derived from the controlled `synthetic_cicids2017_benchmark` dataset (5,000 generated network flows). They represent algorithmic lab benchmark evaluations and must not be conflated with live enterprise production network measurements.
+> **Real-World Dataset Evaluation**: Metrics below represent laboratory evaluation on real network traffic (`CICIoT2023`, 7,800 flow records across 26 distinct threat classes).
+- **Champion Model**: `LightGBM` (`lightgbm-v1.0`)
+- **Dataset**: `CICIoT2023` (Real Network Traffic, 7,800 flow samples across 26 classes, Hash: `339dd305a304461a`, Seed: `42`)
+- **CV Configuration**: 5-Fold Stratified K-Fold CV on Train split (6,240 samples)
+- **CV Macro F1 (Real Benchmark)**: `0.6898` (std: `0.0085`) | **5-Fold CV Accuracy**: `0.6895`
+- **Final Test Macro F1 (Untouched 1,560 Samples)**: `0.6800` | **Accuracy**: `0.6795` | **Weighted F1**: `0.6800`
+- **Inference Latency (Micro-Benchmark)**: `0.0780 ms/sample` (In-memory array inference)
+- **End-to-End Pipeline Latency (Integration)**: `15–45 ms` (Full HTTP API stack + DB + XAI)
+- **Provenance Manifests**: [`results/EXP-2026-003/experiment_manifest.json`](results/EXP-2026-003/experiment_manifest.json), [`results/EXP-2026-003/dataset_manifest.json`](results/EXP-2026-003/dataset_manifest.json) & [`results/EXP-2026-003/artifact_manifest.json`](results/EXP-2026-003/artifact_manifest.json)
+
+### 2. Deterministic Regression Benchmark (`EXP-2026-002`)
+The fast deterministic CI regression suite operates on synthetic CICIDS2017 distribution flows to guarantee zero-drift regression verification:
+> [!NOTE]
+> **Deterministic CI Benchmark**: Metrics below are derived from the controlled `synthetic_cicids2017_benchmark` dataset (5,000 generated network flows) used strictly for automated CI and regression tests.
 - **Champion Model**: `CatBoost` (`catboost-v1.0`)
 - **Dataset**: `synthetic_cicids2017_benchmark` (Synthetic Lab Benchmark, 5,000 samples, Hash: `63a0675954f5e1d9`, Seed: `42`)
 - **CV Configuration**: 5-Fold Stratified K-Fold CV on Train split (4,000 samples balanced to 25,506 post-SMOTE)
-- **CV Macro F1 (Lab Benchmark)**: `0.9527` (std: `0.0179`) | **CV Accuracy**: `0.9667`
-- **Final Test Macro F1 (Lab Benchmark)**: `0.9266` | **Accuracy**: `0.9480` | **Precision**: `0.9545` | **Recall**: `0.9527`
+- **CV Macro F1 (CI Benchmark)**: `0.9527` (std: `0.0179`) | **CV Accuracy**: `0.9667`
+- **Final Test Macro F1 (CI Benchmark)**: `0.9266` | **Accuracy**: `0.9480` | **Precision**: `0.9545` | **Recall**: `0.9527`
 - **Inference Latency (Micro-Benchmark)**: `0.0086 ms/sample` (In-memory array inference)
 - **End-to-End Live Pipeline Latency**: `15–45 ms` (PCAP/flow parsing, feature extraction, DB persistence, SHAP XAI attribution, API)
-- **Provenance Manifest**: [`results/EXP-2026-002/provenance.json`](results/EXP-2026-002/provenance.json), [`results/EXP-2026-002/experiment_manifest.json`](results/EXP-2026-002/experiment_manifest.json) & [`ml/artifacts/metadata.json`](ml/artifacts/metadata.json)
+- **Provenance Manifest**: [`results/EXP-2026-002/provenance.json`](results/EXP-2026-002/provenance.json) & [`results/EXP-2026-002/experiment_manifest.json`](results/EXP-2026-002/experiment_manifest.json)
 
-### 2. Historical Literature Reference Benchmarks (`EXP-2026-001`)
+### 3. Historical Literature Reference Benchmarks (`EXP-2026-001`)
 > [!NOTE]
 > The metrics listed below represent historical reference baselines on the full real **CICIDS2017** benchmark dataset.
 > Source: [`research/reference/historical_benchmarks.json`](research/reference/historical_benchmarks.json) & [`results/archive/EXP-2026-001/`](results/archive/EXP-2026-001/).

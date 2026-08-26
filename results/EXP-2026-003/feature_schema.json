@@ -1,0 +1,475 @@
+{
+  "version": "schema-v2.0",
+  "dataset": "CICIoT2023",
+  "feature_count": 39,
+  "features": {
+    "Header_Length": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Header_Length",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        40.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Protocol Type": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Protocol Type",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        47.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Time_To_Live": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Time_To_Live",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        255.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Rate": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Rate",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        7.555306092010257,
+        524288.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "fin_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for fin_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.5
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "syn_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for syn_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "rst_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for rst_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "psh_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for psh_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "ack_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for ack_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "ece_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for ece_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.2
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "cwr_flag_number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for cwr_flag_number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.2
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "ack_count": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for ack_count",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        100.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "syn_count": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for syn_count",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        100.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "fin_count": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for fin_count",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        49.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "rst_count": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for rst_count",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        100.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "HTTP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for HTTP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "HTTPS": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for HTTPS",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "DNS": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for DNS",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.8
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Telnet": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Telnet",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.1
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "SMTP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for SMTP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.1
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "SSH": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for SSH",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "IRC": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for IRC",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.1
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "TCP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for TCP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "UDP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for UDP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "DHCP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for DHCP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.4
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "ARP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for ARP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "ICMP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for ICMP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "IGMP": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for IGMP",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        0.3
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "IPv": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for IPv",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "LLC": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for LLC",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        1.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Tot sum": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Tot sum",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        457.0,
+        138291.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Min": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Min",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        43.0,
+        2974.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Max": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Max",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        60.0,
+        26130.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "AVG": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for AVG",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        50.0,
+        4193.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Std": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Std",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        5326.152670236431
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Tot size": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Tot size",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        50.0,
+        4193.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "IAT": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for IAT",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        1.9073486328125e-06,
+        23.99725708961487
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Number": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Number",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        6.0,
+        100.0
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    },
+    "Variance": {
+      "datatype": "float64",
+      "semantic_meaning": "Flow statistical metric for Variance",
+      "source": "CICIoT2023_flow_engine",
+      "transformation": "StandardScaler(with_mean=True, with_std=True)",
+      "unit": "packets/sec, bytes, or dimensionless flag ratio",
+      "allowed_range": [
+        0.0,
+        28367902.266666666
+      ],
+      "missing_value_handling": "SimpleImputer(strategy='median')"
+    }
+  }
+}

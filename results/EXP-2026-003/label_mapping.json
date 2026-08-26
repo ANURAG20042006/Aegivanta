@@ -1,0 +1,132 @@
+{
+  "Benign": {
+    "canonical_label": "BENIGN",
+    "category": "Benign",
+    "evidence": "Normal baseline IoT telemetry across 105 devices"
+  },
+  "DDoS-SYN_Flood": {
+    "canonical_label": "DDOS_SYN",
+    "category": "DDoS",
+    "evidence": "Volumetric SYN packet flood targeting IoT gateway"
+  },
+  "DDoS-SlowLoris": {
+    "canonical_label": "DDOS_SLOWLORIS",
+    "category": "DDoS",
+    "evidence": "Slow HTTP header exhaustion attack"
+  },
+  "DDoS-UDP_Flood": {
+    "canonical_label": "DDOS_UDP",
+    "category": "DDoS",
+    "evidence": "Volumetric UDP packet flood"
+  },
+  "DDoS-ICMP_Flood": {
+    "canonical_label": "DDOS_ICMP",
+    "category": "DDoS",
+    "evidence": "ICMP Echo request flood"
+  },
+  "DoS-HTTP_Flood": {
+    "canonical_label": "DOS_HTTP",
+    "category": "DoS",
+    "evidence": "Single-source HTTP GET/POST flood"
+  },
+  "DoS-SYN_Flood": {
+    "canonical_label": "DOS_SYN",
+    "category": "DoS",
+    "evidence": "Single-source TCP SYN flood"
+  },
+  "DoS-TCP_Flood": {
+    "canonical_label": "DOS_TCP",
+    "category": "DoS",
+    "evidence": "Single-source TCP packet flood"
+  },
+  "DoS-UDP_Flood": {
+    "canonical_label": "DOS_UDP",
+    "category": "DoS",
+    "evidence": "Single-source UDP flood"
+  },
+  "Mirai-greeth_flood": {
+    "canonical_label": "MIRAI_GREETH",
+    "category": "Mirai",
+    "evidence": "Mirai botnet GRE Ethernet encapsulation flood"
+  },
+  "Mirai-greip_flood": {
+    "canonical_label": "MIRAI_GREIP",
+    "category": "Mirai",
+    "evidence": "Mirai botnet GRE IP encapsulation flood"
+  },
+  "Mirai-udpplain": {
+    "canonical_label": "MIRAI_UDPPLAIN",
+    "category": "Mirai",
+    "evidence": "Mirai botnet plaintext UDP flood payload"
+  },
+  "Recon-PortScan": {
+    "canonical_label": "RECON_PORTSCAN",
+    "category": "Reconnaissance",
+    "evidence": "Nmap/masscan TCP/UDP port sweep"
+  },
+  "Recon-OSScan": {
+    "canonical_label": "RECON_OSSCAN",
+    "category": "Reconnaissance",
+    "evidence": "Nmap TCP/IP stack fingerprinting probe"
+  },
+  "Recon-HostDiscovery": {
+    "canonical_label": "RECON_HOSTDISCOVERY",
+    "category": "Reconnaissance",
+    "evidence": "ARP/ICMP subnet discovery sweep"
+  },
+  "Recon-PingSweep": {
+    "canonical_label": "RECON_PINGSweep",
+    "category": "Reconnaissance",
+    "evidence": "ICMP echo ping sweep"
+  },
+  "VulnerabilityScan": {
+    "canonical_label": "RECON_VULNSCAN",
+    "category": "Reconnaissance",
+    "evidence": "OpenVAS/Nessus automated vulnerability scan"
+  },
+  "SqlInjection": {
+    "canonical_label": "WEB_SQLI",
+    "category": "Web-based",
+    "evidence": "Web application SQL injection payload"
+  },
+  "CommandInjection": {
+    "canonical_label": "WEB_CMDI",
+    "category": "Web-based",
+    "evidence": "OS command injection via web form"
+  },
+  "XSS": {
+    "canonical_label": "WEB_XSS",
+    "category": "Web-based",
+    "evidence": "Cross-site scripting script injection payload"
+  },
+  "BrowserHijacking": {
+    "canonical_label": "WEB_BROWSERHIJACK",
+    "category": "Web-based",
+    "evidence": "Malicious redirection / DNS hijack"
+  },
+  "Uploading_Attack": {
+    "canonical_label": "WEB_UPLOAD",
+    "category": "Web-based",
+    "evidence": "Arbitrary file upload exploit"
+  },
+  "DictionaryBruteForce": {
+    "canonical_label": "BRUTEFORCE_DICT",
+    "category": "Brute Force",
+    "evidence": "Hydra SSH/HTTP dictionary login attempts"
+  },
+  "DNS_Spoofing": {
+    "canonical_label": "SPOOF_DNS",
+    "category": "Spoofing",
+    "evidence": "Forged DNS responses poisoning cache"
+  },
+  "MITM-ArpSpoofing": {
+    "canonical_label": "SPOOF_ARP",
+    "category": "Spoofing",
+    "evidence": "Gratuitous ARP poisoning for Man-in-the-Middle"
+  },
+  "Backdoor_Malware": {
+    "canonical_label": "MALWARE_BACKDOOR",
+    "category": "Malware",
+    "evidence": "C2 backdoor reverse shell beaconing"
+  }
+}

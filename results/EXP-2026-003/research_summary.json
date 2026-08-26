@@ -1,0 +1,18 @@
+{
+  "experiment_id": "EXP-2026-003",
+  "dataset_identifier": "ciciot2023_real_benchmark",
+  "dataset_hash": "339dd305a304461a",
+  "dataset_total_samples": 7800,
+  "random_seed": 42,
+  "champion_selected_by": "Train Stratified K-Fold CV (n_splits=5)",
+  "champion_model": "LightGBM",
+  "champion_model_version": "lightgbm-v1.0",
+  "cv_macro_f1_mean": 0.6898,
+  "cv_macro_f1_std": 0.0085,
+  "final_test_accuracy": 0.6795,
+  "final_test_macro_f1": 0.68,
+  "final_test_macro_precision": 0.6844,
+  "final_test_macro_recall": 0.6795,
+  "final_test_weighted_f1": 0.68,
+  "provenance_status": "verified"
+}

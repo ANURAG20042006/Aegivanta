@@ -1,0 +1,32 @@
+{
+  "experiment_id": "EXP-2026-003",
+  "dataset": {
+    "name": "CICIoT2023",
+    "type": "real_network_traffic",
+    "hash": "339dd305a304461aa8e8c17bbdce9f8ea4ec54b608bf315ece6336dbd4d7a778",
+    "n_samples": 7800,
+    "train_samples": 6240,
+    "test_samples": 1560,
+    "n_raw_features": 39,
+    "n_selected_features": 30
+  },
+  "reproducibility": {
+    "python_version": "3.11.5",
+    "random_seed": 42,
+    "git_commit": "26d78aedfdf7f657652613bd1e3003ae9a3cd34d"
+  },
+  "results": {
+    "cv_metrics": {
+      "n_splits": 5,
+      "macro_f1_mean": 0.6898,
+      "macro_f1_std": 0.0085
+    },
+    "final_test_metrics": {
+      "accuracy": 0.6795,
+      "macro_f1": 0.68,
+      "macro_precision": 0.6844,
+      "macro_recall": 0.6795,
+      "weighted_f1": 0.68
+    }
+  }
+}

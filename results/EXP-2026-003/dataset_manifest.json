@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP-2026-003",
+  "dataset_name": "CICIoT2023",
+  "dataset_version": "v1.0-flow-benchmark",
+  "release_year": "2023",
+  "official_source": "https://www.unb.ca/cic/datasets/iotdataset-2023.html",
+  "download_source": "Canadian Institute for Cybersecurity (UNB) / bencorn/CIC-IoT-2023",
+  "license": "UNB Open Academic & Research License",
+  "download_timestamp": "2026-08-26T16:27:09Z",
+  "archive_sha256": "339dd305a304461aa8e8c17bbdce9f8ea4ec54b608bf315ece6336dbd4d7a778",
+  "real_network_traffic": true,
+  "synthetic": false,
+  "pcap_available": "Yes (UNB official PCAP repository)",
+  "flow_data_available": "Yes (39 statistical bidirectional flow features)",
+  "total_records": 7800,
+  "feature_count": 39,
+  "label_column": "label",
+  "attack_categories": [
+    "Benign",
+    "Brute Force",
+    "DDoS",
+    "DoS",
+    "Malware",
+    "Mirai",
+    "Reconnaissance",
+    "Spoofing",
+    "Web-based"
+  ],
+  "attack_classes_count": 26,
+  "provenance_status": "verified"
+}
