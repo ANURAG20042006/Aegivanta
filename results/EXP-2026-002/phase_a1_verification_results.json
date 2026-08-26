@@ -1,0 +1,60 @@
+{
+  "dataset": {
+    "total_samples": 5000,
+    "computed_sha256": "63a0675954f5e1d97c65eaef49946c7912d0d1481c86201a01f033187fa9751f",
+    "expected_sha256": "63a0675954f5e1d97c65eaef49946c7912d0d1481c86201a01f033187fa9751f",
+    "hash_match": true,
+    "shape": [
+      5000,
+      82
+    ]
+  },
+  "split_smote": {
+    "raw_train": 4000,
+    "raw_test": 1000,
+    "smote_train": 25506,
+    "test_untouched": 1000,
+    "verified": true
+  },
+  "artifact_hashes": {
+    "actual_model_sha256": "a2df2c19e079c4c163c6e4997af2631fa35a743316e77e6a2ef1a3d3c33a5898",
+    "expected_model_sha256": "a2df2c19e079c4c163c6e4997af2631fa35a743316e77e6a2ef1a3d3c33a5898",
+    "model_match": true,
+    "actual_prep_sha256": "0a9bcc5cc6f4d3a16f694a05df34647ceed59484e5b2cc4453e215644a24d521",
+    "expected_prep_sha256": "0a9bcc5cc6f4d3a16f694a05df34647ceed59484e5b2cc4453e215644a24d521",
+    "prep_match": true,
+    "manifests_agree": true
+  },
+  "metrics_traceability": {
+    "cv_f1_mean": 0.9527,
+    "cv_f1_std": 0.0179,
+    "test_f1": 0.9266,
+    "test_acc": 0.948,
+    "cv_match": true,
+    "test_f1_match": true,
+    "test_acc_match": true
+  },
+  "xai": {
+    "model_version": "catboost-v1.0",
+    "explainer_type": "SHAP TreeExplainer",
+    "explanation_available": true,
+    "version_match": true
+  },
+  "latency_audit": {
+    "micro_bench_mean_ms": 1.1354,
+    "micro_bench_p50_ms": 1.0536,
+    "micro_bench_p95_ms": 1.8456,
+    "xai_mean_ms": 9.38,
+    "xai_p50_ms": 8.5,
+    "xai_p95_ms": 13.91
+  },
+  "environment": {
+    "python_version": "3.11.5",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel",
+    "machine": "AMD64",
+    "sklearn_version": "1.6.1",
+    "numpy_version": "2.2.2",
+    "pandas_version": "2.2.3"
+  }
+}
