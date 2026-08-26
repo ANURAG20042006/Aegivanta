@@ -155,7 +155,8 @@ class BillingGuard:
     @staticmethod
     def validate_billing_provider(provider_type: str, target_env: AegivantaEnvironment) -> bool:
         if target_env == AegivantaEnvironment.PRODUCTION:
-            if provider_type.upper() in ["MOCK", "DEMO", "MOCKBILLINGPROVIDER", "FAKE"]:
+            prov_upper = (provider_type or "").upper()
+            if any(k in prov_upper for k in ["MOCK", "DEMO", "FAKE", "SIMULATED", "TEST"]):
                 record_security_violation(
                     component="BILLING_SERVICE",
                     source=provider_type,

@@ -16,6 +16,7 @@ class HuntingQuery(Base):
     __tablename__ = "hunting_queries"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String(255), nullable=False, default="default-tenant", index=True)
     name = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=True)
     query_definition = Column(JSON, nullable=False)  # JSON structure: filters, time_range, entities
@@ -32,6 +33,7 @@ class HuntingExecution(Base):
     __tablename__ = "hunting_executions"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String(255), nullable=False, default="default-tenant", index=True)
     query_id = Column(String, ForeignKey("hunting_queries.id", ondelete="SET NULL"), nullable=True, index=True)
     executed_by = Column(String(100), nullable=False)
     started_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

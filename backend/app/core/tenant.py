@@ -124,11 +124,22 @@ async def resolve_tenant_context(
     return context
 
 
+from backend.app.config import settings
+
+
 def require_tenant_role(min_role: TenantRole) -> Callable:
     """Dependency factory ensuring current user has at least the specified tenant role level."""
     min_level = TENANT_ROLE_HIERARCHY.get(min_role.value, 0)
 
     async def role_guard(context: TenantContext = Depends(resolve_tenant_context)) -> TenantContext:
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
+        if is_production and not context.tenant_id and not context.is_system_admin:
+            raise PermissionDeniedError("Valid tenant context is mandatory in PRODUCTION environment.")
+
         if context.is_system_admin:
             return context
         user_level = TENANT_ROLE_HIERARCHY.get(context.role or "", 0)

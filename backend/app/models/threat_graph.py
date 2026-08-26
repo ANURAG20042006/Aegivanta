@@ -15,6 +15,7 @@ class ThreatGraphNode(Base):
     __tablename__ = "threat_graph_nodes"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String(255), nullable=False, default="default-tenant", index=True)
     node_type = Column(String(50), nullable=False, index=True)  # ASSET, ALERT, IOC, INCIDENT, CAMPAIGN, TECHNIQUE, IP, DOMAIN
     reference_id = Column(String(255), nullable=True, index=True)  # Underlying primary key or unique identifier
     label = Column(String(255), nullable=False, index=True)
@@ -27,6 +28,7 @@ class ThreatGraphEdge(Base):
     __tablename__ = "threat_graph_edges"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = Column(String(255), nullable=False, default="default-tenant", index=True)
     source_node_id = Column(String, ForeignKey("threat_graph_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
     target_node_id = Column(String, ForeignKey("threat_graph_nodes.id", ondelete="CASCADE"), nullable=False, index=True)
     relationship_type = Column(String(50), nullable=False, index=True)  # TARGETS, CONTAINS, INDICATES, CORRELATED_WITH, EXECUTES, COMMUNICATES_WITH
@@ -38,4 +40,5 @@ class ThreatGraphEdge(Base):
 
     __table_args__ = (
         Index("ix_threat_edge_source_target", "source_node_id", "target_node_id", "relationship_type"),
+        Index("ix_threat_edge_tenant", "tenant_id"),
     )

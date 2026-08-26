@@ -41,6 +41,7 @@ class Incident(Base):
     __tablename__ = "incidents"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False, default="default-tenant", index=True)
     incident_code: Mapped[str] = mapped_column(String(50), default=lambda: f"INC-{uuid.uuid4().hex[:8].upper()}", nullable=False, index=True)
     alert_id: Mapped[str] = mapped_column(String(50), default=lambda: f"ALT-{uuid.uuid4().hex[:8].upper()}", nullable=False, index=True)
     

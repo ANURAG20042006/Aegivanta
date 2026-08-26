@@ -20,6 +20,7 @@ class ProtectedAsset(Base):
     __tablename__ = "protected_assets"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False, default="default-tenant", index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     hostname: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
