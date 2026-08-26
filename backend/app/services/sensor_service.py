@@ -198,7 +198,7 @@ class SensorService:
 
 
             total_health += s.health_score
-            buffered += s.offline_buffer_events
+            buffered += (s.offline_buffer_events or 0)
 
         active_count = max(1, online + degraded + offline)
         return {

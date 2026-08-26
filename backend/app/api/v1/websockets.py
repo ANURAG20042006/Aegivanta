@@ -34,57 +34,70 @@ PING_MISS_LIMIT: int = 2
 
 
 class ConnectionManager:
-    """Manages authenticated WebSocket connections for live SOC telemetry."""
+    """Manages authenticated WebSocket connections with multi-tenant isolation for live SOC telemetry."""
 
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: Dict[WebSocket, str] = {}
 
     @property
     def connection_count(self) -> int:
         return len(self.active_connections)
 
-    async def connect(self, websocket: WebSocket) -> None:
+    def get_tenant_connections(self, tenant_id: str) -> List[WebSocket]:
+        return [ws for ws, tid in self.active_connections.items() if tid == tenant_id]
+
+    async def connect(self, websocket: WebSocket, tenant_id: str = "default-tenant") -> None:
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[websocket] = tenant_id
         logger.info(
-            f"WebSocket client authenticated and connected. "
+            f"WebSocket client authenticated and connected for tenant '{tenant_id}'. "
             f"Mode: {settings.OPERATING_MODE}. "
             f"Total connections: {self.connection_count}"
         )
 
     def disconnect(self, websocket: WebSocket) -> None:
         if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+            tid = self.active_connections.pop(websocket, None)
             logger.info(
-                f"WebSocket client disconnected. "
+                f"WebSocket client disconnected for tenant '{tid}'. "
                 f"Remaining connections: {self.connection_count}"
             )
 
-    async def broadcast_local(self, message: str) -> None:
-        """Broadcasts a raw message strictly to locally connected clients on this instance."""
-        for connection in list(self.active_connections):
+    async def broadcast_local(self, message: str, tenant_id: Optional[str] = None) -> None:
+        """Broadcasts a raw message strictly to locally connected clients on this instance, scoped by tenant if provided."""
+        target_connections = (
+            [ws for ws, tid in self.active_connections.items() if tid == tenant_id]
+            if tenant_id
+            else list(self.active_connections.keys())
+        )
+        for connection in target_connections:
             try:
                 await connection.send_text(message)
             except Exception as e:
                 logger.error(f"Error broadcasting to WebSocket client: {e}")
                 self.disconnect(connection)
 
+    async def broadcast_to_tenant(self, tenant_id: str, message: str) -> None:
+        """Broadcasts raw message strictly to clients belonging to the specified tenant."""
+        await self.broadcast_local(message, tenant_id=tenant_id)
+
     async def broadcast(self, message: str) -> None:
         """Broadcasts message to local clients."""
         await self.broadcast_local(message)
 
-    async def broadcast_event(self, event_type: str, data: dict, publish_to_redis: bool = True) -> None:
+    async def broadcast_event(self, event_type: str, data: dict, tenant_id: Optional[str] = None, publish_to_redis: bool = True) -> None:
         """
-        Broadcast a structured JSON event to local SOC clients and publish across the
-        distributed Redis Pub/Sub backplane so other API replicas forward to their clients.
+        Broadcast a structured JSON event to tenant SOC clients and publish across the
+        distributed Redis Pub/Sub backplane with tenant scoping.
         """
         event_dict = {
             "type": event_type,
             "data": data,
+            "tenant_id": tenant_id,
             "timestamp": asyncio.get_event_loop().time()
         }
         payload = json.dumps(event_dict)
-        await self.broadcast_local(payload)
+        await self.broadcast_local(payload, tenant_id=tenant_id)
 
         if publish_to_redis:
             try:
