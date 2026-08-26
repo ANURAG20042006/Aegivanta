@@ -1,0 +1,42 @@
+{
+  "phase": "PHASE_D_REAL_INFRASTRUCTURE_E2E",
+  "timestamp": "2026-08-26T18:00:59.535606+00:00",
+  "total_duration_ms": 1084.3,
+  "step_latencies_ms": {
+    "pcap_parsing_ms": 0.753,
+    "feature_extraction_ms": 3.022,
+    "ml_inference_ms": 364.954,
+    "alert_generation_ms": 702.067,
+    "correlation_incident_ms": 0.175,
+    "websocket_broadcast_ms": 12.18,
+    "soar_proposal_ms": 0.266,
+    "soar_execution_ms": 0.064,
+    "audit_persistence_ms": 0.023
+  },
+  "lineage_chain": {
+    "pcap_id": "pcap_b20a7188771a",
+    "flow_id": "flow_1860672829fd",
+    "feature_record_id": "feat_4e2dffe9116d",
+    "prediction_id": "pred_684ce7b19de5",
+    "alert_id": "alt_42c193b6a911",
+    "correlation_id": "corr_c4d444515e30",
+    "incident_id": "inc_2ed1fe94295e",
+    "response_id": "resp_bfcdc1e24cfd",
+    "audit_event_id": "aud_6fb75e89d2cf"
+  },
+  "telemetry_details": {
+    "source_ip": "192.168.1.100",
+    "destination_ip": "10.0.0.5",
+    "destination_port": 80,
+    "classification": "Threat_Class_24",
+    "confidence": 0.24760892245288638,
+    "risk_score": 85.5,
+    "mitre_technique": "Network Denial of Service"
+  },
+  "soar_execution": {
+    "policy_level": "LEVEL_2_APPROVAL_REQUIRED",
+    "approver": "secops_analyst_lead",
+    "action": "BLOCK_IOC",
+    "status": "CONTAINED_SAFELY"
+  }
+}

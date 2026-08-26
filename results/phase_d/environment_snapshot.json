@@ -1,0 +1,7 @@
+{
+  "operating_mode": "PHASE_D_E2E_TEST",
+  "authoritative_environment": "LAB",
+  "fail_closed_status": "ENFORCED",
+  "ml_model_hash": "92876bf1d6fcdf94c6ebfe2151dbc03162442a54201dacae993b6f130e276274",
+  "preprocessor_hash": "6ef0f86cd4dea065ec7bddbbb3c5ff731ce59904f8d355bd45a1aa57b0aae5cf"
+}

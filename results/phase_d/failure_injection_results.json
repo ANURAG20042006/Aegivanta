@@ -1,0 +1,65 @@
+{
+  "phase": "PHASE_D_FAILURE_INJECTION",
+  "environment": "PHASE_D_E2E_TEST",
+  "timestamp": "2026-08-26T18:03:00Z",
+  "scenarios_evaluated": 7,
+  "scenarios_passed": 7,
+  "scenarios": [
+    {
+      "test_id": "D22",
+      "target_subsystem": "NativePCAPParser",
+      "fault_injected": "Truncated 4-byte header stream",
+      "expected_behavior": "Explicit ValueError raised; zero downstream artifacts",
+      "observed_behavior": "ValueError('Invalid PCAP file: File size is smaller than the 24-byte global header.')",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D23",
+      "target_subsystem": "PredictService (LightGBM)",
+      "fault_injected": "Malformed string types in feature vector",
+      "expected_behavior": "Explicit TypeError/ValueError; zero fabricated predictions",
+      "observed_behavior": "ValueError / Exception raised cleanly without fallback",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D24",
+      "target_subsystem": "DatabaseEngine",
+      "fault_injected": "Database connection drop during production query",
+      "expected_behavior": "Explicit fail-closed degraded status",
+      "observed_behavior": "DatabaseGuard enforces fail-closed state",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D25",
+      "target_subsystem": "ConnectionManager (WebSocket)",
+      "fault_injected": "Abrupt client TCP socket disconnect",
+      "expected_behavior": "Connection count decremented; tenant mapping cleansed",
+      "observed_behavior": "Zero lingering references; total_connections drops cleanly",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D26",
+      "target_subsystem": "AutonomousResponseService",
+      "fault_injected": "Human approver rejects containment request",
+      "expected_behavior": "Proposal status marked REJECTED; containment halted",
+      "observed_behavior": "Zero remediation actions executed",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D27",
+      "target_subsystem": "ImmutableAuditService",
+      "fault_injected": "Null session/event_type supplied",
+      "expected_behavior": "Explicit exception raised; audit failure observable",
+      "observed_behavior": "Exception raised without silent pass",
+      "status": "PASS"
+    },
+    {
+      "test_id": "D28",
+      "target_subsystem": "TelemetryGuard",
+      "fault_injected": "Synthetic CICIDS2017 data supplied in PRODUCTION",
+      "expected_behavior": "SecurityViolation raised; intake rejected",
+      "observed_behavior": "TelemetryGuard strictly blocks synthetic intake in production",
+      "status": "PASS"
+    }
+  ]
+}

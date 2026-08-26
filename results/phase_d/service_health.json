@@ -1,0 +1,13 @@
+{
+  "status": "HEALTHY",
+  "environment": "PHASE_D_E2E_TEST",
+  "services": {
+    "pcap_parser": "ONLINE",
+    "feature_extractor": "ONLINE",
+    "ml_inference_engine": "ONLINE",
+    "correlation_engine": "ONLINE",
+    "websocket_broadcaster": "ONLINE",
+    "soar_engine": "ONLINE",
+    "audit_logger": "ONLINE"
+  }
+}
