@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.multi_model_detection_service import MultiModelDetectionService
 from backend.app.services.model_security_governance_service import ModelSecurityGovernanceService
 from backend.app.services.model_drift_monitoring_service import ModelDriftMonitoringService
@@ -24,13 +24,13 @@ class RegisterModelRequest(BaseModel):
     framework: Optional[str] = "SCIKIT_LEARN"
     artifact_path: str
     artifact_sha256: str
-    training_dataset_name: Optional[str] = "CIC-IDS2017-Production-Split"
-    training_samples_count: Optional[int] = 50000
+    training_dataset_name: Optional[str] = None
+    training_samples_count: Optional[int] = None
     features_list: Optional[List[str]] = []
-    roc_auc: Optional[float] = 0.985
-    precision_score: Optional[float] = 0.962
-    recall_score: Optional[float] = 0.954
-    f1_score: Optional[float] = 0.958
+    roc_auc: Optional[float] = None
+    precision_score: Optional[float] = None
+    recall_score: Optional[float] = None
+    f1_score: Optional[float] = None
 
 
 class PromoteModelRequest(BaseModel):
@@ -53,7 +53,7 @@ async def list_models(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves all registered ML models with governance, lineage, and cryptographic signatures."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ModelSecurityGovernanceService.list_models(db, tenant_id)
 
 
@@ -64,7 +64,7 @@ async def register_model(
     db: AsyncSession = Depends(get_db)
 ):
     """Registers a new model version with HMAC-SHA256 signature generation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     sig = ModelSecurityGovernanceService.generate_artifact_signature(payload.artifact_sha256)
 
     model = AIModelGovernance(
@@ -79,19 +79,20 @@ async def register_model(
         artifact_sha256=payload.artifact_sha256,
         artifact_signature=sig,
         signature_verified=True,
-        training_dataset_name=payload.training_dataset_name or "CIC-IDS2017-Production-Split",
-        training_samples_count=payload.training_samples_count or 50000,
+        training_dataset_name=payload.training_dataset_name or "CICIoT2023-Production-Evaluation",
+        training_samples_count=payload.training_samples_count or 0,
         features_list=payload.features_list or [],
-        roc_auc=payload.roc_auc or 0.985,
-        precision_score=payload.precision_score or 0.962,
-        recall_score=payload.recall_score or 0.954,
-        f1_score=payload.f1_score or 0.958,
+        roc_auc=payload.roc_auc,
+        precision_score=payload.precision_score,
+        recall_score=payload.recall_score,
+        f1_score=payload.f1_score,
         created_by=context.user_id or "ML_ENGINEER"
     )
     db.add(model)
     await db.flush()
 
     return {"status": "REGISTERED", "model_id": model.id, "artifact_signature": sig}
+
 
 
 @router.post("/models/{id}/promote", summary="Promote Model Lifecycle Stage")
@@ -102,7 +103,7 @@ async def promote_model(
     db: AsyncSession = Depends(get_db)
 ):
     """Promotes a model stage (STAGING -> CANARY -> PRODUCTION)."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     promoted = await ModelSecurityGovernanceService.promote_model(
         db=db,
         tenant_id=tenant_id,
@@ -120,7 +121,7 @@ async def rollback_model(
     db: AsyncSession = Depends(get_db)
 ):
     """Rolls back a model version."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     rb = await ModelSecurityGovernanceService.rollback_model(db, tenant_id, id)
     return {"status": "ROLLED_BACK", "model_version": rb.model_version}
 
@@ -132,7 +133,7 @@ async def verify_signature(
     db: AsyncSession = Depends(get_db)
 ):
     """Verifies HMAC-SHA256 signature for model artifact."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = select(AIModelGovernance).where(AIModelGovernance.id == id, AIModelGovernance.tenant_id == tenant_id)
     model = (await db.execute(stmt)).scalar_one_or_none()
     if not model:
@@ -154,7 +155,7 @@ async def get_drift(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves feature and prediction drift metrics (PSI and KS-test)."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ModelDriftMonitoringService.get_latest_drift_metrics(db, tenant_id)
 
 
@@ -164,7 +165,7 @@ async def get_quality(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves precision, recall, F1, latency, and throughput metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ModelDriftMonitoringService.get_detection_quality(db, tenant_id)
 
 
@@ -174,7 +175,7 @@ async def execute_multi_model(
     context: TenantContext = Depends(resolve_tenant_context)
 ):
     """Runs supervised, anomaly, behavioral, and ensemble scoring with XAI attribution."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return MultiModelDetectionService.execute_multi_model_inference(
         features=payload.features,
         tenant_id=tenant_id,
@@ -188,7 +189,7 @@ async def list_adversarial_events(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists mitigated adversarial attacks, prompt injections, and data poisoning attempts."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = (
         select(AIAdversarialEvent)
         .where(AIAdversarialEvent.tenant_id == tenant_id)
@@ -218,7 +219,7 @@ async def copilot_reason(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes multi-step analyst reasoning with prompt injection defense and human-gated remediation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     user_id = context.user_id or "SOC_ANALYST"
     return await AICopilotV2Service.chat_reason(
         db=db,
@@ -227,3 +228,4 @@ async def copilot_reason(
         prompt=payload.prompt,
         incident_id=payload.incident_id
     )
+

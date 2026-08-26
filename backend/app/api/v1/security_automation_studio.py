@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.playbook_builder_service import PlaybookBuilderService
 from backend.app.services.playbook_engine_service import PlaybookEngineService
 from backend.app.services.automation_studio_posture_service import AutomationStudioPostureService
@@ -45,7 +45,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated automation studio scorecard metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AutomationStudioPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -56,7 +56,7 @@ async def list_playbooks(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active playbooks for a tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PlaybookBuilderService.list_playbooks(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -67,7 +67,7 @@ async def create_playbook(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new DAG automation playbook."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PlaybookBuilderService.create_playbook(
         db=db,
         tenant_id=tenant_id,
@@ -85,7 +85,7 @@ async def list_executions(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists recent playbook execution runs."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PlaybookEngineService.list_executions(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -96,7 +96,7 @@ async def simulate_execution(
     db: AsyncSession = Depends(get_db)
 ):
     """Performs a dry-run execution simulation through all DAG steps."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PlaybookEngineService.simulate_execution(
         db=db,
         tenant_id=tenant_id,
@@ -112,5 +112,5 @@ async def list_templates(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists pre-built turnkey automation templates."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PlaybookBuilderService.list_templates(db=db, tenant_id=tenant_id, limit=limit)

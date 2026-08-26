@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.external_recon_service import ExternalReconService
 from backend.app.services.ctem_prioritization_service import CTEMPrioritizationService
 from backend.app.services.darkweb_brand_monitor_service import DarkWebBrandMonitorService
@@ -41,7 +41,7 @@ async def get_asm_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated ASM posture score and perimeter exposure metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ASMPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -53,7 +53,7 @@ async def list_external_assets(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists discovered external perimeter assets and open ports."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ExternalReconService.list_external_assets(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -64,7 +64,7 @@ async def discover_external_domain(
     db: AsyncSession = Depends(get_db)
 ):
     """Enrolls a new external domain or IP into the asset inventory."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ExternalReconService.discover_new_domain(
         db=db,
         tenant_id=tenant_id,
@@ -81,7 +81,7 @@ async def list_dangling_dns(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists dangling DNS records susceptible to subdomain takeover."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ExternalReconService.list_dangling_dns(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -93,7 +93,7 @@ async def list_darkweb_credentials(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists compromised corporate credentials found on the dark web."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DarkWebBrandMonitorService.list_credential_leaks(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -105,7 +105,7 @@ async def list_brand_typosquats(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists typosquatted lookalike domains impersonating the brand."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DarkWebBrandMonitorService.list_brand_alerts(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -116,5 +116,5 @@ async def get_ctem_prioritized_exposures(
     db: AsyncSession = Depends(get_db)
 ):
     """Returns prioritized external exposures sorted by CTEM mobilization urgency."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CTEMPrioritizationService.list_prioritized_exposures(db=db, tenant_id=tenant_id)

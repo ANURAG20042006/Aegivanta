@@ -66,9 +66,15 @@ class AutonomousMissionService:
         cls,
         db: AsyncSession,
         tenant_id: str = "default-tenant",
-        limit: int = 20
+        limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """Lists autonomous defense missions, seeding defaults if empty."""
+        """Lists autonomous defense missions. In demo/lab mode, seeds defaults if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(AutonomousDefenseMission)
             .where(AutonomousDefenseMission.tenant_id == tenant_id)
@@ -77,7 +83,7 @@ class AutonomousMissionService:
         )
         missions = result.scalars().all()
 
-        if not missions:
+        if not missions and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(AutonomousDefenseMission)
@@ -88,6 +94,7 @@ class AutonomousMissionService:
             missions = result2.scalars().all()
 
         return [cls._serialize(m) for m in missions]
+
 
     @classmethod
     async def create_mission(

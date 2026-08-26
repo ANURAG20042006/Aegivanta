@@ -111,10 +111,17 @@ class ThreatHuntingService:
                 raise SecurityEnvironmentError("Production threat hunting requires an active database session. Simulated empty returns are prohibited.")
             return {
                 "entity": entity,
-                "execution_time_ms": round((time.perf_counter() - t0) * 1000, 2),
+                "total_matches": 0,
                 "total_matched": 0,
+                "result_count": 0,
+                "limit": bounded_limit,
+                "offset": bounded_offset,
+                "duration_ms": round((time.perf_counter() - t0) * 1000.0, 2),
+                "execution_time_ms": round((time.perf_counter() - t0) * 1000.0, 2),
+                "executed_by": executed_by,
                 "results": []
             }
+
 
         entity_lower = entity.lower().strip()
         if entity_lower in ["events", "security_events", "telemetry"]:

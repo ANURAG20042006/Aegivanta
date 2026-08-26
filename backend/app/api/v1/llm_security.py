@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.llm_guardrail_service import LLMGuardrailService
 from backend.app.services.shadow_ai_service import ShadowAIService
 from backend.app.services.rag_security_service import RAGSecurityService
@@ -51,7 +51,7 @@ async def get_ai_security_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates unified AI/LLM security posture score and key metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AIPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -63,7 +63,7 @@ async def inspect_prompt(
     db: AsyncSession = Depends(get_db)
 ):
     """Inspects prompt inputs for injection attacks, PII, and system prompt leaks."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await LLMGuardrailService.inspect_prompt(
         db=db,
         tenant_id=tenant_id,
@@ -80,7 +80,7 @@ async def list_llm_events(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists audit events for prompt injections, jailbreaks, and PII extractions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await LLMGuardrailService.list_events(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -92,7 +92,7 @@ async def list_shadow_ai_tools(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists consumer GenAI tools discovered on corporate network."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ShadowAIService.list_discovered_apps(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -104,7 +104,7 @@ async def toggle_shadow_ai_block(
     db: AsyncSession = Depends(get_db)
 ):
     """Blocks or unblocks a Shadow AI application for corporate endpoints."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     res = await ShadowAIService.toggle_block_status(
         db=db,
         tenant_id=tenant_id,
@@ -122,7 +122,7 @@ async def list_vectordb_audits(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists vector database security audit records."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await RAGSecurityService.list_audits(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -133,7 +133,7 @@ async def scan_vectordb_collection(
     db: AsyncSession = Depends(get_db)
 ):
     """Runs a live security audit on a target vector DB index."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await RAGSecurityService.scan_collection(
         db=db,
         tenant_id=tenant_id,

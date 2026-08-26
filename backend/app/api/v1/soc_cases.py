@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.soc_case_management_service import SOCCaseManagementService
 from backend.app.services.evidence_custody_service import EvidenceCustodyService
 from backend.app.core.exceptions import SentinelAIException
@@ -74,7 +74,7 @@ async def list_cases(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists all SOC investigation cases for the tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     cases = await SOCCaseManagementService.list_cases(
         db=db,
         tenant_id=tenant_id,
@@ -109,7 +109,7 @@ async def create_case(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new SOC investigation case."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     case = await SOCCaseManagementService.create_case(
         db=db,
         tenant_id=tenant_id,
@@ -134,7 +134,7 @@ async def get_case_details(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves full case details including timeline, tasks, comments, and audit history."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     details = await SOCCaseManagementService.get_case_details(db, tenant_id, id)
     if not details:
         raise SentinelAIException(status_code=404, detail="SOC Case not found.")
@@ -149,7 +149,7 @@ async def update_case_status(
     db: AsyncSession = Depends(get_db)
 ):
     """Transitions case status across the 9 lifecycle states."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SOCCaseManagementService.update_case_status(
         db=db,
         tenant_id=tenant_id,
@@ -166,7 +166,7 @@ async def add_case_comment(
     db: AsyncSession = Depends(get_db)
 ):
     """Adds an analyst investigation note / comment to a case."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SOCCaseManagementService.add_case_comment(
         db=db,
         tenant_id=tenant_id,
@@ -185,7 +185,7 @@ async def add_case_task(
     db: AsyncSession = Depends(get_db)
 ):
     """Adds a containment or investigation subtask to a case."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SOCCaseManagementService.add_case_task(
         db=db,
         tenant_id=tenant_id,
@@ -206,7 +206,7 @@ async def attach_evidence_to_case(
     db: AsyncSession = Depends(get_db)
 ):
     """Registers and cryptographically fingerprints forensic evidence item."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     item = await EvidenceCustodyService.register_evidence(
         db=db,
         tenant_id=tenant_id,
@@ -236,7 +236,7 @@ async def list_case_evidence(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists all forensic evidence items attached to a case."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCustodyService.list_case_evidence(db, tenant_id, case_id=id)
 
 
@@ -247,7 +247,7 @@ async def verify_evidence_integrity(
     db: AsyncSession = Depends(get_db)
 ):
     """Recalculates SHA-256 hash against current stored payload to verify zero data tampering."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCustodyService.verify_evidence_integrity(db, tenant_id, id)
 
 
@@ -259,7 +259,7 @@ async def transfer_evidence_custody(
     db: AsyncSession = Depends(get_db)
 ):
     """Records an immutable chain of custody transfer event."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCustodyService.transfer_custody(
         db=db,
         tenant_id=tenant_id,

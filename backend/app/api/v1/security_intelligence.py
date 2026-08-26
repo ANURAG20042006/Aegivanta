@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.security_intelligence_service import SecurityIntelligenceService
 
 router = APIRouter(prefix="", tags=["Security Intelligence & Coverage"])
@@ -15,7 +15,7 @@ async def get_coverage_gaps(
     db: AsyncSession = Depends(get_db)
 ):
     """Identifies techniques without detection rules and provides recommended telemetry."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityIntelligenceService.get_coverage_gaps(db, tenant_id)
 
 
@@ -25,7 +25,7 @@ async def get_attack_paths(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates multi-hop attack path risk graph, blast radius, and containment cut-points."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityIntelligenceService.get_attack_paths(db, tenant_id)
 
 
@@ -35,7 +35,7 @@ async def get_asset_risk_scores(
     db: AsyncSession = Depends(get_db)
 ):
     """Computes dynamic 0–100 risk score and explainable factor breakdown for protected assets."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityIntelligenceService.get_asset_risk_scores(db, tenant_id)
 
 
@@ -45,5 +45,5 @@ async def get_control_effectiveness(
     db: AsyncSession = Depends(get_db)
 ):
     """Measures empirical threat mitigation performance of active security controls."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityIntelligenceService.get_control_effectiveness(db, tenant_id)

@@ -210,7 +210,13 @@ class AdversarialDefenseService:
         tenant_id: str = "default-tenant",
         limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """Lists adversarial attack events, seeding defaults on first run."""
+        """Lists adversarial attack events. In demo/lab mode, seeds baseline events if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(AdversarialAttackEvent)
             .where(AdversarialAttackEvent.tenant_id == tenant_id)
@@ -219,7 +225,7 @@ class AdversarialDefenseService:
         )
         events = result.scalars().all()
 
-        if not events:
+        if not events and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(AdversarialAttackEvent)
@@ -231,25 +237,66 @@ class AdversarialDefenseService:
 
         return [cls._serialize(e) for e in events]
 
+    list_events = list_attack_events
+
+
     @classmethod
     async def get_defense_summary(
         cls,
         db: AsyncSession,
         tenant_id: str = "default-tenant"
     ) -> Dict[str, Any]:
-        """Returns the adversarial defense platform scorecard."""
+        """Returns dynamic adversarial defense scorecard derived from active database records."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
+        result = await db.execute(
+            select(AdversarialAttackEvent)
+            .where(AdversarialAttackEvent.tenant_id == tenant_id)
+            .order_by(AdversarialAttackEvent.detected_at.desc())
+        )
+        events = result.scalars().all()
+
+        if not events and is_production:
+            return {
+                "status": "NO_DATA",
+                "adversarial_defense_score": None,
+                "total_attacks_detected_30d": 0,
+                "total_attacks_blocked_30d": 0,
+                "block_rate": 0.0,
+                "attack_type_breakdown": {},
+                "defense_mechanisms_active": [
+                    "ADVERSARIAL_INPUT_DETECTION",
+                    "QUERY_RATE_LIMITING"
+                ],
+                "avg_defense_latency_ms": 0.0,
+                "evaluated_at": datetime.now(timezone.utc).isoformat()
+            }
+
+        if not events:
+            await cls._seed_defaults(db, tenant_id)
+            result2 = await db.execute(
+                select(AdversarialAttackEvent)
+                .where(AdversarialAttackEvent.tenant_id == tenant_id)
+            )
+            events = result2.scalars().all()
+
+        total = len(events)
+        blocked = sum(1 for e in events if e.blocked)
+        rate = round(blocked / max(total, 1), 2)
+        breakdown: Dict[str, int] = {}
+        for e in events:
+            breakdown[e.attack_type] = breakdown.get(e.attack_type, 0) + 1
+
         return {
-            "adversarial_defense_score": 99.1,
-            "total_attacks_detected_30d": 312,
-            "total_attacks_blocked_30d": 312,
-            "block_rate": 1.0,
-            "attack_type_breakdown": {
-                "EVASION": 141,
-                "MODEL_EXTRACTION": 98,
-                "MEMBERSHIP_INFERENCE": 47,
-                "POISONING": 21,
-                "PROMPT_INJECTION": 5
-            },
+            "adversarial_defense_score": round(rate * 100.0, 1),
+            "total_attacks_detected_30d": total,
+            "total_attacks_blocked_30d": blocked,
+            "block_rate": rate,
+            "attack_type_breakdown": breakdown,
             "defense_mechanisms_active": [
                 "ADVERSARIAL_INPUT_DETECTION",
                 "DIFFERENTIAL_PRIVACY_OUTPUT_NOISE",

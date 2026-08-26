@@ -85,6 +85,9 @@ _DRIFT_SEEDS = [
 ]
 
 
+from backend.app.config import settings
+
+
 class DriftMonitoringService:
 
     @classmethod
@@ -95,6 +98,11 @@ class DriftMonitoringService:
         limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Lists all drift monitoring records for all models."""
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(MLModelDriftRecord)
             .where(MLModelDriftRecord.tenant_id == tenant_id)
@@ -103,7 +111,7 @@ class DriftMonitoringService:
         )
         records = result.scalars().all()
 
-        if not records:
+        if not records and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(MLModelDriftRecord)
@@ -121,15 +129,62 @@ class DriftMonitoringService:
         db: AsyncSession,
         tenant_id: str = "default-tenant"
     ) -> Dict[str, Any]:
-        """Returns the drift monitoring platform summary."""
+        """Returns dynamic drift monitoring platform summary derived from active database records."""
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
+        result = await db.execute(
+            select(MLModelDriftRecord)
+            .where(MLModelDriftRecord.tenant_id == tenant_id)
+            .order_by(MLModelDriftRecord.detected_at.desc())
+        )
+        records = result.scalars().all()
+
+        if not records and is_production:
+            return {
+                "status": "NO_DATA",
+                "drift_monitoring_score": None,
+                "models_monitored": 0,
+                "models_with_no_drift": 0,
+                "models_with_low_drift": 0,
+                "models_with_medium_drift": 0,
+                "models_with_high_drift": 0,
+                "auto_retrain_triggered_this_week": 0,
+                "drift_method_primary": "PSI",
+                "drift_threshold_alert": 0.05,
+                "drift_threshold_retrain": 0.07,
+                "evaluated_at": datetime.now(timezone.utc).isoformat()
+            }
+
+        if not records:
+            # In demo/lab mode, seed baseline if empty
+            await cls._seed_defaults(db, tenant_id)
+            result2 = await db.execute(
+                select(MLModelDriftRecord)
+                .where(MLModelDriftRecord.tenant_id == tenant_id)
+            )
+            records = result2.scalars().all()
+
+        unique_models = set(r.model_id for r in records)
+        no_drift = sum(1 for r in records if r.drift_severity == "NONE")
+        low_drift = sum(1 for r in records if r.drift_severity == "LOW")
+        med_drift = sum(1 for r in records if r.drift_severity == "MEDIUM")
+        high_drift = sum(1 for r in records if r.drift_severity in ["HIGH", "CRITICAL"])
+        retrains = sum(1 for r in records if r.auto_retrain_triggered)
+
+        avg_drift = sum(r.data_drift_score for r in records) / max(len(records), 1)
+        score = round(max(0.0, 100.0 - (avg_drift * 100.0)), 1)
+
         return {
-            "drift_monitoring_score": 96.2,
-            "models_monitored": 5,
-            "models_with_no_drift": 3,
-            "models_with_low_drift": 1,
-            "models_with_medium_drift": 1,
-            "models_with_high_drift": 0,
-            "auto_retrain_triggered_this_week": 1,
+            "drift_monitoring_score": score,
+            "models_monitored": len(unique_models) or len(records),
+            "models_with_no_drift": no_drift,
+            "models_with_low_drift": low_drift,
+            "models_with_medium_drift": med_drift,
+            "models_with_high_drift": high_drift,
+            "auto_retrain_triggered_this_week": retrains,
             "drift_method_primary": "PSI",
             "drift_threshold_alert": 0.05,
             "drift_threshold_retrain": 0.07,
@@ -156,6 +211,7 @@ class DriftMonitoringService:
                 detected_at=datetime.now(timezone.utc)
             ))
         await db.flush()
+
 
     @staticmethod
     def _serialize(r: MLModelDriftRecord) -> Dict[str, Any]:

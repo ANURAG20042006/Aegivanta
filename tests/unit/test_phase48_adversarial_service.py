@@ -13,13 +13,32 @@ from backend.app.models.ai_ml_model_platform import AdversarialAttackEvent
 @pytest.mark.asyncio
 async def test_get_defense_summary():
     db = AsyncMock()
+    mock_event = AdversarialAttackEvent(
+        id="evt-1",
+        tenant_id="tenant-ml-test",
+        model_id="cat-001",
+        model_name="CatBoost-ThreatClassifier",
+        attack_type="EVASION",
+        attack_severity="HIGH",
+        confidence_score=0.96,
+        defense_mechanism="ADVERSARIAL_INPUT_DETECTION",
+        blocked=True,
+        defense_latency_ms=1.1
+    )
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = [mock_event]
+    mock_result = MagicMock()
+    mock_result.scalars.return_value = mock_scalars
+    db.execute.return_value = mock_result
+
     summary = await AdversarialDefenseService.get_defense_summary(db=db, tenant_id="tenant-ml-test")
     assert summary["adversarial_defense_score"] >= 95.0
     assert summary["block_rate"] == 1.0
-    assert summary["total_attacks_detected_30d"] == 312
-    assert summary["total_attacks_blocked_30d"] == 312
+    assert summary["total_attacks_detected_30d"] == 1
+    assert summary["total_attacks_blocked_30d"] == 1
     assert "EVASION" in summary["attack_type_breakdown"]
     assert len(summary["defense_mechanisms_active"]) >= 3
+
 
 
 @pytest.mark.asyncio

@@ -92,7 +92,13 @@ class ProductionReadinessAuditService:
         tenant_id: str = "default-tenant",
         limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """Lists all production readiness gates, seeding defaults if empty."""
+        """Lists all production readiness gates. In demo/lab mode, seeds baseline gates if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(ProductionReadinessGate)
             .where(ProductionReadinessGate.tenant_id == tenant_id)
@@ -101,7 +107,7 @@ class ProductionReadinessAuditService:
         )
         gates = result.scalars().all()
 
-        if not gates:
+        if not gates and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(ProductionReadinessGate)
@@ -112,6 +118,7 @@ class ProductionReadinessAuditService:
             gates = result2.scalars().all()
 
         return [cls._serialize_gate(g) for g in gates]
+
 
     @classmethod
     async def _seed_defaults(cls, db: AsyncSession, tenant_id: str) -> None:

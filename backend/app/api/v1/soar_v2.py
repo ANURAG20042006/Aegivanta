@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.soar_orchestrator_v2 import SOAROrchestratorV2
 from backend.app.services.soar_connector_service import SOARConnectorService
 from backend.app.models.soar_v2 import DeclarativePlaybook, SOARExecutionSession, SOARKillSwitch
@@ -49,7 +49,7 @@ async def list_playbooks(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves all declarative SOAR playbooks configured for the tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = select(DeclarativePlaybook).where(DeclarativePlaybook.tenant_id == tenant_id)
     playbooks = list((await db.execute(stmt)).scalars().all())
 
@@ -98,7 +98,7 @@ async def create_playbook(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates and validates a new declarative SOAR playbook."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     valid, err = SOAROrchestratorV2.validate_playbook_definition(payload.steps)
     if not valid:
         raise SentinelAIException(status_code=400, detail=err)
@@ -129,7 +129,7 @@ async def execute_playbook(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes a SOAR playbook in active containment mode."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     session = await SOAROrchestratorV2.execute_playbook_session(
         db=db,
         tenant_id=tenant_id,
@@ -155,7 +155,7 @@ async def dry_run_playbook(
     db: AsyncSession = Depends(get_db)
 ):
     """Simulates playbook execution without modifying active infrastructure state."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     session = await SOAROrchestratorV2.execute_playbook_session(
         db=db,
         tenant_id=tenant_id,
@@ -179,7 +179,7 @@ async def list_executions(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists past SOAR execution sessions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = (
         select(SOARExecutionSession)
         .where(SOARExecutionSession.tenant_id == tenant_id)
@@ -224,7 +224,7 @@ async def get_kill_switch_status(
     db: AsyncSession = Depends(get_db)
 ):
     """Returns the current state of the SOAR emergency containment kill switch."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     is_active = await SOAROrchestratorV2.is_kill_switch_active(db, tenant_id)
     return {"is_active": is_active, "tenant_id": tenant_id}
 
@@ -236,7 +236,7 @@ async def toggle_kill_switch(
     db: AsyncSession = Depends(get_db)
 ):
     """Activates or deactivates the emergency containment kill switch."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     ks = await SOAROrchestratorV2.toggle_kill_switch(
         db=db,
         tenant_id=tenant_id,
@@ -253,7 +253,7 @@ async def list_connectors(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves all registered SOAR security connectors and their health status."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SOARConnectorService.list_connectors(db, tenant_id)
 
 

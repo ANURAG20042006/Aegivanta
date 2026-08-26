@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.dlp_inspection_service import DLPInspectionService
 from backend.app.services.tokenization_vault_service import TokenizationVaultService
 from backend.app.services.dspm_shadow_data_service import DSPMShadowDataService
@@ -51,7 +51,7 @@ async def get_dlp_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates composite DLP posture score and key data protection metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DLPPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -63,7 +63,7 @@ async def list_dlp_policies(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active sensitive data inspection policies."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DLPInspectionService.list_policies(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -85,7 +85,7 @@ async def list_dlp_incidents(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists intercepted DLP data transmission violations."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DLPInspectionService.list_incidents(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -97,7 +97,7 @@ async def list_token_vault(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active cryptographic tokenization vault entries."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await TokenizationVaultService.list_tokens(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -108,7 +108,7 @@ async def tokenize_data(
     db: AsyncSession = Depends(get_db)
 ):
     """Tokenizes sensitive data into a format-preserving surrogate token."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await TokenizationVaultService.tokenize_data(
         db=db,
         tenant_id=tenant_id,
@@ -125,7 +125,7 @@ async def detokenize_data(
     db: AsyncSession = Depends(get_db)
 ):
     """Reversibly detokenizes a surrogate token if requestor role is authorized."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await TokenizationVaultService.detokenize_data(
         db=db,
         tenant_id=tenant_id,
@@ -142,5 +142,5 @@ async def list_shadow_data(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists discovered cloud storage buckets and database assets containing sensitive data."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DSPMShadowDataService.list_shadow_data_stores(db=db, tenant_id=tenant_id, limit=limit)

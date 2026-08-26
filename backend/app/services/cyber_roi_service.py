@@ -24,7 +24,13 @@ class CyberROIService:
         tenant_id: str = "default-tenant",
         limit: int = 20
     ) -> List[Dict[str, Any]]:
-        """Lists historical Cyber ROI records, seeding defaults on first run."""
+        """Lists historical Cyber ROI records. In demo/lab mode, seeds baseline quarters if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(CyberROIRecord)
             .where(CyberROIRecord.tenant_id == tenant_id)
@@ -33,7 +39,7 @@ class CyberROIService:
         )
         records = result.scalars().all()
 
-        if not records:
+        if not records and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(CyberROIRecord)
@@ -52,6 +58,12 @@ class CyberROIService:
         tenant_id: str = "default-tenant"
     ) -> Dict[str, Any]:
         """Returns the most recent Cyber ROI record."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(CyberROIRecord)
             .where(CyberROIRecord.tenant_id == tenant_id)
@@ -60,7 +72,7 @@ class CyberROIService:
         )
         record = result.scalars().first()
 
-        if not record:
+        if not record and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(CyberROIRecord)
@@ -70,7 +82,15 @@ class CyberROIService:
             )
             record = result2.scalars().first()
 
-        return cls._serialize(record) if record else {}
+        return cls._serialize(record) if record else {
+            "status": "NO_DATA",
+            "net_annual_cyber_benefit": 0.0,
+            "total_roi_percentage": 0.0,
+            "annual_investment": 0.0,
+            "total_risk_prevented": 0.0,
+            "breach_reduction_percentage": 0.0
+        }
+
 
     @classmethod
     async def _seed_defaults(cls, db: AsyncSession, tenant_id: str) -> None:

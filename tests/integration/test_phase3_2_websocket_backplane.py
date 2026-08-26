@@ -41,8 +41,9 @@ async def test_multi_instance_websocket_redis_pubsub_backplane():
     client_on_a = MockWebSocket("client-A")
     client_on_b = MockWebSocket("client-B")
 
-    manager_instance_a.active_connections.append(client_on_a)
-    manager_instance_b.active_connections.append(client_on_b)
+    manager_instance_a.active_connections[client_on_a] = "default-tenant"
+    manager_instance_b.active_connections[client_on_b] = "default-tenant"
+
 
     # 1. Broadcast threat incident from Instance A
     incident_data = {

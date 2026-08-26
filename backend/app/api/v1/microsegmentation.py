@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.ztna_controller_service import ZTNAControllerService
 from backend.app.services.microsegmentation_policy_service import MicrosegmentationPolicyService
 from backend.app.services.lateral_movement_detector_service import LateralMovementDetectorService
@@ -49,7 +49,7 @@ async def get_ztna_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates composite ZTNA posture score and key network isolation metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await MicrosegmentationPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -61,7 +61,7 @@ async def list_connectors(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active SDP / ZTNA gateway connector nodes."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ZTNAControllerService.list_connectors(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -73,7 +73,7 @@ async def list_policies(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active L4/L7 microsegmentation policies."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await MicrosegmentationPolicyService.list_policies(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -84,7 +84,7 @@ async def create_policy(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new L4/L7 segment isolation policy."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await MicrosegmentationPolicyService.create_policy(
         db=db,
         tenant_id=tenant_id,
@@ -105,7 +105,7 @@ async def list_sessions(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active identity-bound ZTNA client access sessions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ZTNAControllerService.list_sessions(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -116,7 +116,7 @@ async def terminate_session(
     db: AsyncSession = Depends(get_db)
 ):
     """Revokes and terminates an active ZTNA client session."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ZTNAControllerService.terminate_session(
         db=db,
         tenant_id=tenant_id,
@@ -132,7 +132,7 @@ async def list_lateral_alerts(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists intercepted lateral movement violations."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await LateralMovementDetectorService.list_lateral_alerts(db=db, tenant_id=tenant_id, limit=limit)
 
 

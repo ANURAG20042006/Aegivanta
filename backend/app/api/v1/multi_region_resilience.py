@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.region_replication_service import RegionReplicationService
 from backend.app.services.data_residency_service import DataResidencyService
 from backend.app.services.multi_region_posture_service import MultiRegionPostureService
@@ -47,7 +47,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated multi-region resilience metrics and scorecard."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await MultiRegionPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -59,7 +59,7 @@ async def list_clusters(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active multi-region database clusters."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await RegionReplicationService.list_clusters(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -71,7 +71,7 @@ async def trigger_failover(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes instantaneous active-active regional failover."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await RegionReplicationService.trigger_failover(
         db=db,
         tenant_id=tenant_id,
@@ -88,7 +88,7 @@ async def list_failover_events(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists historical regional failover switchover events."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await RegionReplicationService.list_failover_events(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -100,7 +100,7 @@ async def list_boundaries(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active data residency boundaries."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DataResidencyService.list_boundaries(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -111,7 +111,7 @@ async def create_boundary(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new sovereign data residency boundary."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DataResidencyService.create_boundary(
         db=db,
         tenant_id=tenant_id,

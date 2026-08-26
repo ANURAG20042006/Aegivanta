@@ -1,5 +1,6 @@
 import api from './api';
 import { ReportResponse } from '../types';
+import { authStorage } from '../utils/authStorage';
 
 export const reportService = {
   generateReport: async (format: 'pdf' | 'excel' | 'csv'): Promise<ReportResponse> => {
@@ -13,10 +14,11 @@ export const reportService = {
   downloadFile: async (downloadUrl: string): Promise<void> => {
     // Use fetch here so the auth header is explicit and binary responses are never
     // coerced by Axios into a JSON error payload.
-    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
+    const token = authStorage.getAccessToken();
     const response = await fetch(downloadUrl, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
+
     if (!response.ok) {
       let detail = `HTTP ${response.status}`;
       try {

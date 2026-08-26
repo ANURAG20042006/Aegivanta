@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.edge_fabric_service import EdgeFabricService
 from backend.app.services.edge_inspection_service import EdgeInspectionService
 from backend.app.services.edge_security_posture_service import EdgeSecurityPostureService
@@ -40,7 +40,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated edge posture metrics and health scorecard."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EdgeSecurityPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -52,7 +52,7 @@ async def list_pops(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active global edge PoP ingestion nodes."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EdgeFabricService.list_pops(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -64,7 +64,7 @@ async def list_policies(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active edge inspection policies."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EdgeInspectionService.list_policies(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -75,7 +75,7 @@ async def create_policy(
     db: AsyncSession = Depends(get_db)
 ):
     """Deploys a new edge inspection & DDoS mitigation policy."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EdgeInspectionService.create_policy(
         db=db,
         tenant_id=tenant_id,
@@ -94,5 +94,5 @@ async def list_routes(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists regional ingestion routes to primary core clusters."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EdgeFabricService.list_routes(db=db, tenant_id=tenant_id, limit=limit)

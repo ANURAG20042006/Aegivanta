@@ -25,7 +25,13 @@ class CISOReportService:
         db: AsyncSession,
         tenant_id: str = "default-tenant"
     ) -> Dict[str, Any]:
-        """Returns the most recent CISO board report, seeding defaults on first run."""
+        """Returns the most recent CISO board report."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(CISOBoardReport)
             .where(CISOBoardReport.tenant_id == tenant_id)
@@ -34,8 +40,15 @@ class CISOReportService:
         )
         report = result.scalars().first()
 
-        if not report:
+        if not report and not is_production:
             report = await cls._seed_default_report(db, tenant_id)
+
+        if not report:
+            return {
+                "status": "NO_DATA",
+                "report_title": "No CISO Reports Generated",
+                "executive_summary": "No operational CISO reports have been generated yet for this environment."
+            }
 
         return cls._serialize_report(report)
 
@@ -47,6 +60,12 @@ class CISOReportService:
         limit: int = 20
     ) -> List[Dict[str, Any]]:
         """Lists all CISO board reports for this tenant."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(CISOBoardReport)
             .where(CISOBoardReport.tenant_id == tenant_id)
@@ -55,7 +74,7 @@ class CISOReportService:
         )
         reports = result.scalars().all()
 
-        if not reports:
+        if not reports and not is_production:
             await cls._seed_default_report(db, tenant_id)
             result2 = await db.execute(
                 select(CISOBoardReport)
@@ -66,6 +85,7 @@ class CISOReportService:
             reports = result2.scalars().all()
 
         return [cls._serialize_report(r) for r in reports]
+
 
     @classmethod
     async def generate_report(

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.threat_intelligence_platform_service import ThreatIntelligencePlatformService
 from backend.app.models.threat_intel_platform import ThreatActor, ThreatCampaign, MalwareFamily, IndicatorSighting
 from backend.app.models.threat_intel import ThreatIndicator
@@ -53,7 +53,7 @@ async def list_threat_actors(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves all profiled threat actors for the tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = select(ThreatActor).where(ThreatActor.tenant_id == tenant_id)
     actors = list((await db.execute(stmt)).scalars().all())
     return [
@@ -80,7 +80,7 @@ async def create_threat_actor(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new threat actor profile."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     actor = ThreatActor(
         tenant_id=tenant_id,
         name=payload.name,
@@ -104,7 +104,7 @@ async def list_threat_campaigns(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves all active and historical attack campaigns."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = select(ThreatCampaign).where(ThreatCampaign.tenant_id == tenant_id)
     campaigns = list((await db.execute(stmt)).scalars().all())
     return [
@@ -130,7 +130,7 @@ async def create_threat_campaign(
     db: AsyncSession = Depends(get_db)
 ):
     """Registers a coordinated malicious campaign."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     campaign = ThreatCampaign(
         tenant_id=tenant_id,
         name=payload.name,
@@ -155,7 +155,7 @@ async def correlate_indicator(
     db: AsyncSession = Depends(get_db)
 ):
     """Cross-correlates an indicator across all alerts, incidents, and sightings."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ThreatIntelligencePlatformService.correlate_indicator(
         db=db,
         tenant_id=tenant_id,
@@ -170,7 +170,7 @@ async def record_sighting(
     db: AsyncSession = Depends(get_db)
 ):
     """Records an empirical network sensor sighting for an indicator."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     sighting = await ThreatIntelligencePlatformService.record_sighting(
         db=db,
         tenant_id=tenant_id,

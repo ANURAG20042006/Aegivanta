@@ -67,7 +67,13 @@ class DefenseWarRoomService:
         tenant_id: str = "default-tenant",
         limit: int = 20
     ) -> List[Dict[str, Any]]:
-        """Lists active and historical war rooms, seeding defaults if empty."""
+        """Lists active and historical war rooms. In demo/lab mode, seeds baseline rooms if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(DefenseWarRoomSession)
             .where(DefenseWarRoomSession.tenant_id == tenant_id)
@@ -76,7 +82,7 @@ class DefenseWarRoomService:
         )
         rooms = result.scalars().all()
 
-        if not rooms:
+        if not rooms and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(DefenseWarRoomSession)
@@ -87,6 +93,7 @@ class DefenseWarRoomService:
             rooms = result2.scalars().all()
 
         return [cls._serialize_room(r) for r in rooms]
+
 
     @classmethod
     async def get_war_room_details(

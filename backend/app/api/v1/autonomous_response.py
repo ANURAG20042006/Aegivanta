@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.autonomous_response_service import AutonomousResponseService
 from backend.app.core.exceptions import SentinelAIException
 
@@ -39,7 +39,7 @@ async def get_response_policy(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves the active autonomous response policy and autonomy level for the tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     policy = await AutonomousResponseService.get_or_create_tenant_policy(db, tenant_id)
     return {
         "policy_id": policy.id,
@@ -60,7 +60,7 @@ async def update_response_policy(
     db: AsyncSession = Depends(get_db)
 ):
     """Updates autonomy levels (LEVEL_0_OBSERVE to LEVEL_4_FULL_AUTONOMOUS) and threshold guards."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     policy = await AutonomousResponseService.get_or_create_tenant_policy(db, tenant_id)
     policy.autonomy_level = payload.autonomy_level
     if payload.is_enabled is not None:
@@ -83,7 +83,7 @@ async def simulate_response(
     db: AsyncSession = Depends(get_db)
 ):
     """Performs dry-run simulation of response action, computing blast radius and required approvals."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AutonomousResponseService.simulate_response(
         db=db,
         tenant_id=tenant_id,
@@ -101,7 +101,7 @@ async def execute_response(
     db: AsyncSession = Depends(get_db)
 ):
     """Validates policy constraints and executes or queues response action for human approval."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     actor = context.user_id or "AUTONOMOUS_ENGINE"
     return await AutonomousResponseService.execute_response(
         db=db,
@@ -121,7 +121,7 @@ async def rollback_response(
     db: AsyncSession = Depends(get_db)
 ):
     """Reverts an executed reversible containment action back to original system state."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     actor = context.user_id or "ADMINISTRATOR"
     return await AutonomousResponseService.rollback_response(
         db=db,

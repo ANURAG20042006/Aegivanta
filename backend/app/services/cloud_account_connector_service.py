@@ -105,13 +105,19 @@ class CloudAccountConnectorService:
         ).order_by(desc(CloudAccount.created_at))
         accounts = list((await db.execute(stmt)).scalars().all())
 
-        if not accounts:
-            # Seed default connected cloud accounts
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
+
+        if not accounts and not is_production:
+            # Seed default simulated cloud accounts strictly in DEMO/LAB environment
             defaults = [
-                ("AWS", "AWS-Production-Main", "123456789012", "ASSUME_ROLE", "PRODUCTION", 28, 4),
-                ("AZURE", "Azure-Enterprise-Core", "sub-0987-4321-azure", "SERVICE_PRINCIPAL", "PRODUCTION", 16, 2),
-                ("GCP", "GCP-Data-Analytics-Prod", "aegivanta-data-analytics", "SERVICE_ACCOUNT_KEY", "PRODUCTION", 14, 1),
-                ("KUBERNETES", "EKS-Production-Cluster-01", "eks-prod-us-east-1", "KUBECONFIG", "PRODUCTION", 36, 3)
+                ("AWS", "AWS-Demo-Environment", "123456789012", "ASSUME_ROLE", "DEMO", 28, 4),
+                ("AZURE", "Azure-Demo-Core", "sub-0987-4321-azure", "SERVICE_PRINCIPAL", "DEMO", 16, 2),
+                ("GCP", "GCP-Demo-Analytics", "aegivanta-data-analytics", "SERVICE_ACCOUNT_KEY", "DEMO", 14, 1),
+                ("KUBERNETES", "EKS-Demo-Cluster-01", "eks-demo-us-east-1", "KUBECONFIG", "DEMO", 36, 3)
             ]
             for p, name, ident, auth, env, assets, findings in defaults:
                 inst = CloudAccount(
@@ -135,6 +141,7 @@ class CloudAccountConnectorService:
 
             stmt2 = select(CloudAccount).where(CloudAccount.tenant_id == tenant_id)
             accounts = list((await db.execute(stmt2)).scalars().all())
+
 
         return [
             {

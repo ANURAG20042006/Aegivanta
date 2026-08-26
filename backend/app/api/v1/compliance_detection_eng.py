@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.detection_engineering_service import DetectionEngineeringService
 from backend.app.services.compliance_posture_service import CompliancePostureService
 from backend.app.services.evidence_collector_service import EvidenceCollectorService
@@ -51,7 +51,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated compliance and detection engineering posture."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCollectorService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -63,7 +63,7 @@ async def list_detection_rules(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active autonomous detection rules."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DetectionEngineeringService.list_rules(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -74,7 +74,7 @@ async def create_detection_rule(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a candidate detection-as-code rule."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DetectionEngineeringService.create_rule(
         db=db,
         tenant_id=tenant_id,
@@ -92,7 +92,7 @@ async def test_rule_sandbox(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes a detection rule inside the safe sandbox against test telemetry."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DetectionEngineeringService.test_rule_sandbox(
         db=db,
         tenant_id=tenant_id,
@@ -110,7 +110,7 @@ async def list_compliance_controls(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists compliance controls and automated evidence assessments."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CompliancePostureService.list_controls(
         db=db,
         tenant_id=tenant_id,
@@ -127,7 +127,7 @@ async def list_compliance_reports(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists compliance audit reports."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCollectorService.list_reports(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -138,7 +138,7 @@ async def generate_compliance_report(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates a cryptographic auditor attestation report."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await EvidenceCollectorService.generate_report(
         db=db,
         tenant_id=tenant_id,

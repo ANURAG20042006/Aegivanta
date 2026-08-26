@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.continuous_security_validation_service import ContinuousSecurityValidationService
 
 router = APIRouter(prefix="/security/continuous-validation", tags=["Continuous Security Validation"])
@@ -21,7 +21,7 @@ async def get_latest_validation(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves the latest continuous defense verification report."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ContinuousSecurityValidationService.get_latest_validation_summary(db, tenant_id)
 
 
@@ -31,7 +31,7 @@ async def trigger_validation_run(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes on-demand continuous security defense validation across all 16 domains."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     run = await ContinuousSecurityValidationService.run_validation(db, tenant_id, trigger_type="ON_DEMAND")
     return await ContinuousSecurityValidationService.get_latest_validation_summary(db, tenant_id)
 
@@ -43,5 +43,5 @@ async def get_validation_history(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves historical validation runs for trend analysis."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ContinuousSecurityValidationService.get_validation_history(db, tenant_id, limit)

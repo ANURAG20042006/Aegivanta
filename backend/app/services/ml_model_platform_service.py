@@ -110,7 +110,13 @@ class MLModelPlatformService:
         tenant_id: str = "default-tenant",
         limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """Lists all registered models, seeding defaults on first run."""
+        """Lists all registered models. In demo/lab mode, seeds baseline catalogue if empty."""
+        from backend.app.config import settings
+        is_production = (
+            getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+            getattr(settings, "APP_ENV", "").lower() == "production" or
+            getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+        )
         result = await db.execute(
             select(MLModelRegistryV2)
             .where(MLModelRegistryV2.tenant_id == tenant_id)
@@ -119,7 +125,7 @@ class MLModelPlatformService:
         )
         models = result.scalars().all()
 
-        if not models:
+        if not models and not is_production:
             await cls._seed_defaults(db, tenant_id)
             result2 = await db.execute(
                 select(MLModelRegistryV2)
@@ -130,6 +136,7 @@ class MLModelPlatformService:
             models = result2.scalars().all()
 
         return [cls._serialize(m) for m in models]
+
 
     @classmethod
     async def get_champion_model(

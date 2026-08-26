@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.marketplace_catalog_service import MarketplaceCatalogService
 from backend.app.services.package_installer_service import PackageInstallerService
 from backend.app.services.marketplace_posture_service import MarketplacePostureService
@@ -50,7 +50,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated security marketplace scorecard metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await MarketplacePostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -92,7 +92,7 @@ async def list_installed(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active installed extensions for a tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PackageInstallerService.list_installed(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -103,7 +103,7 @@ async def install_package(
     db: AsyncSession = Depends(get_db)
 ):
     """Installs and hot-reloads a package into the tenant's security environment."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PackageInstallerService.install_package(
         db=db,
         tenant_id=tenant_id,
@@ -120,7 +120,7 @@ async def uninstall_package(
     db: AsyncSession = Depends(get_db)
 ):
     """Uninstalls and deactivates a security extension."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PackageInstallerService.uninstall_package(
         db=db,
         tenant_id=tenant_id,

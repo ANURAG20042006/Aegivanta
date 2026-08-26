@@ -8,7 +8,7 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends
 
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.sre_slo_validation_service import SRESLOValidationService
 from backend.app.services.security_chaos_service import SecurityChaosService
 
@@ -49,7 +49,7 @@ async def run_chaos_simulation(
     context: TenantContext = Depends(resolve_tenant_context)
 ):
     """Executes a non-destructive fault injection simulation and verifies fallback resilience."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return SecurityChaosService.run_chaos_simulation(
         scenario_key=req.scenario_key,
         tenant_id=tenant_id

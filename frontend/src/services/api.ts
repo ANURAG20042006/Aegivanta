@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authStorage } from '../utils/authStorage';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -7,12 +8,16 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor to attach JWT Bearer Token & Request Correlation ID
+// Request Interceptor to attach JWT Bearer Token, X-Tenant-ID & Request Correlation ID
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
+    const token = authStorage.getAccessToken();
+    const activeTenantId = authStorage.getActiveTenantId();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (activeTenantId && !config.headers['X-Tenant-ID']) {
+      config.headers['X-Tenant-ID'] = activeTenantId;
     }
     // Generate correlation X-Request-ID for client requests
     if (!config.headers['X-Request-ID']) {
@@ -28,8 +33,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('aegivanta_token');
-      localStorage.removeItem('sentinel_token');
+      authStorage.clearAccessToken();
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
@@ -37,5 +41,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default api;

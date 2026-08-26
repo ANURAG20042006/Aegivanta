@@ -1,17 +1,19 @@
 import axios from 'axios';
+import { authStorage } from '../utils/authStorage';
 
 const API_BASE = '/api/v1';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  const activeTenantId = localStorage.getItem('active_tenant_id');
+  const token = authStorage.getAccessToken();
+  const activeTenantId = authStorage.getActiveTenantId();
   return {
     headers: {
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(activeTenantId ? { 'X-Tenant-ID': activeTenantId } : {})
     }
   };
 };
+
 
 export interface Organization {
   id: string;

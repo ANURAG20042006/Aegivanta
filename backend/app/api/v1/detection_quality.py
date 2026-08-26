@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.detection_quality_service import DetectionQualityService
 from backend.app.core.exceptions import SentinelAIException
 
@@ -17,7 +17,7 @@ async def get_detection_quality(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates precision, recall, F1, FPR, MTTD, MTTA, and MTTR for the active tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DetectionQualityService.compute_quality_metrics(db, tenant_id, lookback_days)
 
 
@@ -28,7 +28,7 @@ async def get_quality_history(
     db: AsyncSession = Depends(get_db)
 ):
     """Returns chronologically ordered historical quality snapshots for trend charts."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DetectionQualityService.get_quality_history(db, tenant_id, limit)
 
 

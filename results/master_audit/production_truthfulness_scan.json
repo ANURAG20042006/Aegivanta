@@ -1,0 +1,40 @@
+{
+  "all_passed": true,
+  "total_rules": 6,
+  "passed_rules": 6,
+  "failed_rules": 0,
+  "details": [
+    {
+      "rule": "Rule 1: False External Certification Prohibition",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "rule": "Rule 2: Production Mock & Seed Data Isolation",
+      "passed": true,
+      "errors": [],
+      "verified_services_count": 10
+    },
+    {
+      "rule": "Rule 3: Authoritative Multi-Tenant Isolation",
+      "passed": true,
+      "errors": [],
+      "routes_scanned": 89
+    },
+    {
+      "rule": "Rule 4: Authoritative ML Governance & Lineage",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "rule": "Rule 5: Frontend Canonical Token & Tenant Storage",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "rule": "Rule 6: Capability Maturity & Disclosure Integrity",
+      "passed": true,
+      "errors": []
+    }
+  ]
+}

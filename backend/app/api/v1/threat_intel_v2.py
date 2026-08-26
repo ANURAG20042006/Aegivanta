@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.stix_taxii_engine_service import STIXTAXIIEngineService
 from backend.app.services.threat_actor_profiling_service import ThreatActorProfilingService
 from backend.app.services.ioc_decay_service import IOCDecayService
@@ -40,7 +40,7 @@ async def get_cti_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated CTI posture score and global threat metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CTIPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -52,7 +52,7 @@ async def list_threat_actors(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists nation-state and eCrime threat actor profiles."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ThreatActorProfilingService.list_actors(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -64,7 +64,7 @@ async def list_stix_feeds(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists automated STIX/TAXII threat feed subscriptions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await STIXTAXIIEngineService.list_feed_sources(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -75,7 +75,7 @@ async def poll_stix_feed(
     db: AsyncSession = Depends(get_db)
 ):
     """Triggers an on-demand poll and ingestion from the TAXII server."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     res = await STIXTAXIIEngineService.poll_feed_now(db=db, tenant_id=tenant_id, feed_id=feed_id)
     return res or {"error": "Feed not found"}
 
@@ -88,7 +88,7 @@ async def list_indicators(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists CTI indicators with real-time decayed confidence scores."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await IOCDecayService.list_indicators(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -99,7 +99,7 @@ async def list_campaign_heatmaps(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists MITRE ATT&CK techniques with threat heat levels."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ThreatActorProfilingService.list_campaign_heatmaps(db=db, tenant_id=tenant_id)
 
 

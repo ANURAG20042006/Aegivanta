@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.ueba_scoring_service import UEBAScoringService
 from backend.app.services.ai_soc_autonomous_investigator import AISOCAutonomousInvestigator
 from backend.app.services.insider_threat_detector_service import InsiderThreatDetectorService
@@ -48,7 +48,7 @@ async def get_ai_soc_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated AI SOC autonomy score and key metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -60,7 +60,7 @@ async def list_profiles(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists UEBA user risk profiles."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await UEBAScoringService.list_profiles(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -72,7 +72,7 @@ async def list_investigations(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists autonomous AI SOC investigation cases."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCAutonomousInvestigator.list_investigations(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -83,7 +83,7 @@ async def trigger_investigation(
     db: AsyncSession = Depends(get_db)
 ):
     """Launches an autonomous AI SOC investigation on a trigger alert."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCAutonomousInvestigator.trigger_investigation(
         db=db,
         tenant_id=tenant_id,
@@ -99,7 +99,7 @@ async def approve_action(
     db: AsyncSession = Depends(get_db)
 ):
     """Records human-in-the-loop approval and execution audit for an AI proposed action."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCAutonomousInvestigator.approve_decision_action(
         db=db,
         tenant_id=tenant_id,
@@ -117,7 +117,7 @@ async def list_insider_threats(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists detected insider threat indicators."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await InsiderThreatDetectorService.list_insider_threats(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -129,5 +129,5 @@ async def list_decision_audits(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists AI SOC decision traces and human approval audits."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCAutonomousInvestigator.list_decision_audits(db=db, tenant_id=tenant_id, limit=limit)

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.security_validation_service import SecurityValidationService
 
 router = APIRouter(prefix="/security/validation", tags=["Continuous Defense Validation"])
@@ -16,7 +16,7 @@ async def get_latest_validation(
     db: AsyncSession = Depends(get_db)
 ):
     """Returns the most recent security defense validation run and check breakdown."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityValidationService.get_latest_validation(db, tenant_id)
 
 
@@ -26,6 +26,6 @@ async def trigger_validation_run(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes on-demand non-destructive audit of all active security controls."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     run = await SecurityValidationService.run_validation(db, tenant_id, "MANUAL")
     return await SecurityValidationService.get_latest_validation(db, tenant_id)

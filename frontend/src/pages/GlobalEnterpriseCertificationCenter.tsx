@@ -133,7 +133,7 @@ export const GlobalEnterpriseCertificationCenter: React.FC = () => {
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-slate-900/60 to-emerald-950/40 p-5 flex items-center justify-between flex-wrap gap-4 shadow-xl">
         <div className="flex items-center gap-3">
           <span className="px-3.5 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 text-xs font-black border border-amber-400/40 tracking-wider">
-            {summary?.overall_security_posture_rating ?? 'SOVEREIGN_AUTONOMOUS_ENTERPRISE_CERTIFIED'}
+            {summary?.overall_security_posture_rating ?? 'TECHNICAL_CONTROLS_SELF_ATTESTED'}
           </span>
           <span className="text-slate-200 text-sm">
             50/50 Phases Verified & Passing &nbsp;·&nbsp; SLA: <span className="text-emerald-400 font-bold">{summary?.sla_availability_rating ?? '99.999%'}</span>
@@ -144,9 +144,18 @@ export const GlobalEnterpriseCertificationCenter: React.FC = () => {
 
         <span className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30 flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          Production Audit: PASSED
+          Internal Audit: VERIFIED
         </span>
       </div>
+
+      {/* Production Truthfulness & Self-Attestation Notice */}
+      <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 flex items-center gap-3 text-xs text-cyan-200">
+        <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+        <div>
+          <span className="font-semibold text-cyan-300">Technical Control Mapping & Attestation Notice:</span> All framework scores and badges represent internal automated control mappings (FedRAMP High, ISO 27001, SOC 2, HIPAA, PCI DSS) evaluated against technical specifications. Aegivanta is self-attested and not certified by external third-party auditors.
+        </div>
+      </div>
+
 
       {/* Tab Navigation */}
       <div className="flex gap-1 bg-slate-900/60 border border-slate-700/50 rounded-2xl p-1.5 overflow-x-auto">

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.security_simulation_service import SecuritySimulationService
 from backend.app.core.exceptions import SentinelAIException
 
@@ -34,7 +34,7 @@ async def trigger_simulation(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes safe synthetic ATT&CK simulation and measures detection latency."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     sim = await SecuritySimulationService.run_simulation(
         db=db,
         tenant_id=tenant_id,
@@ -50,7 +50,7 @@ async def list_simulations(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists historical simulation runs for the tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     sims = await SecuritySimulationService.list_simulations(db, tenant_id, limit)
     return [
         {
@@ -74,7 +74,7 @@ async def get_simulation_details(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves full simulation execution report with event latency breakdown."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     details = await SecuritySimulationService.get_simulation_details(db, id, tenant_id)
     if not details:
         raise SentinelAIException(status_code=404, detail="Simulation not found.")
@@ -88,7 +88,7 @@ async def rerun_simulation(
     db: AsyncSession = Depends(get_db)
 ):
     """Re-runs an existing simulation technique."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     existing = await SecuritySimulationService.get_simulation_details(db, id, tenant_id)
     if not existing:
         raise SentinelAIException(status_code=404, detail="Simulation not found.")
@@ -107,5 +107,5 @@ async def get_purple_team_report(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates structured purple-team validation report with detection metrics and remediation guidance."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecuritySimulationService.generate_purple_team_report(db, id, tenant_id)

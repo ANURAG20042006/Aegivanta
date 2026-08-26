@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.predictive_forecasting_service import PredictiveForecastingService
 from backend.app.services.adversarial_simulation_service import AdversarialSimulationService
 from backend.app.services.predictive_posture_service import PredictivePostureService
@@ -40,7 +40,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated predictive intelligence score and metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PredictivePostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -53,7 +53,7 @@ async def list_forecasts(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists predictive threat forecasts."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PredictiveForecastingService.list_forecasts(
         db=db,
         tenant_id=tenant_id,
@@ -69,7 +69,7 @@ async def generate_forecast(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates a new predictive threat forecast using ML ensemble models."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PredictiveForecastingService.generate_forecast(
         db=db,
         tenant_id=tenant_id,
@@ -87,7 +87,7 @@ async def list_simulations(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists adversarial attack simulations."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AdversarialSimulationService.list_simulations(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -99,5 +99,5 @@ async def list_horizon_indicators(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists global threat horizon trends."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PredictiveForecastingService.list_horizon_indicators(db=db, tenant_id=tenant_id, limit=limit)

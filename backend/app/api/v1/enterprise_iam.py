@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.pam_service import PAMService
 from backend.app.services.itdr_service import ITDRService
 from backend.app.services.zero_trust_continuous_auth_service import ZeroTrustContinuousAuthService
@@ -64,7 +64,7 @@ async def get_iam_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates unified IAM & Zero Trust 2.0 posture score and key metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await IdentityGovernanceService.get_iam_summary(db=db, tenant_id=tenant_id)
 
 
@@ -76,7 +76,7 @@ async def list_pam_elevations(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists PAM JIT elevation requests and active sessions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PAMService.list_elevations(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -87,7 +87,7 @@ async def request_jit_elevation(
     db: AsyncSession = Depends(get_db)
 ):
     """Submits a JIT privilege elevation request."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     elevation = await PAMService.request_elevation(
         db=db,
         tenant_id=tenant_id,
@@ -114,7 +114,7 @@ async def approve_jit_elevation(
     db: AsyncSession = Depends(get_db)
 ):
     """Approves and activates a JIT elevation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PAMService.approve_elevation(db=db, tenant_id=tenant_id, elevation_id=id)
 
 
@@ -125,7 +125,7 @@ async def revoke_jit_elevation(
     db: AsyncSession = Depends(get_db)
 ):
     """Terminates an active JIT elevation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await PAMService.revoke_elevation(db=db, tenant_id=tenant_id, elevation_id=id)
 
 
@@ -137,7 +137,7 @@ async def list_itdr_detections(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists identity threat detections (MFA fatigue, password spray, impossible travel)."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ITDRService.list_detections(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -148,7 +148,7 @@ async def simulate_itdr_attack(
     db: AsyncSession = Depends(get_db)
 ):
     """Simulates an identity attack vector for ITDR validation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ITDRService.simulate_identity_attack(
         db=db,
         tenant_id=tenant_id,
@@ -181,7 +181,7 @@ async def list_registered_passkeys(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists registered FIDO2 / WebAuthn Passkeys."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await IdentityGovernanceService.list_passkeys(db=db, tenant_id=tenant_id)
 
 
@@ -191,7 +191,7 @@ async def list_identity_scorecards(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists per-user identity posture scorecards and privilege creep status."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await IdentityGovernanceService.list_scorecards(db=db, tenant_id=tenant_id)
 
 
@@ -202,7 +202,7 @@ async def reap_dormant_identities(
     db: AsyncSession = Depends(get_db)
 ):
     """Identifies and reaps accounts inactive for greater than the threshold days."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await IdentityGovernanceService.reap_dormant_identities(
         db=db,
         tenant_id=tenant_id,

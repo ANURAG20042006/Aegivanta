@@ -21,11 +21,12 @@ async def test_generate_attestation():
         tenant_id="tenant-cert-test"
     )
     assert "ATTEST-2026-AEGIVANTA" in att["attestation_serial"]
-    assert att["platform_version"] == "v50.0.0-ENTERPRISE-CERTIFIED"
+    assert "INTERNAL-SECURITY-CONTROLS" in att["platform_version"]
     assert len(att["sha256_integrity_hash"]) == 64
     assert att["overall_posture_score"] == 99.9
     assert att["claims"]["phases_completed"] == 50
     assert att["claims"]["multi_tenancy_verified"] is True
+
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,6 @@
 # =============================================================================
 # AEGIVANTA — FRONTEND SOURCE CODE
-# Total Files: 131
+# Total Files: 132
 # =============================================================================
 
 
@@ -5078,10 +5078,20 @@ export const Sidebar: React.FC = () => {
                 }
               >
                 <span className="sidebar-nav-icon"><Icon className="w-4 h-4" /></span>
-                <span>{item.label}</span>
+                <span className="truncate">{item.label}</span>
+                {item.path === '/global-certification' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    SELF-ATTESTED
+                  </span>
+                )}
                 {item.section === 'Advanced SOC' && (
-                  <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                    P3
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                    PROD
+                  </span>
+                )}
+                {item.section === 'Enterprise SaaS' && item.path !== '/integrations' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    SaaS
                   </span>
                 )}
               </NavLink>
@@ -5089,6 +5099,7 @@ export const Sidebar: React.FC = () => {
           );
         })}
       </div>
+
 
       {/* Simple system status */}
       <div className="sidebar-status-card p-4 m-4 rounded-xl text-xs font-mono space-y-3">
@@ -8336,6 +8347,7 @@ FILE: frontend/src/context/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { authService } from '../services/auth';
+import { authStorage } from '../utils/authStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -8350,9 +8362,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token')
-  );
+  const [token, setToken] = useState<string | null>(authStorage.getAccessToken());
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -8373,19 +8383,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (username: string, password: string) => {
     const res = await authService.login(username, password);
-    localStorage.setItem('aegivanta_token', res.access_token);
-    localStorage.setItem('sentinel_token', res.access_token); // backward compatibility
+    authStorage.setAccessToken(res.access_token);
     setToken(res.access_token);
     const profile = await authService.getMe();
     setUser(profile);
   };
 
   const logout = () => {
-    localStorage.removeItem('aegivanta_token');
-    localStorage.removeItem('sentinel_token');
+    authStorage.clearAccessToken();
     setToken(null);
     setUser(null);
   };
+
 
   return (
     <AuthContext.Provider
@@ -19750,7 +19759,7 @@ export const GlobalEnterpriseCertificationCenter: React.FC = () => {
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-slate-900/60 to-emerald-950/40 p-5 flex items-center justify-between flex-wrap gap-4 shadow-xl">
         <div className="flex items-center gap-3">
           <span className="px-3.5 py-1.5 rounded-xl bg-amber-400/20 text-amber-300 text-xs font-black border border-amber-400/40 tracking-wider">
-            {summary?.overall_security_posture_rating ?? 'SOVEREIGN_AUTONOMOUS_ENTERPRISE_CERTIFIED'}
+            {summary?.overall_security_posture_rating ?? 'TECHNICAL_CONTROLS_SELF_ATTESTED'}
           </span>
           <span className="text-slate-200 text-sm">
             50/50 Phases Verified & Passing &nbsp;·&nbsp; SLA: <span className="text-emerald-400 font-bold">{summary?.sla_availability_rating ?? '99.999%'}</span>
@@ -19761,9 +19770,18 @@ export const GlobalEnterpriseCertificationCenter: React.FC = () => {
 
         <span className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30 flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          Production Audit: PASSED
+          Internal Audit: VERIFIED
         </span>
       </div>
+
+      {/* Production Truthfulness & Self-Attestation Notice */}
+      <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 flex items-center gap-3 text-xs text-cyan-200">
+        <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+        <div>
+          <span className="font-semibold text-cyan-300">Technical Control Mapping & Attestation Notice:</span> All framework scores and badges represent internal automated control mappings (FedRAMP High, ISO 27001, SOC 2, HIPAA, PCI DSS) evaluated against technical specifications. Aegivanta is self-attested and not certified by external third-party auditors.
+        </div>
+      </div>
+
 
       {/* Tab Navigation */}
       <div className="flex gap-1 bg-slate-900/60 border border-slate-700/50 rounded-2xl p-1.5 overflow-x-auto">
@@ -33069,6 +33087,7 @@ export const analyticsService = {
 FILE: frontend/src/services/api.ts
 ================================================================================
 import axios from 'axios';
+import { authStorage } from '../utils/authStorage';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -33077,12 +33096,16 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor to attach JWT Bearer Token & Request Correlation ID
+// Request Interceptor to attach JWT Bearer Token, X-Tenant-ID & Request Correlation ID
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
+    const token = authStorage.getAccessToken();
+    const activeTenantId = authStorage.getActiveTenantId();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (activeTenantId && !config.headers['X-Tenant-ID']) {
+      config.headers['X-Tenant-ID'] = activeTenantId;
     }
     // Generate correlation X-Request-ID for client requests
     if (!config.headers['X-Request-ID']) {
@@ -33098,8 +33121,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('aegivanta_token');
-      localStorage.removeItem('sentinel_token');
+      authStorage.clearAccessToken();
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
@@ -33107,6 +33129,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default api;
 
@@ -33730,6 +33753,7 @@ FILE: frontend/src/services/reports.ts
 ================================================================================
 import api from './api';
 import { ReportResponse } from '../types';
+import { authStorage } from '../utils/authStorage';
 
 export const reportService = {
   generateReport: async (format: 'pdf' | 'excel' | 'csv'): Promise<ReportResponse> => {
@@ -33743,10 +33767,11 @@ export const reportService = {
   downloadFile: async (downloadUrl: string): Promise<void> => {
     // Use fetch here so the auth header is explicit and binary responses are never
     // coerced by Axios into a JSON error payload.
-    const token = localStorage.getItem('aegivanta_token') || localStorage.getItem('sentinel_token');
+    const token = authStorage.getAccessToken();
     const response = await fetch(downloadUrl, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
+
     if (!response.ok) {
       let detail = `HTTP ${response.status}`;
       try {
@@ -33849,19 +33874,21 @@ export const responseService = {
 FILE: frontend/src/services/saas.ts
 ================================================================================
 import axios from 'axios';
+import { authStorage } from '../utils/authStorage';
 
 const API_BASE = '/api/v1';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  const activeTenantId = localStorage.getItem('active_tenant_id');
+  const token = authStorage.getAccessToken();
+  const activeTenantId = authStorage.getActiveTenantId();
   return {
     headers: {
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(activeTenantId ? { 'X-Tenant-ID': activeTenantId } : {})
     }
   };
 };
+
 
 export interface Organization {
   id: string;
@@ -35670,6 +35697,76 @@ export interface ReportResponse {
   format: string;
   generated_at: string;
 }
+
+
+
+================================================================================
+FILE: frontend/src/utils/authStorage.ts
+================================================================================
+/**
+ * frontend/src/utils/authStorage.ts
+ * =================================
+ * Canonical token and tenant storage management for Aegivanta Frontend.
+ * Unifies access across standard REST API, SaaS services, WebSockets, and Reports.
+ */
+
+const TOKEN_KEY_PRIMARY = 'aegivanta_token';
+const TOKEN_KEY_LEGACY = 'sentinel_token';
+const TOKEN_KEY_GENERIC = 'token';
+const TENANT_KEY = 'active_tenant_id';
+
+export const authStorage = {
+  /**
+   * Retrieves active access token with fallback across supported keys.
+   */
+  getAccessToken(): string | null {
+    return (
+      localStorage.getItem(TOKEN_KEY_PRIMARY) ||
+      localStorage.getItem(TOKEN_KEY_LEGACY) ||
+      localStorage.getItem(TOKEN_KEY_GENERIC) ||
+      null
+    );
+  },
+
+  /**
+   * Persists access token across standard keys for backward compatibility.
+   */
+  setAccessToken(token: string): void {
+    localStorage.setItem(TOKEN_KEY_PRIMARY, token);
+    localStorage.setItem(TOKEN_KEY_LEGACY, token);
+    localStorage.setItem(TOKEN_KEY_GENERIC, token);
+  },
+
+  /**
+   * Clears all stored authentication tokens.
+   */
+  clearAccessToken(): void {
+    localStorage.removeItem(TOKEN_KEY_PRIMARY);
+    localStorage.removeItem(TOKEN_KEY_LEGACY);
+    localStorage.removeItem(TOKEN_KEY_GENERIC);
+  },
+
+  /**
+   * Retrieves active tenant ID.
+   */
+  getActiveTenantId(): string | null {
+    return localStorage.getItem(TENANT_KEY) || null;
+  },
+
+  /**
+   * Sets active tenant ID.
+   */
+  setActiveTenantId(tenantId: string): void {
+    localStorage.setItem(TENANT_KEY, tenantId);
+  },
+
+  /**
+   * Clears active tenant ID.
+   */
+  clearActiveTenantId(): void {
+    localStorage.removeItem(TENANT_KEY);
+  }
+};
 
 
 

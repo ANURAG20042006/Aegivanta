@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.security_value_service import SecurityValueService
 from backend.app.core.exceptions import SentinelAIException
 
@@ -17,7 +17,7 @@ async def get_security_value(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates threats blocked, MTTD/MTTA/MTTR, risk reduction %, and historical trend series."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityValueService.get_security_value_metrics(db, tenant_id, lookback_days)
 
 
@@ -27,7 +27,7 @@ async def get_posture_improvements(
     db: AsyncSession = Depends(get_db)
 ):
     """Returns prioritized security actions with estimated impact scores."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityValueService.get_posture_improvements(db, tenant_id)
 
 
@@ -37,7 +37,7 @@ async def get_telemetry_cost_intelligence(
     db: AsyncSession = Depends(get_db)
 ):
     """Analyzes telemetry volume, duplicate trends, and actionable storage savings."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SecurityValueService.get_telemetry_cost_intelligence(db, tenant_id)
 
 

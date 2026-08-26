@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.sbom_engine_service import SBOMEngineService
 from backend.app.services.vex_engine_service import VEXEngineService
 from backend.app.services.slsa_provenance_service import SLSAProvenanceService
@@ -66,7 +66,7 @@ async def get_supply_chain_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates unified supply chain posture score and key metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CICDGatekeeperService.get_supply_chain_summary(db=db, tenant_id=tenant_id)
 
 
@@ -78,7 +78,7 @@ async def list_sbom_components(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists SBOM dependency components and license flags."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SBOMEngineService.list_components(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -89,7 +89,7 @@ async def generate_sbom_export(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates standard CycloneDX 1.5 or SPDX 2.3 SBOM manifest."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SBOMEngineService.generate_sbom_export(db=db, tenant_id=tenant_id, format_type=req.format_type)
 
 
@@ -101,7 +101,7 @@ async def list_vex_statements(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists OpenVEX exploitability statements."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await VEXEngineService.list_statements(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -112,7 +112,7 @@ async def publish_vex_statement(
     db: AsyncSession = Depends(get_db)
 ):
     """Publishes an OpenVEX exploitability statement."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     stmt = await VEXEngineService.publish_statement(
         db=db,
         tenant_id=tenant_id,
@@ -136,7 +136,7 @@ async def export_openvex_document(
     db: AsyncSession = Depends(get_db)
 ):
     """Exports compliant OpenVEX document."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await VEXEngineService.export_openvex_json(db=db, tenant_id=tenant_id)
 
 
@@ -148,7 +148,7 @@ async def list_slsa_attestations(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists SLSA Level 3 provenance build attestations."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SLSAProvenanceService.list_attestations(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -159,7 +159,7 @@ async def verify_slsa_provenance(
     db: AsyncSession = Depends(get_db)
 ):
     """Validates SLSA provenance signature and builder isolation for an artifact."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await SLSAProvenanceService.verify_provenance(
         db=db,
         tenant_id=tenant_id,
@@ -175,7 +175,7 @@ async def list_pipeline_gates(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists CI/CD security gatekeeper policies."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CICDGatekeeperService.list_gates(db=db, tenant_id=tenant_id)
 
 
@@ -186,7 +186,7 @@ async def evaluate_pipeline_gate(
     db: AsyncSession = Depends(get_db)
 ):
     """Evaluates CI/CD deployment against active gatekeeper policy."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CICDGatekeeperService.evaluate_pipeline_gate(
         db=db,
         tenant_id=tenant_id,

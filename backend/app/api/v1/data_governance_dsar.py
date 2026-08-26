@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.data_lineage_service import DataLineageService
 from backend.app.services.legal_hold_service import LegalHoldService
 from backend.app.services.dsar_workflow_service import DSARWorkflowService
@@ -45,7 +45,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated data governance metrics and scorecard."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DataGovernancePostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -57,7 +57,7 @@ async def list_lineage(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active data lineage records across processing stages."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DataLineageService.list_lineage(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -69,7 +69,7 @@ async def list_holds(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active and historical legal hold orders."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await LegalHoldService.list_holds(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -80,7 +80,7 @@ async def create_hold(
     db: AsyncSession = Depends(get_db)
 ):
     """Issues a new forensic legal hold order freezing matching artifacts."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await LegalHoldService.create_hold(
         db=db,
         tenant_id=tenant_id,
@@ -98,7 +98,7 @@ async def list_requests(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active and completed DSAR privacy requests."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DSARWorkflowService.list_requests(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -109,7 +109,7 @@ async def create_request(
     db: AsyncSession = Depends(get_db)
 ):
     """Submits and processes a new DSAR privacy request."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DSARWorkflowService.create_request(
         db=db,
         tenant_id=tenant_id,

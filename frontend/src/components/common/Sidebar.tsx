@@ -185,10 +185,20 @@ export const Sidebar: React.FC = () => {
                 }
               >
                 <span className="sidebar-nav-icon"><Icon className="w-4 h-4" /></span>
-                <span>{item.label}</span>
+                <span className="truncate">{item.label}</span>
+                {item.path === '/global-certification' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    SELF-ATTESTED
+                  </span>
+                )}
                 {item.section === 'Advanced SOC' && (
-                  <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                    P3
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                    PROD
+                  </span>
+                )}
+                {item.section === 'Enterprise SaaS' && item.path !== '/integrations' && (
+                  <span className="ml-auto px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    SaaS
                   </span>
                 )}
               </NavLink>
@@ -196,6 +206,7 @@ export const Sidebar: React.FC = () => {
           );
         })}
       </div>
+
 
       {/* Simple system status */}
       <div className="sidebar-status-card p-4 m-4 rounded-xl text-xs font-mono space-y-3">

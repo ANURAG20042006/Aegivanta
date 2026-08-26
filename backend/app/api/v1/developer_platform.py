@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.developer_api_key_service import DeveloperApiKeyService
 from backend.app.services.webhook_dispatcher_service import WebhookDispatcherService
 from backend.app.services.developer_platform_posture_service import DeveloperPlatformPostureService
@@ -49,7 +49,7 @@ async def get_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated developer platform scorecard metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DeveloperPlatformPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -61,7 +61,7 @@ async def list_keys(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active API keys for a tenant."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DeveloperApiKeyService.list_keys(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -72,7 +72,7 @@ async def create_key(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates a new developer API key with plaintext secret."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DeveloperApiKeyService.create_key(
         db=db,
         tenant_id=tenant_id,
@@ -90,7 +90,7 @@ async def list_webhooks(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active webhook subscriptions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await WebhookDispatcherService.list_subscriptions(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -101,7 +101,7 @@ async def create_webhook(
     db: AsyncSession = Depends(get_db)
 ):
     """Creates a new webhook subscription and generates an HMAC secret."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await WebhookDispatcherService.create_subscription(
         db=db,
         tenant_id=tenant_id,
@@ -117,7 +117,7 @@ async def list_deliveries(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists recent webhook delivery logs."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await WebhookDispatcherService.list_deliveries(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -128,7 +128,7 @@ async def test_dispatch(
     db: AsyncSession = Depends(get_db)
 ):
     """Dispatches a test event with calculated HMAC signature."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await WebhookDispatcherService.test_dispatch(
         db=db,
         tenant_id=tenant_id,

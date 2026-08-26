@@ -90,10 +90,12 @@ def test_production_valid_configuration_passes(monkeypatch):
         APP_ENV="production",
         OPERATING_MODE="PRODUCTION",
         DEBUG=False,
+        DATABASE_URL="postgresql+asyncpg://postgres:SuperSecurePostgresPass2026!@localhost:5432/aegivanta_prod",
         CORS_ORIGINS=["https://soc.sentinelai.internal"]
     )
     # Should complete with zero errors
     validate_production_settings(prod_settings)
+
 
 
 def test_development_test_configuration_passes(monkeypatch):

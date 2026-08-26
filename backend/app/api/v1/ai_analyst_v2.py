@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.ai_soc_analyst_v2_service import AISOCAnalystV2Service
 from backend.app.services.autonomous_correlation_service import AutonomousCorrelationEngine
 
@@ -33,7 +33,7 @@ async def investigate_with_ai(
     Executes structured AI reasoning over verified empirical evidence with
     prompt injection sanitization and mandatory human approval gating for containment.
     """
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AISOCAnalystV2Service.analyze_security_context(
         db=db,
         tenant_id=tenant_id,
@@ -53,7 +53,7 @@ async def get_correlation_graph(
     Returns an explainable multi-domain correlation graph linking endpoint,
     network, identity, threat intel, and Zero-Trust posture.
     """
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AutonomousCorrelationEngine.correlate_incident_context(
         db=db,
         tenant_id=tenant_id,

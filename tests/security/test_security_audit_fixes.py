@@ -239,9 +239,11 @@ def test_production_cors_validation_safety():
         OPERATING_MODE="PRODUCTION",
         SECRET_KEY="high_entropy_unique_production_secret_key_32_chars!",
         POSTGRES_PASSWORD="secure_password_123",
+        DATABASE_URL="postgresql+asyncpg://postgres:secure_password_123@localhost:5432/aegivanta_prod",
         CORS_ORIGINS=["https://sentinelai.io", "https://app.sentinelai.io"]
     )
     validate_production_settings(safe_settings)
+
 
     # Insecure localhost settings must fail
     insecure_settings = Settings(

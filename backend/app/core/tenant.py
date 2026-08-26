@@ -6,11 +6,13 @@ from fastapi import Request, Depends, HTTPException, status
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.config import settings
 from backend.app.database import get_db
 from backend.app.core.dependencies import get_current_user
 from backend.app.models.user import User
 from backend.app.models.tenant import Organization, Tenant, TenantMembership, TenantRole
 from backend.app.core.exceptions import AuthenticationError, PermissionDeniedError, SentinelAIException
+
 
 logger = logging.getLogger("SentinelAI.Tenant")
 
@@ -124,7 +126,23 @@ async def resolve_tenant_context(
     return context
 
 
-from backend.app.config import settings
+def get_enforced_tenant_id(context: Optional[TenantContext]) -> str:
+    """
+    Returns an authoritative tenant_id from the TenantContext.
+    In PRODUCTION mode, strictly fails closed if tenant_id is missing or None.
+    In DEMO/LAB mode, safely returns the tenant_id or explicit 'demo-tenant'.
+    """
+    is_production = (
+        getattr(settings, "OPERATING_MODE", "").upper() == "PRODUCTION" or
+        getattr(settings, "APP_ENV", "").lower() == "production" or
+        getattr(settings, "AEGIVANTA_ENVIRONMENT", "").upper() == "PRODUCTION"
+    )
+    if not context or not context.tenant_id:
+        if is_production:
+            raise PermissionDeniedError("Authoritative tenant context is mandatory in PRODUCTION mode.")
+        return "demo-tenant"
+
+    return context.tenant_id
 
 
 def require_tenant_role(min_role: TenantRole) -> Callable:
@@ -150,3 +168,4 @@ def require_tenant_role(min_role: TenantRole) -> Callable:
         return context
 
     return role_guard
+

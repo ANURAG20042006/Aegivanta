@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.cloud_account_connector_service import CloudAccountConnectorService
 from backend.app.services.cnapp_posture_service import CNAPPPostureService
 from backend.app.services.cloud_workload_protection_service import CloudWorkloadProtectionService
@@ -88,7 +88,7 @@ async def get_cnapp_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates multi-pillar CNAPP security posture score and pillar breakdowns."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CNAPPPostureService.get_cnapp_summary(db=db, tenant_id=tenant_id)
 
 
@@ -98,7 +98,7 @@ async def list_cloud_accounts(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists connected cloud accounts across AWS, Azure, GCP, and Kubernetes."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudAccountConnectorService.list_accounts(db=db, tenant_id=tenant_id)
 
 
@@ -109,7 +109,7 @@ async def connect_cloud_account(
     db: AsyncSession = Depends(get_db)
 ):
     """Onboards a cloud account with encrypted credentials and triggers initial inventory sync."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     account = await CloudAccountConnectorService.connect_account(
         db=db,
         tenant_id=tenant_id,
@@ -136,7 +136,7 @@ async def sync_cloud_account(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes on-demand asset discovery and configuration sync for the cloud account."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudAccountConnectorService.sync_account(db=db, tenant_id=tenant_id, account_id=id)
 
 
@@ -149,7 +149,7 @@ async def list_cwpp_findings(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active runtime threat detections across VMs, Containers, and Kubernetes Pods."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudWorkloadProtectionService.list_findings(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -160,7 +160,7 @@ async def simulate_cwpp_threat(
     db: AsyncSession = Depends(get_db)
 ):
     """Simulates a synthetic workload runtime attack for validation."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudWorkloadProtectionService.simulate_workload_threat(
         db=db,
         tenant_id=tenant_id,
@@ -177,7 +177,7 @@ async def contain_workload(
     db: AsyncSession = Depends(get_db)
 ):
     """Applies governed containment on a compromised workload."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudWorkloadProtectionService.contain_workload(db=db, tenant_id=tenant_id, finding_id=id)
 
 
@@ -189,7 +189,7 @@ async def list_serverless_findings(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists serverless function misconfigurations and overprivileged IAM execution roles."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ServerlessSecurityService.list_findings(db=db, tenant_id=tenant_id)
 
 
@@ -200,7 +200,7 @@ async def audit_serverless_function(
     db: AsyncSession = Depends(get_db)
 ):
     """Audits serverless function for public URLs, unencrypted secrets, and wildcard IAM."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ServerlessSecurityService.audit_function(
         db=db,
         tenant_id=tenant_id,
@@ -221,7 +221,7 @@ async def list_k8s_clusters(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists registered Kubernetes clusters with Pod Security Standard compliance."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await KubernetesSecurityService.list_clusters(db=db, tenant_id=tenant_id)
 
 
@@ -232,7 +232,7 @@ async def enroll_k8s_cluster(
     db: AsyncSession = Depends(get_db)
 ):
     """Enrolls a Kubernetes cluster for continuous manifest and RBAC auditing."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     cluster = await KubernetesSecurityService.enroll_cluster(
         db=db,
         tenant_id=tenant_id,
@@ -260,7 +260,7 @@ async def get_cloud_inventory(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists cloud and container assets across AWS, GCP, Azure, and Kubernetes."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     assets = await CloudAssetInventoryService.list_assets(
         db=db,
         tenant_id=tenant_id,
@@ -277,7 +277,7 @@ async def run_cspm_scan(
     db: AsyncSession = Depends(get_db)
 ):
     """Executes CSPM benchmark and misconfiguration audit across cloud assets."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     summary = await CSPMRuleEngine.run_full_cspm_scan(db=db, tenant_id=tenant_id)
     metrics.aegivanta_cspm_findings_total.set(summary["total_open_findings"])
     return summary
@@ -289,7 +289,7 @@ async def get_cspm_findings(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves open CSPM compliance and misconfiguration findings."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CSPMRuleEngine.list_findings(db=db, tenant_id=tenant_id)
 
 
@@ -300,7 +300,7 @@ async def scan_container_image(
     db: AsyncSession = Depends(get_db)
 ):
     """Scans container image for CVEs, creates SBOM catalog, and verifies signatures."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     res = await ContainerSecurityService.scan_container_image(
         db=db,
         tenant_id=tenant_id,
@@ -318,7 +318,7 @@ async def list_container_scans(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists recent container vulnerability and SBOM scans."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await ContainerSecurityService.list_image_scans(db=db, tenant_id=tenant_id)
 
 
@@ -339,7 +339,7 @@ async def get_cloud_iam_analysis(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves Cloud IAM (CIEM) entitlement risk analysis and privilege escalation paths."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     res = await CloudIAMAnalyzerService.get_iam_risk_analysis(db=db, tenant_id=tenant_id)
     metrics.aegivanta_cloud_iam_privilege_escalation_paths_total.set(res["privilege_escalation_vectors_count"])
     return res
@@ -351,5 +351,5 @@ async def get_cloud_attack_paths(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieves explainable graph-synthesized cloud attack paths."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CloudAttackPathService.list_attack_paths(db=db, tenant_id=tenant_id)

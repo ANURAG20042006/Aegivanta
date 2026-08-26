@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from backend.app.database import get_db
-from backend.app.core.tenant import resolve_tenant_context, TenantContext
+from backend.app.core.tenant import resolve_tenant_context, TenantContext, get_enforced_tenant_id
 from backend.app.services.honeypot_fleet_service import HoneypotFleetService
 from backend.app.services.canary_token_service import CanaryTokenService
 from backend.app.services.adversary_engagement_service import AdversaryEngagementService
@@ -52,7 +52,7 @@ async def get_deception_summary(
     db: AsyncSession = Depends(get_db)
 ):
     """Calculates consolidated deception posture score and key metrics."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await DeceptionPostureService.get_summary(db=db, tenant_id=tenant_id)
 
 
@@ -64,7 +64,7 @@ async def list_honeypots(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists deployed honeypot decoys across corporate segments."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await HoneypotFleetService.list_honeypots(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -75,7 +75,7 @@ async def deploy_honeypot(
     db: AsyncSession = Depends(get_db)
 ):
     """Deploys a new honeypot decoy into target network segment."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await HoneypotFleetService.deploy_honeypot(
         db=db,
         tenant_id=tenant_id,
@@ -94,7 +94,7 @@ async def list_canaries(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active canary tokens."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CanaryTokenService.list_canary_tokens(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -105,7 +105,7 @@ async def generate_canary_token(
     db: AsyncSession = Depends(get_db)
 ):
     """Generates a new traceable canary token."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await CanaryTokenService.generate_token(
         db=db,
         tenant_id=tenant_id,
@@ -123,7 +123,7 @@ async def trigger_canary_token(
     db: AsyncSession = Depends(get_db)
 ):
     """Processes a canary token hit and logs high-fidelity interaction event."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     res = await CanaryTokenService.process_canary_trigger(
         db=db,
         tenant_id=tenant_id,
@@ -141,7 +141,7 @@ async def list_interactions(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists captured adversary keystrokes and honeypot interactions."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AdversaryEngagementService.list_interactions(db=db, tenant_id=tenant_id, limit=limit)
 
 
@@ -153,5 +153,5 @@ async def list_endpoint_lures(
     db: AsyncSession = Depends(get_db)
 ):
     """Lists active deception lures distributed on corporate endpoints."""
-    tenant_id = context.tenant_id or "default-tenant"
+    tenant_id = get_enforced_tenant_id(context)
     return await AdversaryEngagementService.list_endpoint_lures(db=db, tenant_id=tenant_id, limit=limit)
