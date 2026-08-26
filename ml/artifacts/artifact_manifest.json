@@ -1,5 +1,6 @@
 {
   "experiment_id": "EXP-2026-002",
+  "champion_model": "CatBoost",
   "model_version": "catboost-v1.0",
   "model_type": "Boosting",
   "feature_schema_version": "schema-v1.0",
@@ -40,57 +41,64 @@
   "model_n_features_in": 30,
   "preprocessor_hash": "0a9bcc5cc6f4d3a16f694a05df34647ceed59484e5b2cc4453e215644a24d521",
   "model_hash": "a2df2c19e079c4c163c6e4997af2631fa35a743316e77e6a2ef1a3d3c33a5898",
+  "baseline_matrix_hash": "29769728263c1584377886c65aae69a3c6bfbb2824120b82f1e15c0498b1d3e4",
   "training_timestamp": "2026-08-17T00:46:33.580087+00:00",
   "dataset_hash": "63a0675954f5e1d9",
   "git_commit": "e997ad72ef391dd9b88b7077122f194932471bd2",
   "artifacts": {
+    "CatBoost": {
+      "path": "ml/artifacts/catboost.joblib",
+      "type": "joblib",
+      "sha256": "a2df2c19e079c4c163c6e4997af2631fa35a743316e77e6a2ef1a3d3c33a5898",
+      "model_version": "catboost-v1.0"
+    },
     "Random Forest": {
       "path": "ml/artifacts/random_forest.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "8cc472dfdfee0083fbdbaaaab396ac41ab835f374d77c871eaa6f3608dc7cc9f",
+      "model_version": "random_forest-v1.0"
     },
     "XGBoost": {
       "path": "ml/artifacts/xgboost.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "4d48f7396e02313673d3764630da6331a92c13bd60497f208c195c84f22c3c87",
+      "model_version": "xgboost-v1.0"
     },
     "LightGBM": {
       "path": "ml/artifacts/lightgbm.joblib",
-      "type": "joblib"
-    },
-    "CatBoost": {
-      "path": "ml/artifacts/catboost.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "33eb0c8158d7ae335101e3d222f8386974a827415ab47091aabe1c2687b05fd9",
+      "model_version": "lightgbm-v1.0"
     },
     "Decision Tree": {
       "path": "ml/artifacts/decision_tree.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "b355179832421de6a3c1d5cc52707026c061a679fafefbef24875ae28a097077",
+      "model_version": "decision_tree-v1.0"
     },
     "Logistic Regression": {
       "path": "ml/artifacts/logistic_regression.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "e8e8bc9d949eb7984df1ee6b77dcc276fa4574f6b16c23ed653eb9dfbca978c6",
+      "model_version": "logistic_regression-v1.0"
     },
     "SVM": {
       "path": "ml/artifacts/svm.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "a1aa947b74572ca64aaf1a8ff27db1107b0dd2bf27c75b8ed9951f2c39dd97a7",
+      "model_version": "svm-v1.0"
     },
     "KNN": {
       "path": "ml/artifacts/knn.joblib",
-      "type": "joblib"
+      "type": "joblib",
+      "sha256": "eef28ce30d1cadd3a7b75ff8262032d2f9a58a425d89bb7fe3ea2b2610d30e5d",
+      "model_version": "knn-v1.0"
     },
     "Naive Bayes": {
       "path": "ml/artifacts/naive_bayes.joblib",
-      "type": "joblib"
-    },
-    "1D-CNN": {
-      "path": "ml/artifacts/cnn_1d.pt",
-      "type": "pytorch"
-    },
-    "LSTM": {
-      "path": "ml/artifacts/lstm.pt",
-      "type": "pytorch"
-    },
-    "Autoencoder": {
-      "path": "ml/artifacts/autoencoder.pt",
-      "type": "pytorch"
+      "type": "joblib",
+      "sha256": "b42b192f5ea7072d26d006a0b743138a093de41fa5c9aaf9336f02aa9395a659",
+      "model_version": "naive_bayes-v1.0"
     }
   }
 }

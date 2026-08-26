@@ -34,7 +34,10 @@ class RealModelExplainer:
         model_obj = getattr(self.model, "model", self.model)
         model_type = type(model_obj).__name__.lower()
 
-        if any(t in model_type for t in ["xgb", "catboost", "lgbm", "randomforest", "decisiontree", "tree"]):
+        if "catboost" in model_type:
+            self.explainer_type = "SHAP TreeExplainer"
+            self.explainer = "catboost_native"
+        elif any(t in model_type for t in ["xgb", "lgbm", "randomforest", "decisiontree", "tree"]):
             if HAS_SHAP:
                 try:
                     self.explainer = shap.TreeExplainer(model_obj)
@@ -82,6 +85,7 @@ class RealModelExplainer:
         # Check for unsupported model architecture
         model_obj = getattr(self.model, "model", self.model)
         model_type_name = type(model_obj).__name__
+        model_type = model_type_name.lower()
 
         if self.explainer_type == "UnsupportedModel":
             t_exec = (time.time() - t0) * 1000.0
@@ -101,8 +105,54 @@ class RealModelExplainer:
                 "top_features": []
             }
 
-        # 1. SHAP TreeExplainer Evaluation
-        if HAS_SHAP and self.explainer is not None:
+        # 1. CatBoost Native Exact SHAP Feature Attributions
+        if "catboost" in model_type:
+            try:
+                from catboost import Pool
+                cb_pool = Pool(processed_vector)
+                shap_vals = model_obj.get_feature_importance(cb_pool, type="ShapValues")
+                if shap_vals.ndim == 3:
+                    vals = shap_vals[0, 0, :-1]
+                elif shap_vals.ndim == 2:
+                    vals = shap_vals[0, :-1]
+                else:
+                    vals = shap_vals[:-1]
+
+                feature_items = []
+                for i in range(min(num_features, len(vals))):
+                    contrib = float(vals[i])
+                    input_val = float(processed_vector[0, i])
+                    feature_items.append({
+                        "feature": feature_labels[i],
+                        "input_value": round(input_val, 4),
+                        "contribution": round(contrib, 4),
+                        "direction": "positive" if contrib >= 0 else "negative"
+                    })
+
+                feature_items = sorted(feature_items, key=lambda item: abs(item["contribution"]), reverse=True)[:top_n]
+                for rank, item in enumerate(feature_items, 1):
+                    item["rank"] = rank
+
+                t_exec = (time.time() - t0) * 1000.0
+                return {
+                    "explanation_available": True,
+                    "available": True,
+                    "explanation_method": "SHAP TreeExplainer",
+                    "reason": None,
+                    "explainer_type": "SHAP TreeExplainer",
+                    "model_version": model_version,
+                    "prediction": prediction,
+                    "confidence": round(confidence, 4) if confidence is not None else None,
+                    "timestamp": timestamp,
+                    "xai_latency_ms": round(t_exec, 2),
+                    "features": feature_items,
+                    "top_features": feature_items
+                }
+            except Exception as e:
+                logger.warning(f"CatBoost native SHAP calculation failed: {e}")
+
+        # 2. General SHAP TreeExplainer Evaluation
+        if HAS_SHAP and self.explainer is not None and self.explainer != "catboost_native":
             try:
                 shap_values = self.explainer.shap_values(processed_vector)
                 

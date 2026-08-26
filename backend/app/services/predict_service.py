@@ -306,7 +306,10 @@ class PredictService:
                 severity = "Medium"
 
             # Compute Real SHAP Feature Explanation
-            model_ver = metadata.get("model_version", f"{model_name.lower().replace(' ', '_')}-v1.0")
+            if model_name.lower() in ["catboost", "best_model", "champion", "default"]:
+                model_ver = metadata.get("model_version", "catboost-v1.0")
+            else:
+                model_ver = f"{model_name.lower().replace(' ', '_')}-v1.0"
             feature_names = getattr(preprocessor, "selected_feature_names", [])
             explainer = cls.get_explainer(model_name, getattr(model, "model", model), feature_names)
 

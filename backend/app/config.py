@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
-    PROJECT_VERSION: str = "45.0.0"
+    PROJECT_VERSION: str = "50.0.0"
 
 
 

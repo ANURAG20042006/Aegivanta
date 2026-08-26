@@ -1,6 +1,13 @@
 # Aegivanta Platform – Master Unified Documentation
 
 > **Comprehensive single-file documentation for Aegivanta Enterprise Security Operations Platform.**
+>
+> [!IMPORTANT]
+> **EVIDENCE & PROVENANCE INTEGRITY NOTICE (PHASE A AUDIT)**:
+> 1. **Synthetic Data Disclosure**: All machine learning training benchmarks, leaderboards, and accuracy evaluations in this documentation referencing `synthetic_cicids2017_benchmark` (EXP-2026-002) represent controlled synthetic algorithmic lab evaluations (5,000 generated flows, Hash: `63a0675954f5e1d9`, Seed: 42). They must not be described as or conflated with real-world enterprise production network measurements.
+> 2. **Compliance & Certification Disclosure**: All compliance matrices, FedRAMP, SOC 2 Type II, ISO 27001:2022, HIPAA Security Rule, and PCI DSS v4.0 sections in this document describe self-attested technical control mappings and architectural alignment implemented in software. Not externally certified by third-party audit firms.
+> 3. **Latency Terminology**: Micro-benchmark array inference latencies (e.g. 0.0086 ms/sample) are labeled as BENCHMARK / LAB evaluations. End-to-end operational pipeline latencies (15–45 ms) encompass live PCAP/packet extraction, SQLite/Postgres persistence, SHAP XAI attribution, and REST/WebSocket API dispatch.
+> 4. **Product Identity**: Aegivanta is the current enterprise product and platform identity. SentinelAI is the core detection engine and historical namespace.
 
 ## 📑 Table of Contents
 

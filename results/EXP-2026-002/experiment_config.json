@@ -1,13 +1,12 @@
 {
   "experiment_id": "EXP-2026-002",
   "dataset_name": "synthetic_cicids2017_benchmark",
-  "dataset_hash": "62aa92a7d54fe464",
+  "dataset_hash": "63a0675954f5e1d9",
   "seed": 42,
-  "num_samples": 500,
-  "raw_train_size": 400,
-  "raw_test_size": 100,
-  "train_size_smote": 2574,
+  "num_samples": 5000,
+  "raw_train_size": 4000,
+  "raw_test_size": 1000,
+  "train_size_smote": 25506,
   "feature_schema_version": "schema-v1.0",
-  "preprocessing_version": "split_first_smote_inside_folds_only",
-  "test_set_usage": "evaluated ONCE after champion frozen \u2014 never used for selection"
+  "preprocessing_version": "split_first_smote_inside_folds_only"
 }
