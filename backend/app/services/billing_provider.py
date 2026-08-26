@@ -135,5 +135,8 @@ class MockBillingProvider(BillingProvider):
 
 
 def get_billing_provider() -> BillingProvider:
-    """Returns configured BillingProvider instance."""
+    """Returns configured BillingProvider instance. Fails closed in PRODUCTION if mock is used."""
+    from backend.app.core.environment import get_authoritative_environment, AegivantaEnvironment, BillingGuard
+    current_env = get_authoritative_environment()
+    BillingGuard.validate_billing_provider(provider_type="MockBillingProvider", target_env=current_env)
     return MockBillingProvider()

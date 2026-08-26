@@ -96,10 +96,19 @@ class SOCDashboardService:
                 mttr_list.append(delta)
                 resolve_list.append(delta)
 
-        avg_mttd_min = round((sum(mttd_list) / len(mttd_list)) / 60.0, 2) if mttd_list else 1.2
-        avg_mtta_min = round((sum(mtta_list) / len(mtta_list)) / 60.0, 2) if mtta_list else 3.5
-        avg_mttr_min = round((sum(mttr_list) / len(mttr_list)) / 60.0, 2) if mttr_list else 12.8
-        avg_resolve_min = round((sum(resolve_list) / len(resolve_list)) / 60.0, 2) if resolve_list else 18.4
+        from backend.app.core.environment import get_authoritative_environment, AegivantaEnvironment
+        current_env = get_authoritative_environment()
+
+        if current_env == AegivantaEnvironment.PRODUCTION:
+            avg_mttd_min = round((sum(mttd_list) / len(mttd_list)) / 60.0, 2) if mttd_list else 0.0
+            avg_mtta_min = round((sum(mtta_list) / len(mtta_list)) / 60.0, 2) if mtta_list else 0.0
+            avg_mttr_min = round((sum(mttr_list) / len(mttr_list)) / 60.0, 2) if mttr_list else 0.0
+            avg_resolve_min = round((sum(resolve_list) / len(resolve_list)) / 60.0, 2) if resolve_list else 0.0
+        else:
+            avg_mttd_min = round((sum(mttd_list) / len(mttd_list)) / 60.0, 2) if mttd_list else 1.2
+            avg_mtta_min = round((sum(mtta_list) / len(mtta_list)) / 60.0, 2) if mtta_list else 3.5
+            avg_mttr_min = round((sum(mttr_list) / len(mttr_list)) / 60.0, 2) if mttr_list else 12.8
+            avg_resolve_min = round((sum(resolve_list) / len(resolve_list)) / 60.0, 2) if resolve_list else 18.4
 
         # 3. Alerts & Detections Count
         alt_res = await db.execute(select(func.count(Alert.id)).where(Alert.timestamp >= since_time))

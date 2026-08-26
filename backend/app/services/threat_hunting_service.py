@@ -96,18 +96,37 @@ class ThreatHuntingService:
 
         results: List[Dict[str, Any]] = []
 
-        if db:
-            entity_lower = entity.lower().strip()
-            if entity_lower in ["events", "security_events", "telemetry"]:
-                results = await cls._query_security_events(filters, start_time, end_time, bounded_limit, bounded_offset, db)
-            elif entity_lower in ["alerts", "detections"]:
-                results = await cls._query_alerts(filters, start_time, end_time, bounded_limit, bounded_offset, db)
-            elif entity_lower in ["incidents"]:
-                results = await cls._query_incidents(filters, start_time, end_time, bounded_limit, bounded_offset, db)
-            elif entity_lower in ["iocs", "threat_indicators"]:
-                results = await cls._query_iocs(filters, bounded_limit, bounded_offset, db)
-            else:
-                raise ValueError(f"Unknown hunting entity target: '{entity}'. Permitted: events, alerts, incidents, iocs.")
+        from backend.app.core.environment import get_authoritative_environment, AegivantaEnvironment, SecurityEnvironmentError
+        current_env = get_authoritative_environment()
+
+        if db is None:
+            if current_env == AegivantaEnvironment.PRODUCTION:
+                from backend.app.core.environment import record_security_violation
+                record_security_violation(
+                    component="THREAT_HUNTING",
+                    source=entity,
+                    reason="Threat hunting query execution failed closed due to missing database session in PRODUCTION.",
+                    environment=current_env
+                )
+                raise SecurityEnvironmentError("Production threat hunting requires an active database session. Simulated empty returns are prohibited.")
+            return {
+                "entity": entity,
+                "execution_time_ms": round((time.perf_counter() - t0) * 1000, 2),
+                "total_matched": 0,
+                "results": []
+            }
+
+        entity_lower = entity.lower().strip()
+        if entity_lower in ["events", "security_events", "telemetry"]:
+            results = await cls._query_security_events(filters, start_time, end_time, bounded_limit, bounded_offset, db)
+        elif entity_lower in ["alerts", "detections"]:
+            results = await cls._query_alerts(filters, start_time, end_time, bounded_limit, bounded_offset, db)
+        elif entity_lower in ["incidents"]:
+            results = await cls._query_incidents(filters, start_time, end_time, bounded_limit, bounded_offset, db)
+        elif entity_lower in ["iocs", "threat_indicators"]:
+            results = await cls._query_iocs(filters, bounded_limit, bounded_offset, db)
+        else:
+            raise ValueError(f"Unknown hunting entity target: '{entity}'. Permitted: events, alerts, incidents, iocs.")
 
         duration_ms = round((time.perf_counter() - t0) * 1000.0, 2)
 

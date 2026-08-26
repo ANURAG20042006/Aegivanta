@@ -116,6 +116,29 @@ class TelemetryIngestionService:
         batch_payload: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Processes a validated batch of telemetry events with deduplication and sequence sorting."""
+        from backend.app.core.environment import get_authoritative_environment, AegivantaEnvironment, TelemetryGuard, DataProvenance
+        current_env = get_authoritative_environment()
+
+        # Enforce batch-level provenance check in PRODUCTION
+        if current_env == AegivantaEnvironment.PRODUCTION:
+            prov_data = batch_payload.get("provenance")
+            if prov_data and isinstance(prov_data, dict):
+                prov_obj = DataProvenance(**prov_data)
+            else:
+                is_synth = batch_payload.get("is_synthetic", False)
+                is_mock = batch_payload.get("is_mock", False)
+                is_demo = batch_payload.get("is_demo", False)
+                prov_obj = DataProvenance(
+                    environment=current_env if not (is_synth or is_mock or is_demo) else AegivantaEnvironment.DEMO,
+                    source_type="SENSOR_EDR",
+                    source_id=sensor.id,
+                    is_synthetic=is_synth,
+                    is_mock=is_mock,
+                    is_demo=is_demo,
+                    is_production=not (is_synth or is_mock or is_demo)
+                )
+            TelemetryGuard.validate_telemetry_provenance(provenance=prov_obj, target_env=current_env)
+
         schema_version = batch_payload.get("schema_version", "v1")
         events: List[Dict[str, Any]] = batch_payload.get("events", [])
 
@@ -130,6 +153,18 @@ class TelemetryIngestionService:
         dropped = 0
 
         for ev in events:
+            # Per-event provenance check in PRODUCTION
+            if current_env == AegivantaEnvironment.PRODUCTION:
+                if ev.get("is_synthetic") or ev.get("is_mock") or ev.get("is_demo"):
+                    from backend.app.core.environment import record_security_violation, SecurityEnvironmentError
+                    record_security_violation(
+                        component="TELEMETRY_INGESTION",
+                        source=sensor.id,
+                        reason="Synthetic/mock/demo event blocked inside telemetry batch in PRODUCTION.",
+                        environment=current_env
+                    )
+                    raise SecurityEnvironmentError("Synthetic or mock event rejected in PRODUCTION environment.")
+
             # Validate schema
             is_valid, reason = cls.validate_event(ev, schema_version)
             if not is_valid:

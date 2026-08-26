@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     PROJECT_DESCRIPTION: str = "Enterprise AI-Powered Security Operations Platform"
     APP_ENV: str = Field(default="development", description="Application Environment: development, staging, production")
     OPERATING_MODE: str = Field(default="DEMO", description="Operating Mode: DEMO, LAB, or PRODUCTION")
+    AEGIVANTA_ENVIRONMENT: str = Field(default="DEMO", description="Authoritative System Environment: DEMO, LAB, PRODUCTION")
     DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = "development"
@@ -232,3 +233,8 @@ def validate_production_settings(custom_settings: "Settings" = None) -> None:
     # 5. CORS Origins Check
     if any(origin == "*" or origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1") for origin in target_settings.CORS_ORIGINS):
         raise RuntimeError("Production CORS_ORIGINS must not use wildcard '*' or localhost entries.")
+
+    # 6. Database URL Guard in Production
+    db_url = target_settings.DATABASE_URL
+    if "sqlite" in db_url.lower() or ":memory:" in db_url.lower() or "sentinelai.db" in db_url.lower():
+        raise RuntimeError("Production requires a production PostgreSQL database. SQLite or in-memory databases are prohibited.")
