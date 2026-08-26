@@ -1,0 +1,33 @@
+{
+  "exercise_name": "Phase F Disaster Recovery Verification",
+  "timestamp": "2026-08-26T18:16:20.045267+00:00",
+  "status": "SUCCESS",
+  "rto_actual_seconds": 2.513,
+  "rto_target_seconds": 1800.0,
+  "rto_passed": true,
+  "rpo_actual_seconds": 0.0,
+  "rpo_target_seconds": 3600.0,
+  "rpo_passed": true,
+  "step_latencies_ms": {
+    "backup_ms": 31.71,
+    "destruction_ms": 0.0,
+    "restore_ms": 2.04,
+    "verify_ms": 2478.92
+  },
+  "backup_verification": {
+    "backup_file": "primary_snapshot.json",
+    "backup_sha256": "080ac1110d5f16be50a0b23a05eca7dcbd1846f39488a44f7173c9d77ef6d3af",
+    "integrity_verified": true
+  },
+  "data_fidelity": {
+    "tables_restored": [
+      "tenants",
+      "users",
+      "incidents",
+      "audit_chain"
+    ],
+    "row_integrity_pct": 100.0,
+    "audit_chain_intact": true,
+    "ml_inference_verified": true
+  }
+}

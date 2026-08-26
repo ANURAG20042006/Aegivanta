@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-08-26T18:16:17.561709+00:00",
+  "backup_id": "bkp_1787768177",
+  "database_state": {
+    "tenants": [
+      {
+        "id": "tenant-001",
+        "name": "Acme Defense",
+        "status": "ACTIVE"
+      },
+      {
+        "id": "tenant-002",
+        "name": "CyberSec Global",
+        "status": "ACTIVE"
+      }
+    ],
+    "users": [
+      {
+        "id": "user-001",
+        "username": "admin_alice",
+        "role": "admin",
+        "tenant_id": "tenant-001"
+      },
+      {
+        "id": "user-002",
+        "username": "analyst_bob",
+        "role": "analyst",
+        "tenant_id": "tenant-001"
+      },
+      {
+        "id": "user-003",
+        "username": "viewer_charlie",
+        "role": "viewer",
+        "tenant_id": "tenant-002"
+      }
+    ],
+    "incidents": [
+      {
+        "id": "inc-001",
+        "title": "Volumetric SYN Flood",
+        "severity": "Critical",
+        "risk_score": 85.5,
+        "tenant_id": "tenant-001"
+      },
+      {
+        "id": "inc-002",
+        "title": "Port Scan Activity",
+        "severity": "Medium",
+        "risk_score": 45.0,
+        "tenant_id": "tenant-002"
+      }
+    ],
+    "audit_chain": [
+      {
+        "id": "aud-001",
+        "event": "auth.login",
+        "actor": "admin_alice",
+        "prev_hash": "GENESIS",
+        "hmac": "a1b2c3d4e5"
+      },
+      {
+        "id": "aud-002",
+        "event": "incident.created",
+        "actor": "system",
+        "prev_hash": "a1b2c3d4e5",
+        "hmac": "f6g7h8i9j0"
+      }
+    ]
+  },
+  "ml_artifacts": {
+    "model_hash": "92876bf1d6fcdf94c6ebfe2151dbc03162442a54201dacae993b6f130e276274",
+    "preprocessor_hash": "6ef0f86cd4dea065ec7bddbbb3c5ff731ce59904f8d355bd45a1aa57b0aae5cf",
+    "model_version": "lightgbm-v1.0"
+  }
+}
