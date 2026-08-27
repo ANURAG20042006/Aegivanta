@@ -47,13 +47,13 @@ async def list_incidents(
     """Returns real incident records with server-side filters for analyst workflows."""
     filters = []
     if severity:
-        filters.append(Incident.severity == severity.capitalize())
+        filters.append(func.lower(Incident.severity) == severity.lower())
     if is_malicious is not None:
         filters.append(Incident.is_malicious == is_malicious)
     if attack_type:
         filters.append(Incident.attack_type == attack_type)
     if status_filter:
-        filters.append(Incident.status == status_filter.upper())
+        filters.append(func.lower(Incident.status) == status_filter.lower())
     if asset_id:
         filters.append(Incident.asset_id == asset_id)
 

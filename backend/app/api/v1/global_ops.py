@@ -16,6 +16,7 @@ router = APIRouter(prefix="/global-ops", tags=["Phase 24 - Global Operations & F
 
 
 @router.get("/finops/dashboard")
+@router.get("/finops")
 async def get_finops_dashboard(
     tenant_id: str = "default-tenant"
 ):
@@ -24,6 +25,7 @@ async def get_finops_dashboard(
 
 
 @router.get("/capacity/dashboard")
+@router.get("/capacity")
 async def get_capacity_dashboard(
     tenant_id: str = "default-tenant"
 ):
@@ -32,6 +34,7 @@ async def get_capacity_dashboard(
 
 
 @router.get("/sre/slo-dashboard")
+@router.get("/slo")
 async def get_slo_dashboard():
     """Returns SLO compliance, error budget consumption, and reliability metrics."""
     return FinOpsCapacityService.get_slo_dashboard()

@@ -66,6 +66,7 @@ class TransferCustodyRequest(BaseModel):
 # ==================== Case Management Endpoints ====================
 
 @router.get("/cases", summary="List SOC Cases")
+@router.get("", summary="List SOC Cases Alias")
 async def list_cases(
     status: Optional[str] = Query(None),
     priority: Optional[str] = Query(None),

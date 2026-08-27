@@ -83,6 +83,7 @@ class AuditServerlessFunctionRequest(BaseModel):
 # ==================== Multi-Cloud Accounts & CNAPP Posture ====================
 
 @router.get("/cnapp/summary", summary="Get Consolidated CNAPP Posture Scorecard")
+@router.get("/cnapp-summary", summary="Get Consolidated CNAPP Posture Scorecard Alias")
 async def get_cnapp_summary(
     context: TenantContext = Depends(resolve_tenant_context),
     db: AsyncSession = Depends(get_db)

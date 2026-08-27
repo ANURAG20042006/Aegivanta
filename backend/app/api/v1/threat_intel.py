@@ -36,6 +36,7 @@ class IOCLookupRequest(BaseModel):
 
 
 @router.get("/indicators", summary="List Threat Intelligence Indicators")
+@router.get("/iocs", summary="List Threat Intelligence Indicators Alias")
 async def list_indicators(
     ioc_type: Optional[str] = None,
     severity: Optional[str] = None,

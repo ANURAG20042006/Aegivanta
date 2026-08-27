@@ -41,9 +41,9 @@ async def list_alerts(
     """Paginated list of security alerts with server-side filters."""
     filters = []
     if severity:
-        filters.append(Alert.severity == severity.lower())
+        filters.append(func.lower(Alert.severity) == severity.lower())
     if status_filter:
-        filters.append(Alert.status == status_filter.lower())
+        filters.append(func.lower(Alert.status) == status_filter.lower())
     if asset_id:
         filters.append(Alert.asset_id == asset_id)
     if source_ip:
