@@ -18,6 +18,8 @@ router = APIRouter(prefix="/threat-graph", tags=["Threat Intelligence Graph"])
 
 
 @router.get("", summary="Get Threat Intelligence Graph Topology", dependencies=[Depends(graph_rate_limit)])
+@router.get("/topology", summary="Get Threat Intelligence Graph Topology Alias", dependencies=[Depends(graph_rate_limit)])
+@router.get("/nodes", summary="Get Threat Intelligence Graph Nodes Alias", dependencies=[Depends(graph_rate_limit)])
 async def get_graph(
     limit: int = 150,
     db: AsyncSession = Depends(get_db),

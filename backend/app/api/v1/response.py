@@ -103,6 +103,7 @@ async def evaluate_response(
 
 
 @router.post("/actions/preview", summary="Generate Dry-Run Simulation Preview")
+@router.post("/execute-dryrun", summary="Generate Dry-Run Simulation Preview Alias")
 async def preview_action_endpoint(
     payload: ActionPreviewRequest,
     db: AsyncSession = Depends(get_db),
@@ -122,6 +123,7 @@ async def preview_action_endpoint(
 
 
 @router.post("/actions", summary="Submit and Trigger Response Action", status_code=status.HTTP_201_CREATED)
+@router.post("/request", summary="Submit and Trigger Response Action Alias", status_code=status.HTTP_201_CREATED)
 async def submit_action_endpoint(
     payload: ActionSubmitRequest,
     x_idempotency_key: Optional[str] = Header(None, alias="X-Idempotency-Key"),
@@ -159,6 +161,7 @@ async def submit_action_endpoint(
 
 
 @router.get("/actions", summary="List Response Actions with Pagination")
+@router.get("/requests", summary="List Response Requests Alias")
 async def list_actions_endpoint(
     incident_id: Optional[str] = None,
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -230,6 +233,7 @@ async def get_action_details(
 
 
 @router.post("/actions/{action_id}/approve", summary="Approve Pending Response Action")
+@router.post("/approve/{action_id}", summary="Approve Pending Response Action Alias")
 async def approve_action_endpoint(
     action_id: str,
     db: AsyncSession = Depends(get_db),
@@ -259,6 +263,7 @@ async def approve_action_endpoint(
 
 
 @router.post("/actions/{action_id}/reject", summary="Reject Pending Response Action")
+@router.post("/reject/{action_id}", summary="Reject Pending Response Action Alias")
 async def reject_action_endpoint(
     action_id: str,
     payload: ActionRejectRequest,
